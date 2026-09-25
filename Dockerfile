@@ -1,7 +1,7 @@
 FROM node:20-slim
 
 # Download full static FFmpeg build (guarantees lavfi and all features)
-RUN apt-get update && apt-get install -y wget xz-utils \
+RUN apt-get update && apt-get install -y wget xz-utils fontconfig fonts-liberation \
  && wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz \
  && tar -xJf ffmpeg-release-amd64-static.tar.xz \
  && mv ffmpeg-*-static/ffmpeg /usr/local/bin/ \
