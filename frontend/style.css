@@ -1,0 +1,268 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #030509;
+  --glass-bg: rgba(15, 20, 34, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-hover: rgba(255, 255, 255, 0.12);
+  --text-main: #f8f9fa;
+  --text-muted: #8b949e;
+  --accent: #6c63ff;
+  --accent-glow: rgba(108, 99, 255, 0.5);
+  --gradient-btn: linear-gradient(135deg, #6c63ff 0%, #ff6584 100%);
+  --shadow-lg: 0 30px 60px rgba(0, 0, 0, 0.8);
+  --radius: 20px;
+  --success: #06d6a0;
+  --error: #ef476f;
+}
+
+body {
+  background-color: var(--bg);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-main);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Beautiful Animated Background Glows */
+body::before, body::after {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  filter: blur(120px);
+  z-index: -1;
+  animation: float 20s infinite alternate ease-in-out;
+}
+body::before {
+  background: rgba(108, 99, 255, 0.2);
+  top: -10%; left: -10%;
+}
+body::after {
+  background: rgba(255, 101, 132, 0.15);
+  bottom: -10%; right: -10%;
+  animation-delay: -10s;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(100px, 100px) scale(1.2); }
+}
+
+/* The Glass App Container */
+#app {
+  width: 100%;
+  max-width: 900px;
+  height: 90vh;
+  max-height: 800px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid var(--glass-border);
+  border-radius: 32px;
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* Typography */
+h1, h2, h3, .step__num { font-family: 'Outfit', sans-serif; }
+.header {
+  padding: 24px 40px;
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo { font-size: 24px; font-weight: 800; display: flex; gap: 8px; align-items: center; }
+.logo__text { background: var(--gradient-btn); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header__badge { background: rgba(255,101,132,0.15); color: #ff6584; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,101,132,0.3); }
+
+/* Steps */
+.step {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  transform: translateY(20px);
+}
+.step--active {
+  display: flex !important;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.step__header { margin-bottom: 32px; display: flex; gap: 20px; align-items: flex-start; }
+.step__num { font-size: 48px; font-weight: 800; color: rgba(255,255,255,0.05); line-height: 0.8; }
+.step__title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.step__sub { color: var(--text-muted); font-size: 15px; }
+
+/* Forms & Cards */
+.card {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.field-label { display: block; font-weight: 600; margin-bottom: 12px; color: var(--text-main); font-family: 'Outfit'; }
+textarea.textarea {
+  width: 100%;
+  height: 200px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 20px;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: none;
+  transition: all 0.3s ease;
+}
+textarea.textarea:focus { outline: none; border-color: var(--accent); background: rgba(255,255,255,0.06); box-shadow: 0 0 0 4px rgba(108,99,255,0.1); }
+.char-count { text-align: right; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+
+/* Grids */
+.gameplay-grid, .caption-grid, .voice-grid, .duration-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+/* Selectable Cards */
+label input[type="radio"] { display: none; }
+.gameplay-card, .caption-card, .voice-card, .duration-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+.gameplay-card:hover, .caption-card:hover, .voice-card:hover, .duration-card:hover {
+  background: var(--glass-hover);
+  transform: translateY(-2px);
+}
+label input[type="radio"]:checked + * + *,
+label input[type="radio"]:checked ~ * {
+  /* Just target the card itself via JS class for styling if needed, but we can use :has in modern CSS */
+}
+label:has(input[type="radio"]:checked) {
+  border-color: var(--accent);
+  background: rgba(108,99,255,0.1);
+  box-shadow: 0 8px 24px rgba(108,99,255,0.2);
+}
+
+.gameplay-card__thumb { font-size: 32px; background: rgba(0,0,0,0.3); width: 64px; height: 64px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.gameplay-card__name { font-weight: 600; font-family: 'Outfit'; }
+
+.caption-card__preview { height: 60px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 12px; width: 100%; font-weight: 800; font-size: 18px; }
+.caption-card__label { font-weight: 600; font-family: 'Outfit'; }
+.caption-card__desc { font-size: 12px; color: var(--text-muted); }
+
+.voice-card__icon { font-size: 28px; }
+.voice-card__name { font-weight: 600; }
+
+.duration-card__time { font-size: 24px; font-family: 'Outfit'; font-weight: 700; color: var(--accent); }
+.duration-card__label { font-size: 12px; color: var(--text-muted); }
+
+/* Buttons */
+.step__actions { display: flex; justify-content: space-between; margin-top: auto; padding-top: 32px; }
+.btn {
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+}
+.btn--primary {
+  background: var(--gradient-btn);
+  color: white;
+  box-shadow: 0 8px 24px var(--accent-glow);
+}
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px var(--accent-glow);
+  filter: brightness(1.1);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--glass-border);
+}
+.btn--ghost:hover { background: rgba(255,255,255,0.05); color: #fff; }
+
+/* Progress Ring */
+.progress-hero { display: flex; flex-direction: column; align-items: center; padding: 40px 0; }
+.progress-orb { position: relative; width: 160px; height: 160px; margin-bottom: 24px; }
+.progress-orb__inner { position: absolute; inset: 10px; background: var(--glass-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; font-family: 'Outfit'; color: var(--accent); box-shadow: inset 0 4px 20px rgba(0,0,0,0.5); }
+.progress-ring { width: 160px; height: 160px; transform: rotate(-90deg); }
+.progress-ring__bg { fill: none; stroke: var(--glass-border); stroke-width: 8; }
+.progress-ring__fill { fill: none; stroke: url(#ringGradient); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 439.8; stroke-dashoffset: 439.8; transition: stroke-dashoffset 0.5s ease; }
+
+.progress__title { font-size: 24px; margin-bottom: 8px; }
+.progress__stage { color: var(--accent); font-weight: 600; font-family: 'Outfit'; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; }
+
+.pipeline-steps { display: flex; flex-direction: column; gap: 8px; margin-top: 32px; max-height: 250px; overflow-y: auto; padding-right: 10px; }
+.pipeline-step { background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 10px; display: flex; gap: 12px; border: 1px solid var(--glass-border); color: var(--text-muted); transition: all 0.3s ease; align-items: center; }
+.pipeline-step.active { border-color: var(--accent); background: rgba(108,99,255,0.1); color: #fff; box-shadow: 0 0 20px rgba(108,99,255,0.1); transform: translateX(5px); }
+.pipeline-step.done { color: var(--success); border-color: rgba(6, 214, 160, 0.3); background: rgba(6, 214, 160, 0.05); }
+.ps-icon { font-size: 20px; }
+
+/* Result Video */
+.result-header { text-align: center; margin-bottom: 32px; }
+.result-header__badge { display: inline-block; background: rgba(6, 214, 160, 0.15); color: #06d6a0; padding: 6px 16px; border-radius: 20px; font-family: 'Outfit'; font-weight: 700; margin-bottom: 16px; }
+.result-header__title { font-size: 32px; margin-bottom: 8px; }
+.result-header__sub { color: var(--text-muted); }
+.result-player { display: flex; justify-content: center; margin-bottom: 32px; }
+.result-video { width: 100%; max-width: 320px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px var(--glass-border); background: #000; }
+.result-actions { display: flex; justify-content: center; gap: 16px; }
+.result-meta { text-align: center; margin-top: 32px; font-size: 13px; color: var(--text-muted); font-family: monospace; opacity: 0.6; }
+
+/* Toast */
+.toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: rgba(239, 71, 111, 0.9); backdrop-filter: blur(10px); color: white; padding: 16px 32px; border-radius: 16px; font-weight: 600; font-family: 'Outfit'; transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 30px rgba(239, 71, 111, 0.3); z-index: 100; }
+.toast.show { bottom: 40px; }
+
+/* SVG Defs for gradient ring */
+svg.progress-ring { overflow: visible; }
+
+
+/* Fix for Gameplay Cards */
+.gameplay-card--selected { border-color: var(--accent); background: rgba(108,99,255,0.1); box-shadow: 0 8px 24px rgba(108,99,255,0.2); }
+.gameplay-card__emoji { font-size: 32px; margin-bottom: 8px; }
+.gameplay-card__status { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.gameplay-card__status--ok { color: var(--success); }
+.gameplay-card__status--missing { color: var(--error); }
+.gameplay-card__check { display: none; margin-top: 8px; color: var(--accent); font-weight: bold; }
+.gameplay-card--selected .gameplay-card__check { display: block; }
+

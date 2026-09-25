@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StoryPlay — Create Your Gaming Short</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app-style.css">
+</head>
+<body>
+
+  <!-- Minecraft BG -->
+  <div class="bg-scene"></div>
+  <div class="bg-overlay"></div>
+
+  <!-- App Shell -->
+  <div id="app">
+
+    <!-- ── STEP INDICATOR ── -->
+    <header class="app-header">
+      <div class="app-logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="url(#appLg)"/>
+          <defs><linearGradient id="appLg" x1="5" y1="4.5" x2="19" y2="19.5" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#A78BFA"/><stop offset="1" stop-color="#3B82F6"/>
+          </linearGradient></defs>
+        </svg>
+        <span>StoryPlay</span>
+        <span class="beta-badge">Beta</span>
+      </div>
+      <div class="step-indicators">
+        <div class="step-dot active" data-step="1">1</div>
+        <div class="step-dot" data-step="2">2</div>
+        <div class="step-dot" data-step="3">3</div>
+        <div class="step-dot" data-step="4">4</div>
+      </div>
+    </header>
+
+    <!-- ── STEP 1: Story ── -->
+    <section id="step-story" class="step step--active">
+      <div class="step-layout">
+        <div class="step-main">
+          <div class="step-heading">
+            <span class="step-num">01</span>
+            <div>
+              <h1 class="step-title">Your <span class="grad">Story</span></h1>
+              <p class="step-subtitle">Paste the story that will be narrated over your gameplay.</p>
+            </div>
+          </div>
+
+          <div class="field-card">
+            <div class="field-card-header">
+              <div class="field-label-row">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+                <span>Story text</span>
+              </div>
+              <div class="field-header-actions">
+              <div class="custom-select" id="aiDurationWrapper">
+                <div class="custom-select__trigger" id="aiDurationTrigger">
+                  <span id="aiDurationLabel">45s (Medium)</span>
+                  <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#8B93A8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="custom-select__options" id="aiDurationOptions">
+                  <div class="custom-select__option" data-value="30">30s (Short)</div>
+                  <div class="custom-select__option selected" data-value="45">45s (Medium)</div>
+                  <div class="custom-select__option" data-value="60">60s (Long)</div>
+                </div>
+                <input type="hidden" id="aiDuration" value="45">
+              </div>
+                <button id="btnAiGenerate" class="btn-ai">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+                  Generate Reddit Story
+                </button>
+              </div>
+            </div>
+            <textarea
+              id="storyInput"
+              class="story-textarea"
+              rows="8"
+              placeholder="Once upon a time, in a world where pixels ruled everything, a lone gamer discovered the ancient code..."
+              maxlength="3000"
+            ></textarea>
+            <div class="textarea-footer">
+              <span class="char-count"><span id="charCount">0</span> / 3000  Minimum 50 characters</span>
+            </div>
+          </div>
+
+          <div class="examples-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+            <span>Try an example:</span>
+            <button class="example-pill" data-type="reddit">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="#FF4500"><circle cx="12" cy="12" r="10"/><path d="M17.5 10.5a1 1 0 110 2 1 1 0 010-2zm-11 0a1 1 0 110 2 1 1 0 010-2zM12 15c2 0 3.5-.8 3.5-1.5h-7c0 .7 1.5 1.5 3.5 1.5z" fill="white"/></svg>
+              Reddit Story
+            </button>
+            <button class="example-pill" data-type="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+              True Story
+            </button>
+            <button class="example-pill" data-type="gaming">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg>
+              Gaming Moment
+            </button>
+            <button class="example-pill" data-type="fiction">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Fictional Story
+            </button>
+          </div>
+
+          <button class="btn-continue" id="btnStoryNext">Continue →</button>
+        </div>
+
+        <!-- Right side phone preview -->
+        <div class="step-preview">
+          <div class="preview-phone">
+            <img src="card-mid.jpg" alt="Preview">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── STEP 2: Gameplay ── -->
+    <section id="step-gameplay" class="step">
+      <div class="step-heading">
+        <span class="step-num">02</span>
+        <div>
+          <h2 class="step-title">Choose <span class="grad">Gameplay</span></h2>
+          <p class="step-subtitle">Pick the background gameplay for your Short.</p>
+        </div>
+      </div>
+      <div id="gameplayGrid" class="gameplay-grid">
+        <div class="gameplay-loading">Loading gameplay options…</div>
+      </div>
+      <div class="step-actions">
+        <button class="btn-back" id="btnGameplayBack">← Back</button>
+        <button class="btn-continue" id="btnGameplayNext" disabled>Continue →</button>
+      </div>
+    </section>
+
+    <!-- ── STEP 3: Captions ── -->
+    <section id="step-captions" class="step">
+      <div class="step-heading step-heading--with-info">
+        <div class="step-heading-left">
+          <span class="step-num">03</span>
+          <div>
+            <h2 class="step-title">Caption <span class="grad">Style</span></h2>
+            <p class="step-subtitle">Choose how your subtitles will look.</p>
+          </div>
+        </div>
+        <div class="step-info-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" color="#A020F0"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+          <div class="step-info-text">Captions make your Short more engaging.<br>You can always change this later.</div>
+        </div>
+      </div>
+
+      <div class="caption-grid">
+        <label class="caption-card" data-style="bold-yellow">
+          <input type="radio" name="captionStyle" value="bold-yellow" checked>
+          <div class="caption-card__bg">
+            <img src="bg-minecraft.jpg" alt="Preview">
+            <div class="caption-card__overlay"></div>
+            <div class="caption-preview preview--bold-yellow">
+              I FOUND A <span style="color:#FFD700">SECRET</span><br>CASTLE...
+            </div>
+            <div class="caption-card__check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          </div>
+          <div class="caption-card__info">
+            <div class="caption-label">Epic Gaming</div>
+            <div class="caption-desc">Bold, high contrast, impact font</div>
+          </div>
+        </label>
+        
+        <label class="caption-card" data-style="white-highlight">
+          <input type="radio" name="captionStyle" value="white-highlight">
+          <div class="caption-card__bg">
+            <img src="bg-minecraft.jpg" alt="Preview">
+            <div class="caption-card__overlay"></div>
+            <div class="caption-preview preview--white-highlight">
+              <span style="opacity:0.6">I found a </span> <mark>secret castle...</mark>
+            </div>
+            <div class="caption-card__check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          </div>
+          <div class="caption-card__info">
+            <div class="caption-label">White Highlight</div>
+            <div class="caption-desc">Clean word-by-word highlight</div>
+          </div>
+        </label>
+
+        <label class="caption-card" data-style="word-pop">
+          <input type="radio" name="captionStyle" value="word-pop">
+          <div class="caption-card__bg">
+            <img src="bg-minecraft.jpg" alt="Preview">
+            <div class="caption-card__overlay"></div>
+            <div class="caption-preview preview--word-pop">
+              I FOUND A <span style="color:#FF2E93; transform: scale(1.1); display:inline-block; font-style:italic">SECRET CASTLE...</span>
+            </div>
+            <div class="caption-card__check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          </div>
+          <div class="caption-card__info">
+            <div class="caption-label">Pop!</div>
+            <div class="caption-desc">Animated, colorful, fun</div>
+          </div>
+        </label>
+
+        <label class="caption-card" data-style="clean">
+          <input type="radio" name="captionStyle" value="clean">
+          <div class="caption-card__bg">
+            <img src="bg-minecraft.jpg" alt="Preview">
+            <div class="caption-card__overlay"></div>
+            <div class="caption-preview preview--clean">
+              <span>I found a secret castle...</span>
+            </div>
+            <div class="caption-card__check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          </div>
+          <div class="caption-card__info">
+            <div class="caption-label">Clean Style</div>
+            <div class="caption-desc">Minimal, professional</div>
+          </div>
+        </label>
+      </div>
+
+      <div class="color-section">
+        <h3 class="color-label">Text Color</h3>
+        <div class="color-row" id="captionColorContainer">
+          <label class="color-swatch"><input type="radio" name="captionColor" value="#ffffff" checked><span style="background:#ffffff"></span></label>
+          <label class="color-swatch"><input type="radio" name="captionColor" value="#FFD700"><span style="background:#FFD700"></span></label>
+          <label class="color-swatch"><input type="radio" name="captionColor" value="#FF3333"><span style="background:#FF3333"></span></label>
+          <label class="color-swatch"><input type="radio" name="captionColor" value="#3388FF"><span style="background:#3388FF"></span></label>
+          <label class="color-swatch"><input type="radio" name="captionColor" value="#33FF33"><span style="background:#33FF33"></span></label>
+          <label class="color-swatch"><input type="radio" name="captionColor" value="#FF33FF"><span style="background:#FF33FF"></span></label>
+          <label class="color-swatch"><input type="radio" name="captionColor" value="#9933FF"><span style="background:#9933FF"></span></label>
+          <label class="color-swatch"><input type="radio" name="captionColor" value="#111111"><span style="background:#111111; border: 1px solid rgba(255,255,255,0.2)"></span></label>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-back" id="btnCaptionsBack">← Back</button>
+        <button class="btn-continue" id="btnCaptionsNext">Continue →</button>
+      </div>
+    </section>
+
+    <!-- ── STEP 4: Voice ── -->
+    <section id="step-voice" class="step">
+      <div class="step-heading step-heading--with-info">
+        <div class="step-heading-left">
+          <span class="step-num">04</span>
+          <div>
+            <h2 class="step-title">Voice & <span class="grad">Duration</span></h2>
+            <p class="step-subtitle">Choose the narrator voice and video length for your Short.</p>
+          </div>
+        </div>
+        <div class="step-info-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A020F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M8 9v6M16 9v6M4 11v2M20 11v2"></path>
+          </svg>
+          <div class="step-info-text">Pick a voice that matches your story's vibe.<br>You can change this later.</div>
+        </div>
+      </div>
+
+      <div class="field-panel">
+        <div class="field-panel-header">
+          <div class="field-panel-title-wrapper">
+            <div class="field-icon-circle">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+            </div>
+            <div>
+              <div class="field-panel-title">Narrator Voice</div>
+              <div class="field-panel-desc">Choose the voice for your story.</div>
+            </div>
+          </div>
+          <button class="btn-preview-voice">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Preview Voice
+          </button>
+        </div>
+
+        <div class="voice-grid">
+          <label class="voice-card" data-voice="default">
+            <input type="radio" name="voice" value="default" checked>
+            <div class="voice-card-header">
+              <div class="voice-play-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+              <div class="voice-wave"></div>
+              <div class="voice-card-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+            </div>
+            <div class="voice-name">Default</div>
+            <div class="voice-desc">Natural and versatile</div>
+          </label>
+          <label class="voice-card" data-voice="energetic">
+            <input type="radio" name="voice" value="energetic">
+            <div class="voice-card-header">
+              <div class="voice-play-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+              <div class="voice-wave"></div>
+              <div class="voice-card-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+            </div>
+            <div class="voice-name">Energetic</div>
+            <div class="voice-desc">Exciting and dynamic</div>
+          </label>
+          <label class="voice-card" data-voice="calm">
+            <input type="radio" name="voice" value="calm">
+            <div class="voice-card-header">
+              <div class="voice-play-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+              <div class="voice-wave"></div>
+              <div class="voice-card-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+            </div>
+            <div class="voice-name">Calm</div>
+            <div class="voice-desc">Smooth and relaxed</div>
+          </label>
+          <label class="voice-card" data-voice="narrator">
+            <input type="radio" name="voice" value="narrator">
+            <div class="voice-card-header">
+              <div class="voice-play-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+              <div class="voice-wave"></div>
+              <div class="voice-card-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+            </div>
+            <div class="voice-name">Narrator</div>
+            <div class="voice-desc">Deep and dramatic</div>
+          </label>
+        </div>
+      </div>
+
+      <div class="field-panel">
+        <div class="field-panel-header">
+          <div class="field-panel-title-wrapper">
+            <div class="field-icon-circle">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <div class="field-panel-title">Video Duration</div>
+              <div class="field-panel-desc">Choose the length of your Short.</div>
+            </div>
+          </div>
+        </div>
+        <div class="duration-grid">
+          <label class="duration-card">
+            <input type="radio" name="duration" value="30">
+            <img class="duration-card-img" src="bg-minecraft.jpg" alt="">
+            <div class="duration-card-content">
+              <div class="dur-time">30s</div>
+              <div class="dur-bar-wrap"><div class="dur-bar" style="width:30%"></div></div>
+              <div class="dur-label">Short</div>
+              <div class="dur-desc">Quick and catchy</div>
+            </div>
+            <div class="dur-card-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          </label>
+          <label class="duration-card">
+            <input type="radio" name="duration" value="45" checked>
+            <img class="duration-card-img" src="bg-minecraft.jpg" alt="">
+            <div class="duration-card-content">
+              <div class="dur-time">45s</div>
+              <div class="dur-bar-wrap"><div class="dur-bar" style="width:60%"></div></div>
+              <div class="dur-label">Standard</div>
+              <div class="dur-desc">Perfect for most stories</div>
+            </div>
+            <div class="dur-card-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          </label>
+          <label class="duration-card">
+            <input type="radio" name="duration" value="60">
+            <img class="duration-card-img" src="bg-minecraft.jpg" alt="">
+            <div class="duration-card-content">
+              <div class="dur-time">60s</div>
+              <div class="dur-bar-wrap"><div class="dur-bar" style="width:100%"></div></div>
+              <div class="dur-label">Long</div>
+              <div class="dur-desc">More details and depth</div>
+            </div>
+            <div class="dur-card-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          </label>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-back" id="btnVoiceBack">← Back</button>
+        <button class="btn-generate" id="btnGenerate">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Generate Short &rarr;
+        </button>
+      </div>
+    </section>
+
+    <!-- ── STEP 5: Progress ── -->
+    <section id="step-progress" class="step">
+      <div class="progress-hero">
+        <div class="progress-orb">
+          <div class="progress-orb-inner"><span id="progressPct">0%</span></div>
+          <svg class="progress-ring" viewBox="0 0 120 120">
+            <defs><linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00E6FF"/><stop offset="100%" stop-color="#8A2BE2"/>
+            </linearGradient></defs>
+            <circle class="ring-bg" cx="60" cy="60" r="54"/>
+            <circle class="ring-fill" id="progressRing" cx="60" cy="60" r="54"/>
+          </svg>
+        </div>
+        <h2 class="progress-title">Creating your <span class="grad">Short</span>...</h2>
+        <p class="progress-stage" id="progressStage">Turning your story into a cinematic video ✨</p>
+      </div>
+      <div class="pipeline-steps">
+        <div class="pipeline-step" id="ps-preparing_story">
+          <div class="ps-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-2 16H8v-2h4v2zm4-4H8v-2h8v2zm0-4H8V8h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+          </div>
+          <div class="ps-text">
+            <div class="ps-title">Preparing Story</div>
+            <div class="ps-desc">Analyzing and structuring your story...</div>
+          </div>
+          <div class="ps-status-icon"></div>
+        </div>
+        <div class="pipeline-step" id="ps-generating_voice">
+          <div class="ps-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+          </div>
+          <div class="ps-text">
+            <div class="ps-title">Generating Voice</div>
+            <div class="ps-desc">Creating natural voiceover...</div>
+          </div>
+          <div class="ps-status-icon"></div>
+        </div>
+        <div class="pipeline-step" id="ps-transcribing">
+          <div class="ps-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"></line><line x1="18" y1="9" x2="18" y2="15"></line><line x1="6" y1="9" x2="6" y2="15"></line></svg>
+          </div>
+          <div class="ps-text">
+            <div class="ps-title">Transcribing Audio</div>
+            <div class="ps-desc">Generating synchronized text...</div>
+          </div>
+          <div class="ps-status-icon"></div>
+        </div>
+        <div class="pipeline-step" id="ps-creating_subtitles">
+          <div class="ps-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="9" y1="10" x2="15" y2="10"></line><line x1="12" y1="14" x2="12" y2="14.01"></line></svg>
+          </div>
+          <div class="ps-text">
+            <div class="ps-title">Creating Subtitles</div>
+            <div class="ps-desc">Adding styled captions...</div>
+          </div>
+          <div class="ps-status-icon"></div>
+        </div>
+        <div class="pipeline-step" id="ps-selecting_gameplay">
+          <div class="ps-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 12h4"></path><path d="M8 10v4"></path><path d="M15 13h.01"></path><path d="M18 11h.01"></path></svg>
+          </div>
+          <div class="ps-text">
+            <div class="ps-title">Selecting Gameplay</div>
+            <div class="ps-desc">Finding the perfect background...</div>
+          </div>
+          <div class="ps-status-icon"></div>
+        </div>
+        <div class="pipeline-step" id="ps-trimming_gameplay">
+          <div class="ps-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>
+          </div>
+          <div class="ps-text">
+            <div class="ps-title">Trimming Gameplay</div>
+            <div class="ps-desc">Syncing with your story...</div>
+          </div>
+          <div class="ps-status-icon"></div>
+        </div>
+        <div class="pipeline-step" id="ps-compositing">
+          <div class="ps-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+          </div>
+          <div class="ps-text">
+            <div class="ps-title">Compositing</div>
+            <div class="ps-desc">Merging audio, video and captions...</div>
+          </div>
+          <div class="ps-status-icon"></div>
+        </div>
+        <div class="pipeline-step" id="ps-finalizing">
+          <div class="ps-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          </div>
+          <div class="ps-text">
+            <div class="ps-title">Finalizing</div>
+            <div class="ps-desc">Polishing your Short...</div>
+          </div>
+          <div class="ps-status-icon"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── STEP 6: Result ── -->
+    <section id="step-result" class="step">
+      <div class="result-badge">🎉 Ready!</div>
+      <h2 class="result-title">Your Short is ready</h2>
+      <p class="result-sub">Download it and post to YouTube Shorts, TikTok, or Instagram Reels.</p>
+      <div class="result-player">
+        <video id="resultVideo" class="result-video" controls playsinline></video>
+      </div>
+      <div class="result-actions">
+        <button class="btn-continue" id="btnDownload">⬇ Download MP4</button>
+        <button class="btn-back" id="btnCreateAnother">+ Create Another</button>
+      </div>
+      <div class="result-meta" id="resultMeta"></div>
+    </section>
+
+    <!-- Toast -->
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+  </div><!-- #app -->
+
+  <script>
+    /**
+     * DEPLOYMENT CONFIG
+     * -----------------
+     * Local dev:  leave __API_BASE__ as '' (uses same origin)
+     * Production: set to your Railway backend URL, e.g.:
+     *   window.__API_BASE__ = 'https://storyplay.railway.app';
+     */
+    window.__API_BASE__ = '';
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Environment secrets — NEVER commit .env
+.env
+
+# Generated video output & temp files
+storage/output/
+storage/outputs/
+storage/temp/
+
+# Gameplay videos (upload manually to Railway volume)
+storage/gameplay/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large test files
+*.mp4
+*.mp3
+tts_test.*
+test_*
+test-*

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StoryPlay — Turn any story into a gaming Short.</title>
+  <meta name="description" content="Paste a story, pick gameplay, and get a ready-to-upload short video with AI voice, captions, and smooth edits.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+
+  <!-- Background ambient glows -->
+  <div class="glow-bg top-left"></div>
+  <div class="glow-bg top-right"></div>
+  <div class="glow-bg center"></div>
+
+  <!-- ───────────────── NAVBAR ───────────────── -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="url(#lg1)"/>
+          <defs>
+            <linearGradient id="lg1" x1="5" y1="4.5" x2="19" y2="19.5" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#A78BFA"/><stop offset="1" stop-color="#3B82F6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span>StoryPlay</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#games">Games</a>
+        <a href="#examples">Examples</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="icon-btn" aria-label="Toggle Theme">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <a href="signin.html" class="btn btn-ghost">Sign In</a>
+        <a href="app.html" class="btn btn-primary">Create Video</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ───────────────── MAIN ───────────────── -->
+  <div class="page">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-left">
+        <div class="hero-pill">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+          Turn Stories Into Viral Gaming Shorts
+        </div>
+        <h1 class="hero-title">
+          Turn any story into a<br>
+          <span class="gradient-text">gaming</span> Short.
+        </h1>
+        <p class="hero-desc">
+          Paste a story, pick gameplay, and get a ready-to-upload short video with AI voice, captions, and smooth edits.
+        </p>
+        <div class="hero-cta-group">
+          <a href="app.html" class="btn btn-primary btn-large">Create Your First Video &rarr;</a>
+          <button class="btn btn-outline btn-large" id="watchDemoBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            Watch Demo
+          </button>
+        </div>
+        <div class="hero-features">
+          <div class="feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            AI Voice / Narration
+          </div>
+          <div class="feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M7 17v2m5-2v2m5-2v2"/></svg>
+            Auto Captions
+          </div>
+          <div class="feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12a6 6 0 0012 0"/><rect x="9" y="2" width="6" height="10" rx="3"/><path d="M12 22v-4"/></svg>
+            Popular Games
+          </div>
+          <div class="feature-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+            9:16 Shorts Ready
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone cluster -->
+      <div class="hero-right">
+        <div class="hero-phone-container">
+
+          <!-- "Your Story" label — top-left of cluster -->
+          <div class="arrow-label label-left">
+            <span>Your Story</span>
+            <svg class="drawn-arrow" viewBox="0 0 56 36" fill="none">
+              <path d="M4 6 C 10 6, 20 24, 44 30" stroke="#00C6FF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <path d="M36 30 L44 30 L40 23" stroke="#00C6FF" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <!-- "Viral Short" label — top-right of cluster -->
+          <div class="arrow-label label-right">
+            <span>Viral Short</span>
+            <svg class="drawn-arrow" viewBox="0 0 56 36" fill="none">
+              <path d="M52 6 C 46 6, 36 24, 12 30" stroke="#FF2A85" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <path d="M20 30 L12 30 L16 23" stroke="#FF2A85" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <!-- Expand hint arrows -->
+          <div class="expand-arrow arr-left">‹‹</div>
+          <div class="expand-arrow arr-right">››</div>
+
+          <!-- Left floating card -->
+          <div class="floating-card left-card">
+            <img src="card-left.jpg" alt="Gameplay preview">
+          </div>
+
+          <!-- Center main phone -->
+          <div class="floating-card main-phone">
+            <img src="card-mid.jpg" alt="Minecraft gameplay with captions">
+          </div>
+
+          <!-- Right floating card -->
+          <div class="floating-card right-card">
+            <img src="card-right.jpg" alt="Viral gaming short">
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how-it-works">
+      <div class="how-it-works glass-card">
+        <div class="step">
+          <div class="step-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          </div>
+          <div class="step-content">
+            <h3>1. Paste Your Story</h3>
+            <p>Use any story – Reddit, true story, fiction or your own idea.</p>
+          </div>
+        </div>
+        <div class="step-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="step">
+          <div class="step-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M8 12h.01M12 12h.01M16 12h.01M12 6v-2M12 18v2"/></svg>
+          </div>
+          <div class="step-content">
+            <h3>2. Pick Gameplay</h3>
+            <p>Choose from popular games like Minecraft, GTA V, Roblox etc.</p>
+          </div>
+        </div>
+        <div class="step-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="step">
+          <div class="step-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 013 3v6a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 10a7 7 0 01-14 0M12 19v3M8 22h8"/></svg>
+          </div>
+          <div class="step-content">
+            <h3>3. AI Voice & Captions</h3>
+            <p>We generate natural voiceover and add subtitles automatically.</p>
+          </div>
+        </div>
+        <div class="step-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="step">
+          <div class="step-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M9 10l2 2 4-4"/></svg>
+          </div>
+          <div class="step-content">
+            <h3>4. Get Your Short</h3>
+            <p>Download a ready-to-upload 9:16 video in minutes.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- POPULAR GAMES -->
+    <section id="games" class="games-section">
+      <div class="section-header">
+        <h2>Popular Games</h2>
+        <a href="#" class="view-all">View All &rarr;</a>
+      </div>
+      <div class="games-grid">
+        <div class="game-card"><img src="c4a88e00-77b4-44cb-897f-7be0e2ebcedd.png" alt="Minecraft" loading="lazy"><div class="game-card-overlay"><span class="game-name">Minecraft</span></div></div>
+        <div class="game-card"><img src="d714ab01-aa65-4ff2-9011-85014b3535b7.png" alt="Roblox" loading="lazy"><div class="game-card-overlay"><span class="game-name">Roblox</span></div></div>
+        <div class="game-card"><img src="5bb6cefa-1149-459f-8fa3-029475806cd3.png" alt="GTA V" loading="lazy"><div class="game-card-overlay"><span class="game-name">GTA V</span></div></div>
+        <div class="game-card"><img src="4c892349-45ea-495d-ac04-f977280ebc4e.png" alt="Fortnite" loading="lazy"><div class="game-card-overlay"><span class="game-name">Fortnite</span></div></div>
+        <div class="game-card"><img src="5342df40-c3ca-4ead-a3a3-fe81225d6593.png" alt="Valorant" loading="lazy"><div class="game-card-overlay"><span class="game-name">Valorant</span></div></div>
+        <div class="game-card"><img src="57534f27-0efe-4257-989c-d5ca29f564c7.png" alt="Call of Duty" loading="lazy"><div class="game-card-overlay"><span class="game-name">Call of Duty</span></div></div>
+      </div>
+    </section>
+
+    <!-- STATS BAR -->
+    <section class="stats-bar glass-card">
+      <div class="stat-item">
+        <div class="stat-icon-wrapper blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <div class="stat-text"><h4>100K+</h4><p>Videos Created</p></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon-wrapper cyan">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div class="stat-text"><h4>4.9/5</h4><p>User Rating</p></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon-wrapper purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="stat-text"><h4>10x Faster</h4><p>Than Manual Editing</p></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon-wrapper pink">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </div>
+        <div class="stat-text"><h4>Loved by</h4><p>Creators Worldwide</p></div>
+      </div>
+    </section>
+
+  </div><!-- /page -->
+
+  <!-- Demo Modal -->
+  <div id="demoModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);" onclick="this.style.display='none'">
+    <div style="background:#151522;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:3rem;max-width:500px;width:90%;text-align:center;" onclick="event.stopPropagation()">
+      <div style="font-size:3rem;margin-bottom:1rem;">▶️</div>
+      <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;margin-bottom:0.75rem;">Demo Coming Soon</h3>
+      <p style="color:#8B92A5;margin-bottom:1.5rem;">We're putting together an amazing demo video. For now, try creating your first video directly!</p>
+      <a href="app.html" style="display:inline-block;padding:0.85rem 1.75rem;background:linear-gradient(90deg,#7A52FF,#3B6EFF);border-radius:99px;color:#fff;font-weight:600;font-size:0.95rem;">Create Your First Video →</a>
+      <button onclick="document.getElementById('demoModal').style.display='none'" style="display:block;margin:1rem auto 0;background:none;border:none;color:#8B92A5;cursor:pointer;font-size:0.875rem;">✕ Close</button>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('watchDemoBtn').addEventListener('click', function() {
+      document.getElementById('demoModal').style.display = 'flex';
+    });
+  </script>
+</body>
+</html>
