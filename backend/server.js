@@ -64,6 +64,30 @@ app.get('/api/download-gameplay', (req, res) => {
     file.on('finish', () => res.send(`✅ Downloaded to ${dest}`));
   }).on('error', (err) => res.status(500).send(err.message));
 });
+
+// --- MASSIVE FILE UPLOAD ROUTE (STREAMS DIRECTLY TO DISK) ---
+app.post('/api/upload-stream', (req, res) => {
+  const name = req.query.name;
+  if (!name) return res.status(400).send('Missing name');
+  
+  const fs = require('fs');
+  const path = require('path');
+  const dest = path.resolve(process.env.STORAGE_ROOT || './storage', 'gameplay', name);
+  
+  // If append=true, we add to the file. Otherwise we overwrite it.
+  const stream = fs.createWriteStream(dest, { flags: req.query.append === 'true' ? 'a' : 'w' });
+  
+  req.pipe(stream);
+  
+  req.on('end', () => {
+    res.send(`✅ Chunk for ${name} saved.`);
+  });
+  
+  req.on('error', (err) => {
+    console.error('Upload stream error:', err);
+    res.status(500).send('Stream error');
+  });
+});
 // --------------------------------------------
 app.use('/api/videos',    videosRouter);
 
