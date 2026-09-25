@@ -1,8 +1,13 @@
 FROM node:20-slim
 
-# Install FFmpeg (Debian apt build includes full lavfi/libx264 support)
-RUN apt-get update \
- && apt-get install -y --no-install-recommends ffmpeg \
+# Download full static FFmpeg build (guarantees lavfi and all features)
+RUN apt-get update && apt-get install -y wget xz-utils \
+ && wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz \
+ && tar -xJf ffmpeg-release-amd64-static.tar.xz \
+ && mv ffmpeg-*-static/ffmpeg /usr/local/bin/ \
+ && mv ffmpeg-*-static/ffprobe /usr/local/bin/ \
+ && rm -rf ffmpeg-* \
+ && apt-get remove -y wget xz-utils && apt-get autoremove -y \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
