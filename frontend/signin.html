@@ -114,7 +114,7 @@
         </div>
 
         <div class="oauth-buttons">
-          <button class="btn-oauth">
+          <button id="btn-google" class="btn-oauth">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -129,19 +129,19 @@
           <span>OR</span>
         </div>
 
-        <form class="signin-form" onsubmit="event.preventDefault();">
+        <form id="form-signin" class="signin-form">
           <div class="form-group">
             <div class="input-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
             </div>
-            <input type="email" class="form-input" placeholder="Email address" required>
+            <input type="email" id="input-email" class="form-input" placeholder="Email address" required>
           </div>
           
           <div class="form-group">
             <div class="input-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
             </div>
-            <input type="password" class="form-input" placeholder="Password" required>
+            <input type="password" id="input-password" class="form-input" placeholder="Password" required>
             <div class="input-action">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </div>
@@ -174,5 +174,84 @@
       </div>
     </div>
   </div>
+
+  <!-- Firebase Authentication Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithPopup, 
+      GoogleAuthProvider,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+
+    // 🚨 USER: REPLACE THIS WITH YOUR CONFIG FROM FIREBASE CONSOLE 🚨
+    const firebaseConfig = {
+      apiKey: "PASTE_YOUR_API_KEY_HERE",
+      authDomain: "PASTE_YOUR_AUTH_DOMAIN_HERE",
+      projectId: "PASTE_YOUR_PROJECT_ID_HERE",
+      storageBucket: "PASTE_YOUR_STORAGE_BUCKET_HERE",
+      messagingSenderId: "PASTE_YOUR_SENDER_ID_HERE",
+      appId: "PASTE_YOUR_APP_ID_HERE"
+    };
+
+    let auth = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+    } catch (e) {
+      console.warn("Firebase not configured yet.", e.message);
+    }
+
+    // Google Sign In
+    document.getElementById('btn-google').addEventListener('click', async () => {
+      if (!auth || firebaseConfig.apiKey.includes('PASTE')) {
+        return alert('Please update firebaseConfig in signin.html with your actual Firebase keys!');
+      }
+      const provider = new GoogleAuthProvider();
+      try {
+        const result = await signInWithPopup(auth, provider);
+        console.log("Signed in:", result.user.email);
+        localStorage.setItem('userEmail', result.user.email);
+        window.location.href = '/app.html';
+      } catch (error) {
+        alert("Google Sign In Error: " + error.message);
+      }
+    });
+
+    // Email/Password Sign In & Sign Up
+    document.getElementById('form-signin').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!auth || firebaseConfig.apiKey.includes('PASTE')) {
+        return alert('Please update firebaseConfig in signin.html with your actual Firebase keys!');
+      }
+      
+      const email = document.getElementById('input-email').value;
+      const password = document.getElementById('input-password').value;
+      
+      try {
+        // Try signing in first
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log("Signed in:", userCredential.user.email);
+        localStorage.setItem('userEmail', userCredential.user.email);
+        window.location.href = '/app.html';
+      } catch (error) {
+        // If account doesn't exist, try creating it automatically
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+          try {
+            const newUser = await createUserWithEmailAndPassword(auth, email, password);
+            console.log("Account created:", newUser.user.email);
+            localStorage.setItem('userEmail', newUser.user.email);
+            window.location.href = '/app.html';
+          } catch (signupError) {
+            alert("Signup Error: " + signupError.message);
+          }
+        } else {
+          alert("Sign In Error: " + error.message);
+        }
+      }
+    });
+  </script>
 </body>
 </html>
