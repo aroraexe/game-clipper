@@ -96,9 +96,9 @@ function generateMockVideo({ durationS, outputPath }) {
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input(`color=c=0x1a1a2e:s=${VIDEO_W}x${VIDEO_H}:r=30`)
-      .inputFormat('lavfi')
+      .inputOptions(['-f', 'lavfi'])
       .input('anullsrc=r=44100:cl=stereo')
-      .inputFormat('lavfi')
+      .inputOptions(['-f', 'lavfi'])
       .duration(durationS)
       .outputOptions([
         '-map', '0:v',
