@@ -94,29 +94,17 @@ function extractSegment({ inputPath, startTime, durationS, outputPath }) {
  */
 function generateMockVideo({ durationS, outputPath }) {
   return new Promise((resolve, reject) => {
-    ffmpeg()
-      .input(`color=c=0x1a1a2e:s=${VIDEO_W}x${VIDEO_H}:r=30`)
-      .inputOptions(['-f', 'lavfi'])
-      .input('anullsrc=r=44100:cl=stereo')
-      .inputOptions(['-f', 'lavfi'])
-      .duration(durationS)
-      .outputOptions([
-        '-map', '0:v',
-        '-map', '1:a',
-        // CPU-only encoding — maximum speed
-        '-c:v', 'libx264',
-        '-preset', 'ultrafast',
-        '-tune', 'zerolatency',   // disables lookahead → faster encode start
-        '-crf', '35',
-        '-pix_fmt', 'yuv420p',
-        '-c:a', 'aac',
-        '-threads', '0', // 0 = FFmpeg auto-selects optimal thread count
-      ])
-      .output(outputPath)
-      .on('start', (cmd) => console.log('[FFmpeg:mockVideo] start'))
-      .on('end', () => resolve(outputPath))
-      .on('error', (err) => reject(new Error(`FFmpeg mock video failed: ${err.message}`)))
-      .run();
+    const { exec } = require('child_process');
+    const cmd = `ffmpeg -f lavfi -i "color=c=0x1a1a2e:s=${VIDEO_W}x${VIDEO_H}:r=30" -f lavfi -i "anullsrc=r=44100:cl=stereo" -map 0:v -map 1:a -c:v libx264 -preset ultrafast -tune zerolatency -crf 35 -pix_fmt yuv420p -c:a aac -threads 0 -t ${durationS} -y "${outputPath}"`;
+    
+    console.log('[FFmpeg:mockVideo] start (raw exec)');
+    exec(cmd, (error) => {
+      if (error) {
+        reject(new Error(`FFmpeg mock video failed: ${error.message}`));
+      } else {
+        resolve(outputPath);
+      }
+    });
   });
 }
 
