@@ -37,6 +37,34 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 /* ─── API routes ────────────────────────────────────────────────────────────── */
 app.use('/api/health',    healthRouter);
 app.use('/api/gameplay',  gameplayRouter);
+
+// --- TEMPORARY DOWNLOAD ROUTE FOR RAILWAY ---
+app.get('/api/download-gameplay', (req, res) => {
+  const url = req.query.url;
+  const name = req.query.name || 'minecraft.mp4';
+  if (!url) return res.status(400).send('Missing url parameter');
+  
+  const fs = require('fs');
+  const path = require('path');
+  const dest = path.resolve(process.env.STORAGE_ROOT || './storage', 'gameplay', name);
+  
+  const https = require('https');
+  const http = require('http');
+  const client = url.startsWith('https') ? https : http;
+  
+  const file = fs.createWriteStream(dest);
+  client.get(url, (response) => {
+    if (response.statusCode === 301 || response.statusCode === 302) {
+      return client.get(response.headers.location, (res2) => {
+        res2.pipe(file);
+        file.on('finish', () => res.send(`✅ Downloaded to ${dest}`));
+      });
+    }
+    response.pipe(file);
+    file.on('finish', () => res.send(`✅ Downloaded to ${dest}`));
+  }).on('error', (err) => res.status(500).send(err.message));
+});
+// --------------------------------------------
 app.use('/api/videos',    videosRouter);
 
 /* ─── 404 handler ───────────────────────────────────────────────────────────── */
