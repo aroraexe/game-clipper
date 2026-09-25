@@ -70,9 +70,9 @@ OUTPUT FORMAT:
 
 STORY REQUIREMENTS:
 - Write in first person.
-- Make it dramatic, engaging and suitable for a gaming Short.
+- Make it extremely funny, unhinged, and full of Gen-Z / TikTok brainrot slang (use words like skibidi, rizz, sigma, mewing, Ohio, gyatt, cooked).
 - Target approximately ${wordCount} words.
-- The story must be natural when read aloud.
+- The story must be natural when read aloud but fast-paced.
 - End with a compelling twist, reveal, or payoff.
 - Do not stop mid-sentence.`
                 },

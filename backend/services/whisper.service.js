@@ -50,19 +50,24 @@ async function transcribe(audioPath, _outputDir, cleanStory) {
   /* ── 3. Compute per-word weights ────────────────────────────────── */
   let totalWeight = 0;
   const weighted  = wordsArray.map((word) => {
-    const spoken = word.length;                       // chars → proportional spoken time
-    const pause  = word.match(/[.!?]$/) ? 8          // sentence end → long pause
-                 : word.endsWith(',')   ? 4           // clause end   → short pause
-                 : word.endsWith(';')   ? 5           // semi-colon   → medium pause
-                 : word.endsWith(':')   ? 3           // colon        → brief pause
+    // Base weight of 2 prevents short words ('a', 'I') from flashing too fast
+    const spoken = 2 + word.length;                       
+    const pause  = word.match(/[.!?]$/) ? 10          // sentence end → long pause
+                 : word.endsWith(',')   ? 5           // clause end   → short pause
+                 : word.endsWith(';')   ? 6           // semi-colon   → medium pause
+                 : word.endsWith(':')   ? 4           // colon        → brief pause
                  : 0;
     totalWeight += spoken + pause;
     return { word, spoken, pause };
   });
 
   /* ── 4. Distribute time proportionally ─────────────────────────── */
-  const msPerWeight = (durationS * 1000) / totalWeight;
-  let   cursor      = 0;
+  // TTS usually has a small silence at the beginning
+  const START_OFFSET = 0.25; 
+  // We subtract the start offset and a small end offset from the distributed duration
+  const availableDuration = Math.max(0.1, durationS - START_OFFSET - 0.25);
+  const msPerWeight = (availableDuration * 1000) / totalWeight;
+  let   cursor      = START_OFFSET * 1000;
 
   return weighted.map(({ word, spoken, pause }) => {
     const wordMs  = spoken * msPerWeight;
