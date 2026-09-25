@@ -152,18 +152,13 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
         `crop=${VIDEO_W}:${VIDEO_H},setsar=1[vscaled]`,
 
         // 2) Burn ASS subtitles into video
-        `[vscaled]ass='${assEscaped}'[vout]`,
-        
-        // 3) Mix audio: Gameplay lowered to 10%, Narration at 100%, padded
-        `[0:a]volume=0.10[a0]`,
-        `[1:a]volume=1.0[a1]`,
-        `[a0][a1]amix=inputs=2:duration=longest:normalize=0[aout]`
+        `[vscaled]ass='${assEscaped}'[vout]`
       ])
 
       // Map final video + mixed audio
       .outputOptions([
         '-map', '[vout]',
-        '-map', '[aout]',
+        '-map', '1:a',
 
         // CPU-only video codec — maximum speed settings
         '-c:v', 'libx264',
