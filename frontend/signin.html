@@ -189,7 +189,9 @@
       try {
         const result = await signInWithPopup(auth, provider);
         console.log("Signed in:", result.user.email);
+        const token = await result.user.getIdToken();
         localStorage.setItem('userEmail', result.user.email);
+        localStorage.setItem('firebaseToken', token);
         window.location.href = '/app.html';
       } catch (error) {
         alert("Google Sign In Error: " + error.message);
@@ -210,7 +212,9 @@
         // Try signing in first
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         console.log("Signed in:", userCredential.user.email);
+        const token = await userCredential.user.getIdToken();
         localStorage.setItem('userEmail', userCredential.user.email);
+        localStorage.setItem('firebaseToken', token);
         window.location.href = '/app.html';
       } catch (error) {
         // If account doesn't exist, try creating it automatically
@@ -218,7 +222,9 @@
           try {
             const newUser = await createUserWithEmailAndPassword(auth, email, password);
             console.log("Account created:", newUser.user.email);
+            const token = await newUser.user.getIdToken();
             localStorage.setItem('userEmail', newUser.user.email);
+            localStorage.setItem('firebaseToken', token);
             window.location.href = '/app.html';
           } catch (signupError) {
             alert("Signup Error: " + signupError.message);

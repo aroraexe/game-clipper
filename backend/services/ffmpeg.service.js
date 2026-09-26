@@ -95,7 +95,7 @@ function extractSegment({ inputPath, startTime, durationS, outputPath }) {
 function generateMockVideo({ durationS, outputPath }) {
   return new Promise((resolve, reject) => {
     const { exec } = require('child_process');
-    const cmd = `ffmpeg -f lavfi -i "color=c=0x1a1a2e:s=${VIDEO_W}x${VIDEO_H}:r=30" -f lavfi -i "anullsrc=r=44100:cl=stereo" -map 0:v -map 1:a -c:v libx264 -preset ultrafast -tune zerolatency -crf 35 -pix_fmt yuv420p -c:a aac -threads 0 -t ${durationS} -y "${outputPath}"`;
+    const cmd = `ffmpeg -f lavfi -i "color=c=0x1a1a2e:s=${VIDEO_W}x${VIDEO_H}:r=30" -f lavfi -i "anullsrc=r=44100:cl=stereo" -map 0:v -map 1:a -c:v libx264 -preset ultrafast -tune zerolatency -crf 35 -pix_fmt yuv420p -c:a aac -threads 1 -t ${durationS} -y "${outputPath}"`;
     
     console.log('[FFmpeg:mockVideo] start (raw exec)');
     exec(cmd, (error) => {
@@ -174,8 +174,8 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
         '-b:a', '128k',
         '-ar',  '44100',
 
-        // Threading: 0 = FFmpeg auto-selects optimal thread count for available CPUs
-        '-threads', '0',
+        // Threading: 1 = strict limit for low-RAM environments (Render free tier)
+        '-threads', '1',
 
         // Duration cap
         `-t`, String(durationS),

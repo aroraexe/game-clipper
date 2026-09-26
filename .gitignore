@@ -9,8 +9,10 @@ storage/output/
 storage/outputs/
 storage/temp/
 
-# Gameplay videos (upload manually to Railway volume)
-storage/gameplay/
+# Gameplay videos (ignore massive originals, allow small versions for Render)
+storage/gameplay/*.mp4
+storage/gameplay/*.webm
+!storage/gameplay/*_small.mp4
 
 # Logs
 *.log
@@ -20,9 +22,9 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Large test files
-*.mp4
-*.mp3
+# Large test files (ignore at root only, so we don't accidentally ignore allowed files above)
+/*.mp4
+/*.mp3
 tts_test.*
 test_*
 test-*

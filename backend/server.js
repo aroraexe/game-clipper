@@ -11,6 +11,7 @@ const healthRouter    = require('./routes/health.routes');
 const gameplayRouter  = require('./routes/gameplay.routes');
 const videosRouter    = require('./routes/videos.routes');
 const { initStorage } = require('./utils/storage.util');
+const { requireAuth } = require('./middleware/auth.middleware');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -36,7 +37,7 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 
 /* ─── API routes ────────────────────────────────────────────────────────────── */
 app.use('/api/health',    healthRouter);
-app.use('/api/gameplay',  gameplayRouter);
+app.use('/api/gameplay',  requireAuth, gameplayRouter);
 
 // --- TEMPORARY DOWNLOAD ROUTE FOR RAILWAY ---
 app.get('/api/download-gameplay', (req, res) => {
@@ -89,7 +90,7 @@ app.post('/api/upload-stream', (req, res) => {
   });
 });
 // --------------------------------------------
-app.use('/api/videos',    videosRouter);
+app.use('/api/videos',    requireAuth, videosRouter);
 
 /* ─── 404 handler ───────────────────────────────────────────────────────────── */
 app.use((req, res) => {

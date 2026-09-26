@@ -104,7 +104,8 @@ function initStoryStep() {
         const res = await fetch('/api/videos/generate-story', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('firebaseToken')}`
           },
           body: JSON.stringify({ duration: dur })
         });
@@ -165,7 +166,9 @@ async function loadGameplay() {
 
   let items;
   try {
-    const res  = await fetch('/api/gameplay');
+    const res  = await fetch('/api/gameplay', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('firebaseToken')}` }
+    });
     const json = await res.json();
     items = json.gameplay;
   } catch (err) {
@@ -247,7 +250,10 @@ async function submitJob() {
   try {
     const res = await fetch(`${API_BASE}/api/videos`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('firebaseToken')}`
+      },
       body: JSON.stringify({
         story:        state.story,
         gameplayId:   state.gameplayId,
@@ -292,7 +298,9 @@ function startPolling(jobId) {
 
   state.pollTimer = setInterval(async () => {
     try {
-      const res  = await fetch(`${API_BASE}/api/videos/${jobId}`);
+      const res  = await fetch(`${API_BASE}/api/videos/${jobId}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('firebaseToken')}` }
+      });
       const data = await res.json();
 
       if (!res.ok) {
