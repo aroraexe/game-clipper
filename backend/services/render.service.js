@@ -133,6 +133,7 @@ async function renderPipeline(job) {
         subtitlePath: assPath,
         outputPath: finalPath,
         durationS: trueDurationS,
+        onProgress: (pct) => stage(jobId, 'compositing', 70 + Math.floor(pct * 0.25))
       });
     });
     checkTimeout(timedOut);

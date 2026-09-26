@@ -24,10 +24,10 @@ const fs         = require('fs');
 console.log('[FFmpeg] Running in CPU-only mode (libx264)');
 
 /* ── Output resolution (env-configurable) ───────────────────────────── */
-// Default: 720×1280 (fast, looks great on all phones)
+// Default: 480x854 (fastest, optimized for Render free tier 0.1vCPU)
 // Override: VIDEO_WIDTH=1080 VIDEO_HEIGHT=1920 for local HD renders
-const VIDEO_W = parseInt(process.env.VIDEO_WIDTH,  10) || 720;
-const VIDEO_H = parseInt(process.env.VIDEO_HEIGHT, 10) || 1280;
+const VIDEO_W = parseInt(process.env.VIDEO_WIDTH,  10) || 480;
+const VIDEO_H = parseInt(process.env.VIDEO_HEIGHT, 10) || 854;
 console.log(`[FFmpeg] Output resolution: ${VIDEO_W}×${VIDEO_H}`);
 
 /* ── Configure binary paths from env ─────────────────────────────────────── */
@@ -126,7 +126,7 @@ function generateMockVideo({ durationS, outputPath }) {
  * compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, durationS })
  * → Promise<string>  outputPath
  * ──────────────────────────────────────────────────────────────────────────── */
-function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, durationS }) {
+function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, durationS, onProgress }) {
   const gp  = validatePath(gameplayPath, 'Gameplay segment');
   const aud = validatePath(audioPath,    'Narration audio');
   // subtitles validated separately — path may contain special chars
@@ -187,7 +187,10 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
       .output(outputPath)
       .on('start', (cmd) => console.log('[FFmpeg:composite] start:', cmd.slice(0, 140)))
       .on('progress', (p) => {
-        if (p.percent) process.stdout.write(`\r[FFmpeg:composite] ${Math.round(p.percent)}%`);
+        if (p.percent) {
+          process.stdout.write(`\r[FFmpeg:composite] ${Math.round(p.percent)}%`);
+          if (onProgress) onProgress(p.percent);
+        }
       })
       .on('end', () => {
         process.stdout.write('\n');
