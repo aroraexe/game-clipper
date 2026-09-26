@@ -19,8 +19,9 @@ RUN npm ci --only=production
 # Copy application code
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
+COPY storage/ ./storage/
 
-# Create persistent storage dirs
+# Ensure required persistent storage dirs exist
 RUN mkdir -p storage/gameplay storage/output storage/temp
 
 EXPOSE 3000
