@@ -1,5 +1,7 @@
 const admin = require('firebase-admin');
 
+let isFirebaseInitialized = false;
+
 // Initialize Firebase Admin only once
 try {
   // Option 1: Using a service account file
@@ -15,6 +17,7 @@ try {
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount)
     });
+    isFirebaseInitialized = true;
   } else {
     console.warn("⚠️ Firebase Admin not initialized. Missing FIREBASE_SERVICE_ACCOUNT_BASE64 env var.");
   }
@@ -24,7 +27,7 @@ try {
 
 const requireAuth = async (req, res, next) => {
   // Allow bypassing auth in dev if needed, or if Firebase admin isn't set up yet
-  if (!admin.apps.length) {
+  if (!isFirebaseInitialized) {
     console.warn("Auth bypassed because Firebase Admin is not initialized.");
     return next(); // For safety, you might want to return 401 here in production.
   }
