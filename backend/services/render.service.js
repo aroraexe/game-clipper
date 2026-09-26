@@ -17,7 +17,7 @@ const gameplayService = require('./gameplay.service');
 const ffmpegService = require('./ffmpeg.service');
 const { jobTempDir, outputDir } = require('../utils/storage.util');
 
-const TIMEOUT_MS = parseInt(process.env.JOB_TIMEOUT_MS || '300000', 10);
+const TIMEOUT_MS = parseInt(process.env.JOB_TIMEOUT_MS || '600000', 10);
 
 /* ── Main pipeline ────────────────────────────────────────────────────────── */
 

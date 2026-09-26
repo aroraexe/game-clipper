@@ -24,10 +24,10 @@ const fs         = require('fs');
 console.log('[FFmpeg] Running in CPU-only mode (libx264)');
 
 /* ── Output resolution (env-configurable) ───────────────────────────── */
-// Default: 480x854 (fastest, optimized for Render free tier 0.1vCPU)
+// Default: 720x1280 (HD)
 // Override: VIDEO_WIDTH=1080 VIDEO_HEIGHT=1920 for local HD renders
-const VIDEO_W = parseInt(process.env.VIDEO_WIDTH,  10) || 480;
-const VIDEO_H = parseInt(process.env.VIDEO_HEIGHT, 10) || 854;
+const VIDEO_W = parseInt(process.env.VIDEO_WIDTH,  10) || 720;
+const VIDEO_H = parseInt(process.env.VIDEO_HEIGHT, 10) || 1280;
 console.log(`[FFmpeg] Output resolution: ${VIDEO_W}×${VIDEO_H}`);
 
 /* ── Configure binary paths from env ─────────────────────────────────────── */
@@ -164,7 +164,7 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
         '-c:v', 'libx264',
         '-preset', 'ultrafast',
         '-tune', 'zerolatency',   // disables lookahead → faster encode start
-        '-crf', '33',
+        '-crf', '28',
         '-profile:v', 'baseline',
         '-level', '3.0',
         '-pix_fmt', 'yuv420p',
