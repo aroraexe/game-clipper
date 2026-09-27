@@ -40,6 +40,19 @@
         <div class="step-dot" data-step="3">3</div>
         <div class="step-dot" data-step="4">4</div>
       </div>
+      <div class="user-menu" style="position: relative;">
+        <button id="user-menu-btn" style="background: none; border: none; cursor: pointer; color: white; display: flex; align-items: center; gap: 8px;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #A78BFA); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;" id="user-avatar-initial">U</div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="user-dropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: rgba(15, 15, 20, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px; min-width: 180px; backdrop-filter: blur(10px); z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          <div style="padding: 8px; font-size: 13px; color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; word-break: break-all;" id="user-dropdown-email">user@example.com</div>
+          <button id="btn-signout" style="width: 100%; text-align: left; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid transparent; color: white; cursor: pointer; border-radius: 6px; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            Sign out
+          </button>
+        </div>
+      </div>
     </header>
 
     <!-- ── STEP 1: Story ── -->
@@ -511,5 +524,58 @@
     window.__API_BASE__ = '';
   </script>
   <script src="app.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDeZc5KC6ruyJgga7dht65ekOYQgZaKCHU",
+      authDomain: "gameclipper.firebaseapp.com",
+      projectId: "gameclipper",
+      storageBucket: "gameclipper.firebasestorage.app",
+      messagingSenderId: "46620790316",
+      appId: "1:46620790316:web:f9bf4ff84722971077cb89",
+      measurementId: "G-WT4XJMV9R8"
+    };
+    
+    let auth = null;
+    try {
+      const app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+    } catch (e) {
+      console.warn("Firebase not configured yet.", e.message);
+    }
+
+    const userEmail = localStorage.getItem('userEmail');
+    if (userEmail) {
+      document.getElementById('user-dropdown-email').innerText = userEmail;
+      document.getElementById('user-avatar-initial').innerText = userEmail.charAt(0).toUpperCase();
+    }
+
+    const menuBtn = document.getElementById('user-menu-btn');
+    const dropdown = document.getElementById('user-dropdown');
+    
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.addEventListener('click', () => {
+      dropdown.style.display = 'none';
+    });
+    
+    document.getElementById('btn-signout').addEventListener('click', async () => {
+      try {
+        if (auth) {
+          await signOut(auth);
+        }
+      } catch(e) {
+        console.error("Sign out error", e);
+      }
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('firebaseToken');
+      window.location.href = 'signin.html';
+    });
+  </script>
 </body>
 </html>

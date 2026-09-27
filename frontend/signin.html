@@ -156,8 +156,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { 
       getAuth, 
-      signInWithRedirect, 
-      getRedirectResult,
+      signInWithPopup, 
       GoogleAuthProvider,
       signInWithEmailAndPassword,
       createUserWithEmailAndPassword
@@ -181,28 +180,24 @@
       console.warn("Firebase not configured yet.", e.message);
     }
 
-    // Check if we just came back from Google Sign-In redirect
-    if (auth) {
-      getRedirectResult(auth).then(async (result) => {
-        if (result) {
-          console.log("Signed in:", result.user.email);
-          const token = await result.user.getIdToken();
-          localStorage.setItem('userEmail', result.user.email);
-          localStorage.setItem('firebaseToken', token);
-          window.location.href = '/app.html';
-        }
-      }).catch((error) => {
-        alert("Google Sign In Error: " + error.message);
-      });
-    }
 
-    // Google Sign In (Using Redirect instead of Popup to fix Microsoft Edge issues)
-    document.getElementById('btn-google').addEventListener('click', () => {
+
+    // Google Sign In
+    document.getElementById('btn-google').addEventListener('click', async () => {
       if (!auth || firebaseConfig.apiKey.includes('PASTE')) {
         return alert('Please update firebaseConfig in signin.html with your actual Firebase keys!');
       }
       const provider = new GoogleAuthProvider();
-      signInWithRedirect(auth, provider);
+      try {
+        const result = await signInWithPopup(auth, provider);
+        console.log("Signed in:", result.user.email);
+        const token = await result.user.getIdToken();
+        localStorage.setItem('userEmail', result.user.email);
+        localStorage.setItem('firebaseToken', token);
+        window.location.href = '/app.html';
+      } catch (error) {
+        alert("Google Sign In Error: " + error.message);
+      }
     });
 
     // Email/Password Sign In & Sign Up
