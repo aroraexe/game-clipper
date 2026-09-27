@@ -148,7 +148,7 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
 
       .complexFilter([
         // 1) Scale & crop gameplay to exactly 1080×1920 (9:16)
-        `[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase:flags=fast_bilinear,` +
+        `[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase,` +
         `crop=${VIDEO_W}:${VIDEO_H},setsar=1[vscaled]`,
 
         // 2) Burn ASS subtitles into video
@@ -164,7 +164,7 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
         '-c:v', 'libx264',
         '-preset', 'ultrafast',
         '-tune', 'zerolatency',   // disables lookahead → faster encode start
-        '-crf', '25',
+        '-crf', '16',
         '-profile:v', 'main',
         '-level', '4.0',
         '-pix_fmt', 'yuv420p',
