@@ -26,8 +26,8 @@ console.log('[FFmpeg] Running in CPU-only mode (libx264)');
 /* ── Output resolution (env-configurable) ───────────────────────────── */
 // Default: 720x1280 (HD)
 // Override: VIDEO_WIDTH=1080 VIDEO_HEIGHT=1920 for local HD renders
-const VIDEO_W = parseInt(process.env.VIDEO_WIDTH,  10) || 720;
-const VIDEO_H = parseInt(process.env.VIDEO_HEIGHT, 10) || 1280;
+const VIDEO_W = parseInt(process.env.VIDEO_WIDTH,  10) || 360;
+const VIDEO_H = parseInt(process.env.VIDEO_HEIGHT, 10) || 640;
 console.log(`[FFmpeg] Output resolution: ${VIDEO_W}×${VIDEO_H}`);
 
 /* ── Configure binary paths from env ─────────────────────────────────────── */
@@ -148,7 +148,7 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
 
       .complexFilter([
         // 1) Scale & crop gameplay to exactly 1080×1920 (9:16)
-        `[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase,` +
+        `[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase:flags=fast_bilinear,` +
         `crop=${VIDEO_W}:${VIDEO_H},setsar=1[vscaled]`,
 
         // 2) Burn ASS subtitles into video
