@@ -17,7 +17,10 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 /* ─── Security / middleware ─────────────────────────────────────────────────── */
-app.use(helmet({ contentSecurityPolicy: false }));   // CSP off → serving local HTML
+app.use(helmet({ 
+  contentSecurityPolicy: false,
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
+}));
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
