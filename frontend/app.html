@@ -6,7 +6,7 @@
   <title>StoryPlay — Create Your Gaming Short</title>
   <script>
     if (!localStorage.getItem('userEmail')) {
-      window.location.href = 'signin.html';
+      window.location.href = '/signin';
     }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -574,7 +574,7 @@
       }
       localStorage.removeItem('userEmail');
       localStorage.removeItem('firebaseToken');
-      window.location.href = 'signin.html';
+      window.location.href = '/signin';
     });
   </script>
 </body>

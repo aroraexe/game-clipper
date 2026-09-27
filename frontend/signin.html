@@ -194,7 +194,7 @@
         const token = await result.user.getIdToken();
         localStorage.setItem('userEmail', result.user.email);
         localStorage.setItem('firebaseToken', token);
-        window.location.href = '/app.html';
+        window.location.href = '/app';
       } catch (error) {
         alert("Google Sign In Error: " + error.message);
       }
@@ -217,7 +217,7 @@
         const token = await userCredential.user.getIdToken();
         localStorage.setItem('userEmail', userCredential.user.email);
         localStorage.setItem('firebaseToken', token);
-        window.location.href = '/app.html';
+        window.location.href = '/app';
       } catch (error) {
         // If account doesn't exist, try creating it automatically
         if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
@@ -227,7 +227,7 @@
             const token = await newUser.user.getIdToken();
             localStorage.setItem('userEmail', newUser.user.email);
             localStorage.setItem('firebaseToken', token);
-            window.location.href = '/app.html';
+            window.location.href = '/app';
           } catch (signupError) {
             alert("Signup Error: " + signupError.message);
           }

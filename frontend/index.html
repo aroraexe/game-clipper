@@ -46,9 +46,21 @@
             <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
           </svg>
-        </button>
-        <a href="signin.html" class="btn btn-ghost">Sign In</a>
-        <a href="app.html" class="btn btn-primary">Create Video</a>
+        <div id="userMenu" style="display: none; position: relative;">
+          <button id="user-menu-btn" style="background: none; border: none; cursor: pointer; color: white; display: flex; align-items: center; gap: 8px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #A78BFA); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;" id="user-avatar-initial">U</div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div id="user-dropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: rgba(15, 15, 20, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px; min-width: 180px; backdrop-filter: blur(10px); z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="padding: 8px; font-size: 13px; color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; word-break: break-all;" id="user-dropdown-email">user@example.com</div>
+            <button id="btn-signout" style="width: 100%; text-align: left; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid transparent; color: white; cursor: pointer; border-radius: 6px; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              Sign out
+            </button>
+          </div>
+        </div>
+        <a href="/signin" class="btn btn-ghost" id="navSignIn">Sign In</a>
+        <a href="/signin" class="btn btn-primary" id="navCreateBtn">Create Video</a>
       </div>
     </div>
   </nav>
@@ -71,7 +83,7 @@
           Paste a story, pick gameplay, and get a ready-to-upload short video with AI voice, captions, and smooth edits.
         </p>
         <div class="hero-cta-group">
-          <a href="app.html" class="btn btn-primary btn-large">Create Your First Video &rarr;</a>
+          <a href="/signin" class="btn btn-primary btn-large" id="heroCreateBtn">Create Your First Video &rarr;</a>
           <button class="btn btn-outline btn-large" id="watchDemoBtn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             Watch Demo
@@ -252,6 +264,43 @@
     document.getElementById('watchDemoBtn').addEventListener('click', function() {
       document.getElementById('demoModal').style.display = 'flex';
     });
+
+    // Check Auth State
+    const userEmail = localStorage.getItem('userEmail');
+    if (userEmail) {
+      document.getElementById('navSignIn').style.display = 'none';
+      document.getElementById('userMenu').style.display = 'block';
+      
+      document.getElementById('user-dropdown-email').innerText = userEmail;
+      document.getElementById('user-avatar-initial').innerText = userEmail.charAt(0).toUpperCase();
+
+      document.getElementById('navCreateBtn').href = '/app';
+      document.getElementById('navCreateBtn').textContent = 'Go to App';
+      document.getElementById('heroCreateBtn').href = '/app';
+    }
+
+    const menuBtn = document.getElementById('user-menu-btn');
+    const dropdown = document.getElementById('user-dropdown');
+    
+    if (menuBtn) {
+      menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+
+    document.addEventListener('click', () => {
+      if (dropdown) dropdown.style.display = 'none';
+    });
+    
+    const signOutBtn = document.getElementById('btn-signout');
+    if (signOutBtn) {
+      signOutBtn.addEventListener('click', () => {
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('firebaseToken');
+        window.location.href = '/signin';
+      });
+    }
   </script>
 </body>
 </html>

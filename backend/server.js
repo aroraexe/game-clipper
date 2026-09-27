@@ -36,7 +36,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 /* ─── Static frontend ───────────────────────────────────────────────────────── */
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(express.static(path.join(__dirname, '../frontend'), { extensions: ['html'] }));
 
 /* ─── API routes ────────────────────────────────────────────────────────────── */
 app.use('/api/health',    healthRouter);
