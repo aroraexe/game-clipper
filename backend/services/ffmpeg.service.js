@@ -162,9 +162,9 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
 
         // CPU-only video codec — maximum speed settings
         '-c:v', 'libx264',
-        '-preset', 'ultrafast',
+        '-preset', 'faster',
         '-tune', 'zerolatency',   // disables lookahead → faster encode start
-        '-crf', '28',
+        '-crf', '20',
         '-profile:v', 'baseline',
         '-level', '3.0',
         '-pix_fmt', 'yuv420p',
