@@ -19,6 +19,7 @@ RUN npm ci --only=production
 # Copy application code
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
+COPY protected/ ./protected/
 COPY storage/ ./storage/
 
 # Ensure required persistent storage dirs exist
