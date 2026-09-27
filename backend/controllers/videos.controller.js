@@ -43,9 +43,28 @@ function parseStoryResponse(raw) {
 /* ── POST /api/videos/generate-story ─────────────────────────────────────── */
 exports.generateStory = async (req, res, next) => {
   try {
-    const { duration } = req.body;
+    const { duration, type } = req.body;
     const dur = parseInt(duration) || 45;
     const wordCount = Math.floor(dur * 2.5);
+    const storyType = type || 'reddit';
+
+    let stylePrompt = '';
+    switch (storyType) {
+      case 'reddit':
+        stylePrompt = "Make it sound like a funny, slightly unhinged Reddit 'Am I The Asshole' or 'TIFU' post.";
+        break;
+      case 'true':
+        stylePrompt = "Make it sound like a bizarre but supposedly true story told by a friend.";
+        break;
+      case 'gaming':
+        stylePrompt = "Make it a hilarious story about a gaming moment, raging in voice chat, or a ridiculous glitch.";
+        break;
+      case 'fiction':
+        stylePrompt = "Make it a funny, creative short fictional story with an unexpected plot twist.";
+        break;
+      default:
+        stylePrompt = "Make it a funny, engaging short story.";
+    }
 
     const generateWithRetry = async (retries = 3) => {
       for (let i = 0; i < retries; i++) {
@@ -70,10 +89,11 @@ OUTPUT FORMAT:
 
 STORY REQUIREMENTS:
 - Write in first person.
-- Make it extremely funny, unhinged, and full of Gen-Z / TikTok brainrot slang (use words like skibidi, rizz, sigma, mewing, Ohio, gyatt, cooked).
+- ${stylePrompt}
+- DO NOT use Gen-Z "brainrot" slang (no skibidi, gyatt, rizz, sigma, mewing). Keep the humor smart and witty.
 - Target approximately ${wordCount} words.
 - The story must be natural when read aloud but fast-paced.
-- End with a compelling twist, reveal, or payoff.
+- End the story with a compelling, funny, or thought-provoking QUESTION directed at the viewer.
 - Do not stop mid-sentence.`
                 },
                 {

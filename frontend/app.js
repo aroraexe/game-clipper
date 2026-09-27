@@ -15,6 +15,7 @@ const state = {
   duration:   45,
   jobId:      null,
   pollTimer:  null,
+  storyType:  'reddit',
 };
 
 // Backend URL: empty = same origin (local dev)
@@ -89,6 +90,17 @@ function initStoryStep() {
     });
   }
 
+  const examplePills = document.querySelectorAll('.example-pill');
+  examplePills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const type = pill.dataset.type;
+      state.storyType = type;
+      if (btnAi) {
+        btnAi.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> Generate ${pill.textContent.trim()}`;
+      }
+    });
+  });
+
   if (btnAi && aiDuration) {
     btnAi.addEventListener('click', async () => {
       const originalText = btnAi.textContent;
@@ -107,7 +119,7 @@ function initStoryStep() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('firebaseToken')}`
           },
-          body: JSON.stringify({ duration: dur })
+          body: JSON.stringify({ duration: dur, type: state.storyType })
         });
 
         if (!res.ok) {
