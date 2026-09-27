@@ -31,7 +31,7 @@ function toAssTime(seconds) {
 const PRESETS = {
   'bold-yellow': {
     fontName:     'Impact',
-    fontSize:     120,
+    fontSize:     100,
     primaryColor: '&H0000FFFF',   // Yellow in ASS (AABBGGRR)
     outlineColor: '&H00000000',   // Black
     backColor:    '&H80000000',
@@ -41,10 +41,11 @@ const PRESETS = {
     alignment:    5,              // middle-center
     marginV:      0,
     highlight:    false,
+    wordsPerLine: 3,
   },
   'white-highlight': {
     fontName:     'Arial Rounded MT Bold',
-    fontSize:     110,
+    fontSize:     90,
     primaryColor: '&H00FFFFFF',   // White
     outlineColor: '&H00000000',
     backColor:    '&H80000000',
@@ -55,10 +56,11 @@ const PRESETS = {
     marginV:      0,
     highlight:    true,
     highlightColor: '&H88FFFFFF', // White Glow for highlight
+    wordsPerLine: 3,
   },
   'word-pop': {
     fontName:     'Impact',
-    fontSize:     130,
+    fontSize:     120,
     primaryColor: '&H00FFFFFF',
     outlineColor: '&H88FFFFFF',   // White glow outline
     backColor:    '&H80000000',
@@ -69,19 +71,21 @@ const PRESETS = {
     marginV:      0,
     highlight:    false,
     pop:          true,
+    wordsPerLine: 1, // word-pop shows 1 word at a time anyway
   },
   'clean': {
     fontName:     'Arial',
-    fontSize:     90,
+    fontSize:     70,
     primaryColor: '&H00FFFFFF',
     outlineColor: '&H00000000',
     backColor:    '&H40000000',
     bold:         0,
     outline:      2,
     shadow:       2,
-    alignment:    5,
-    marginV:      0,
+    alignment:    2,              // bottom center
+    marginV:      200,
     highlight:    false,
+    wordsPerLine: 5,
   },
 };
 
@@ -147,11 +151,12 @@ const SHOW_AHEAD_S   = 0;    // strict timing to prevent ASS subtitle stacking
 
 function buildEvents(words, preset) {
   const lines = [];
+  const wordsPerLine = preset.wordsPerLine || 3;
 
-  // Group words into chunks of WORDS_PER_LINE
+  // Group words into chunks of wordsPerLine
   const chunks = [];
-  for (let i = 0; i < words.length; i += WORDS_PER_LINE) {
-    chunks.push(words.slice(i, i + WORDS_PER_LINE));
+  for (let i = 0; i < words.length; i += wordsPerLine) {
+    chunks.push(words.slice(i, i + wordsPerLine));
   }
 
   for (let c = 0; c < chunks.length; c++) {
