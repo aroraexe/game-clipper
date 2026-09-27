@@ -244,6 +244,72 @@ function initCaptionsStep() {
 function initVoiceStep() {
   $('btnVoiceBack').addEventListener('click', () => goTo('captions'));
 
+  let currentAudio = null;
+  const resetIcons = () => {
+    document.querySelectorAll('.voice-play-btn svg').forEach(svg => {
+      svg.innerHTML = '<path d="M8 5v14l11-7z"/>';
+    });
+    const mainBtn = document.querySelector('.btn-preview-voice');
+    if (mainBtn) mainBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Preview Voice';
+  };
+
+  const playVoice = (voiceName, btnElement) => {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    resetIcons();
+
+    currentAudio = new Audio(`/preview_${voiceName}.mp3`);
+    
+    if (btnElement) {
+      if (btnElement.classList.contains('btn-preview-voice')) {
+        btnElement.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Stop Preview';
+      } else {
+        const svg = btnElement.querySelector('svg');
+        if (svg) svg.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+      }
+    }
+
+    currentAudio.play();
+    currentAudio.onended = resetIcons;
+  };
+
+  const previewVoiceBtn = document.querySelector('.btn-preview-voice');
+  if (previewVoiceBtn) {
+    previewVoiceBtn.addEventListener('click', () => {
+      if (currentAudio && !currentAudio.paused) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        resetIcons();
+        return;
+      }
+      const checkedVoice = document.querySelector('input[name="voice"]:checked');
+      if (checkedVoice) playVoice(checkedVoice.value, previewVoiceBtn);
+    });
+  }
+
+  const voiceCards = document.querySelectorAll('.voice-card');
+  voiceCards.forEach(card => {
+    const playBtn = card.querySelector('.voice-play-btn');
+    if (playBtn) {
+      playBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const voiceName = card.dataset.voice;
+        
+        // If clicking the same button that's already playing, just stop it
+        if (currentAudio && !currentAudio.paused && currentAudio.src.includes(voiceName)) {
+           currentAudio.pause();
+           currentAudio.currentTime = 0;
+           resetIcons();
+           return;
+        }
+        playVoice(voiceName, playBtn);
+      });
+    }
+  });
+
   $('btnGenerate').addEventListener('click', async () => {
     const voiceChecked    = document.querySelector('input[name="voice"]:checked');
     const durationChecked = document.querySelector('input[name="duration"]:checked');
