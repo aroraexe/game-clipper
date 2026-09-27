@@ -162,11 +162,11 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
 
         // CPU-only video codec — maximum speed settings
         '-c:v', 'libx264',
-        '-preset', 'faster',
+        '-preset', 'veryfast',
         '-tune', 'zerolatency',   // disables lookahead → faster encode start
-        '-crf', '20',
-        '-profile:v', 'baseline',
-        '-level', '3.0',
+        '-crf', '22',
+        '-profile:v', 'main',
+        '-level', '4.0',
         '-pix_fmt', 'yuv420p',
 
         // Audio codec
@@ -174,8 +174,8 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
         '-b:a', '128k',
         '-ar',  '44100',
 
-        // Threading: 1 = strict limit for low-RAM environments (Render free tier)
-        '-threads', '1',
+        // Threading: 0 = use optimal number of threads based on CPU cores
+        '-threads', '0',
 
         // Duration cap
         `-t`, String(durationS),
