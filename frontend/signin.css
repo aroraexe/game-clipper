@@ -287,6 +287,7 @@ body {
 .right-section {
   flex: 0 0 440px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
 }
 
