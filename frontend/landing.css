@@ -197,6 +197,7 @@ body::before {
 .gradient-text {
   background: linear-gradient(90deg, var(--purple) 0%, var(--blue) 55%, var(--pink) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  padding-bottom: 0.1em;
 }
 
 .hero-desc {
