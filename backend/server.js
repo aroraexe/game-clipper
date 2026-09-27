@@ -6,6 +6,7 @@ const cors          = require('cors');
 const helmet        = require('helmet');
 const rateLimit     = require('express-rate-limit');
 const path          = require('path');
+const cookieParser  = require('cookie-parser');
 
 const healthRouter    = require('./routes/health.routes');
 const gameplayRouter  = require('./routes/gameplay.routes');
@@ -24,6 +25,7 @@ app.use(helmet({
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 /* ─── Rate limiting ─────────────────────────────────────────────────────────── */
 const limiter = rateLimit({
@@ -37,6 +39,14 @@ app.use('/api', limiter);
 
 /* ─── Static frontend ───────────────────────────────────────────────────────── */
 app.use(express.static(path.join(__dirname, '../frontend'), { extensions: ['html'] }));
+
+// Protected App Route
+app.get('/app', (req, res) => {
+  if (!req.cookies.sessionToken) {
+    return res.redirect('/signin');
+  }
+  res.sendFile(path.join(__dirname, '../protected/app.html'));
+});
 
 /* ─── API routes ────────────────────────────────────────────────────────────── */
 app.use('/api/health',    healthRouter);

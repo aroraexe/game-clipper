@@ -574,6 +574,7 @@
       }
       localStorage.removeItem('userEmail');
       localStorage.removeItem('firebaseToken');
+      document.cookie = "sessionToken=; path=/; max-age=0";
       window.location.href = '/signin';
     });
   </script>
