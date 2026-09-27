@@ -451,14 +451,14 @@ body {
   padding: 14px;
   border: none;
   border-radius: 12px;
-  background: var(--grad-btn);
-  color: white;
+  background: #FFFFFF;
+  color: #000000;
   font-family: 'Space Grotesk', sans-serif;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
 }
 
 .btn-submit:hover {

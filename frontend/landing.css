@@ -133,14 +133,14 @@ body::before {
 .btn-ghost:hover { background:rgba(255,255,255,0.07); }
 
 .btn-primary {
-  background: linear-gradient(90deg, var(--purple) 0%, #2E7FFF 100%);
-  color:#fff;
-  box-shadow: 0 4px 20px rgba(122,82,255,0.4);
+  background: #FFFFFF;
+  color: #000000;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
 }
 .btn-primary:hover {
-  filter:brightness(1.13);
-  box-shadow: 0 6px 28px rgba(122,82,255,0.55);
-  transform:translateY(-1px);
+  background: #F0F0F0;
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
 }
 
 /* ─────────────────────────────────────────────────
