@@ -48,6 +48,16 @@ app.get('/app', (req, res) => {
   res.sendFile(path.join(__dirname, '../protected/app.html'));
 });
 
+// Session Login Route
+app.post('/api/auth/session', (req, res) => {
+  const { idToken } = req.body;
+  if (!idToken) return res.status(400).send('Missing idToken');
+  
+  // Set session cookie for 1 day across the whole site
+  res.cookie('sessionToken', idToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: false, path: '/' });
+  res.sendStatus(200);
+});
+
 /* ─── API routes ────────────────────────────────────────────────────────────── */
 app.use('/api/health',    healthRouter);
 app.use('/api/gameplay',  requireAuth, gameplayRouter);
