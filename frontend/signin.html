@@ -233,6 +233,7 @@
     async function handleLoginSuccess(user) {
       const token = await user.getIdToken();
       localStorage.setItem('firebaseToken', token);
+      localStorage.setItem('userEmail', user.email || 'user');
       
       const response = await fetch('/api/auth/session', {
         method: 'POST',
