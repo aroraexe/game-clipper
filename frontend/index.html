@@ -27,12 +27,60 @@
           <span>StoryPlay</span>
         </div>
         <nav class="nav-links">
-          <a href="#features">Features</a>
-          <a href="#how-it-works">How It Works</a>
-          <a href="#games">Games</a>
-          <a href="#examples">Examples</a>
-          <a href="#pricing">Pricing</a>
-          <a href="#faq">FAQ</a>
+          <div class="nav-item">
+            <a href="#features">Features</a>
+            <div class="nav-dropdown">
+              <div class="nav-card">
+                <span class="nav-card-title">Features</span>
+                <span class="nav-card-desc">AI Voices, Auto-captions & more</span>
+              </div>
+            </div>
+          </div>
+          <div class="nav-item">
+            <a href="#how-it-works">How It Works</a>
+            <div class="nav-dropdown">
+              <div class="nav-card">
+                <span class="nav-card-title">How It Works</span>
+                <span class="nav-card-desc">4 simple steps to viral shorts</span>
+              </div>
+            </div>
+          </div>
+          <div class="nav-item">
+            <a href="#games">Games</a>
+            <div class="nav-dropdown">
+              <div class="nav-card">
+                <span class="nav-card-title">Games Library</span>
+                <span class="nav-card-desc">Minecraft, GTA V, Roblox & more</span>
+              </div>
+            </div>
+          </div>
+          <div class="nav-item">
+            <a href="#examples">Examples</a>
+            <div class="nav-dropdown">
+              <div class="nav-card">
+                <span class="nav-card-title">Examples</span>
+                <span class="nav-card-desc">Watch what others have created</span>
+              </div>
+            </div>
+          </div>
+          <div class="nav-item">
+            <a href="#pricing">Pricing</a>
+            <div class="nav-dropdown">
+              <div class="nav-card">
+                <span class="nav-card-title">Pricing</span>
+                <span class="nav-card-desc">Start free, upgrade anytime</span>
+              </div>
+            </div>
+          </div>
+          <div class="nav-item">
+            <a href="#faq">FAQ</a>
+            <div class="nav-dropdown">
+              <div class="nav-card">
+                <span class="nav-card-title">FAQ</span>
+                <span class="nav-card-desc">Get your questions answered</span>
+              </div>
+            </div>
+          </div>
         </nav>
       </div>
       <div class="nav-actions">
@@ -74,18 +122,13 @@
           Turn Stories Into Viral Gaming Shorts
         </div>
         <h1 class="hero-title">
-          Turn any story into a<br>
-          <span class="gradient-text">gaming</span> Short.
+          Turn any story into a <span class="gradient-text">gaming</span> Short.
         </h1>
         <p class="hero-desc">
           Paste a story, pick gameplay, and get a ready-to-upload short video with AI voice, captions, and smooth edits.
         </p>
         <div class="hero-cta-group">
           <a href="/signin" class="btn btn-primary btn-large" id="heroCreateBtn">Create Your First Video &rarr;</a>
-          <button class="btn btn-outline btn-large" id="watchDemoBtn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            Watch Demo
-          </button>
         </div>
         <div class="hero-features">
           <div class="feature-item">
@@ -133,19 +176,44 @@
 
           <!-- Left floating card -->
           <div class="floating-card left-card">
-            <img src="card-left.jpg" alt="Gameplay preview">
+            <video src="example_2.mp4" autoplay loop muted playsinline disablePictureInPicture></video>
           </div>
 
           <!-- Center main phone -->
           <div class="floating-card main-phone">
-            <img src="card-mid.jpg" alt="Minecraft gameplay with captions">
+            <video src="example_1.mp4" autoplay loop muted playsinline disablePictureInPicture></video>
           </div>
 
           <!-- Right floating card -->
           <div class="floating-card right-card">
-            <img src="card-right.jpg" alt="Viral gaming short">
+            <video src="example_4.mp4" autoplay loop muted playsinline disablePictureInPicture></video>
           </div>
 
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="features-section">
+      <div class="section-header">
+        <h2>Why StoryPlay?</h2>
+        <p style="color:var(--muted)">Everything you need to create viral shorts.</p>
+      </div>
+      <div class="features-grid">
+        <div class="glass-card feature-card">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+          <h3>Ultra-Fast Rendering</h3>
+          <p>Get your video in minutes, not hours. Powered by optimized cloud GPUs.</p>
+        </div>
+        <div class="glass-card feature-card">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17v2m5-2v2m5-2v2"/></svg></div>
+          <h3>Dynamic Auto-Captions</h3>
+          <p>Word-by-word bold gaming captions that keep viewers hooked and increase retention.</p>
+        </div>
+        <div class="glass-card feature-card">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
+          <h3>Premium AI Voices</h3>
+          <p>Realistic TTS voices including popular storytelling and meme narrator styles.</p>
         </div>
       </div>
     </section>
@@ -205,15 +273,53 @@
     <section id="games" class="games-section">
       <div class="section-header">
         <h2>Popular Games</h2>
-        <a href="#" class="view-all">View All &rarr;</a>
+        <a href="/signin" class="view-all">View All &rarr;</a>
       </div>
       <div class="games-grid">
-        <div class="game-card"><img src="c4a88e00-77b4-44cb-897f-7be0e2ebcedd.png" alt="Minecraft" loading="lazy"><div class="game-card-overlay"><span class="game-name">Minecraft</span></div></div>
-        <div class="game-card"><img src="d714ab01-aa65-4ff2-9011-85014b3535b7.png" alt="Roblox" loading="lazy"><div class="game-card-overlay"><span class="game-name">Roblox</span></div></div>
-        <div class="game-card"><img src="5bb6cefa-1149-459f-8fa3-029475806cd3.png" alt="GTA V" loading="lazy"><div class="game-card-overlay"><span class="game-name">GTA V</span></div></div>
-        <div class="game-card"><img src="4c892349-45ea-495d-ac04-f977280ebc4e.png" alt="Fortnite" loading="lazy"><div class="game-card-overlay"><span class="game-name">Fortnite</span></div></div>
+        <div class="game-card"><video src="minecraft_small.mp4" autoplay loop muted playsinline disablePictureInPicture style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;"></video><div class="game-card-overlay" style="z-index: 1;"><span class="game-name">Minecraft</span></div></div>
+        <div class="game-card"><video src="roblox_small.mp4" autoplay loop muted playsinline disablePictureInPicture style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;"></video><div class="game-card-overlay" style="z-index: 1;"><span class="game-name">Roblox</span></div></div>
+        <div class="game-card"><video src="gtav_small.mp4" autoplay loop muted playsinline disablePictureInPicture style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;"></video><div class="game-card-overlay" style="z-index: 1;"><span class="game-name">GTA V</span></div></div>
+        <div class="game-card"><video src="fortnite_small.mp4" autoplay loop muted playsinline disablePictureInPicture style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;"></video><div class="game-card-overlay" style="z-index: 1;"><span class="game-name">Fortnite</span></div></div>
         <div class="game-card"><img src="5342df40-c3ca-4ead-a3a3-fe81225d6593.png" alt="Valorant" loading="lazy"><div class="game-card-overlay"><span class="game-name">Valorant</span></div></div>
         <div class="game-card"><img src="57534f27-0efe-4257-989c-d5ca29f564c7.png" alt="Call of Duty" loading="lazy"><div class="game-card-overlay"><span class="game-name">Call of Duty</span></div></div>
+      </div>
+    </section>
+
+    <!-- EXAMPLES -->
+    <section id="examples" class="examples-section">
+      <div class="section-header">
+        <h2>Built with StoryPlay</h2>
+        <p style="color:var(--muted)">See the viral shorts our users are creating.</p>
+      </div>
+      <div class="examples-grid">
+        <div class="example-card" style="padding:0; position:relative; overflow:hidden;">
+          <video src="example_1.mp4" autoplay loop muted playsinline disablePictureInPicture style="width:100%; display:block;"></video>
+          <div style="position:absolute; bottom:15px; left:15px; right:15px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; font-weight:600; font-size:0.85rem; text-align:left; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.1);">
+            <div style="color:var(--pink);font-size:0.75rem;margin-bottom:2px;text-transform:uppercase;letter-spacing:1px;">Style: Word-Pop</div>
+            Minecraft + Reddit Story
+          </div>
+        </div>
+        <div class="example-card" style="padding:0; position:relative; overflow:hidden;">
+          <video src="example_2.mp4" autoplay loop muted playsinline disablePictureInPicture style="width:100%; display:block;"></video>
+          <div style="position:absolute; bottom:15px; left:15px; right:15px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; font-weight:600; font-size:0.85rem; text-align:left; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.1);">
+            <div style="color:var(--blue);font-size:0.75rem;margin-bottom:2px;text-transform:uppercase;letter-spacing:1px;">Style: Bold Yellow</div>
+            GTA V + True Scary Story
+          </div>
+        </div>
+        <div class="example-card" style="padding:0; position:relative; overflow:hidden;">
+          <video src="example_3.mp4" autoplay loop muted playsinline disablePictureInPicture style="width:100%; display:block;"></video>
+          <div style="position:absolute; bottom:15px; left:15px; right:15px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; font-weight:600; font-size:0.85rem; text-align:left; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.1);">
+            <div style="color:var(--purple);font-size:0.75rem;margin-bottom:2px;text-transform:uppercase;letter-spacing:1px;">Style: White Highlight</div>
+            Roblox + Fun Facts
+          </div>
+        </div>
+        <div class="example-card" style="padding:0; position:relative; overflow:hidden;">
+          <video src="example_4.mp4" autoplay loop muted playsinline disablePictureInPicture style="width:100%; display:block;"></video>
+          <div style="position:absolute; bottom:15px; left:15px; right:15px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; font-weight:600; font-size:0.85rem; text-align:left; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.1);">
+            <div style="color:#FFF;font-size:0.75rem;margin-bottom:2px;text-transform:uppercase;letter-spacing:1px;">Style: Clean</div>
+            Fortnite + Funny Story
+          </div>
+        </div>
       </div>
     </section>
 
@@ -245,24 +351,64 @@
       </div>
     </section>
 
+    <!-- PRICING -->
+    <section id="pricing" class="pricing-section">
+      <div class="section-header" style="text-align: center; margin-bottom: 2rem;">
+        <h2>Simple Pricing</h2>
+        <p style="color:var(--muted)">Start for free, upgrade when you go viral.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="glass-card pricing-card">
+          <h3>Starter</h3>
+          <div class="price">Free</div>
+          <ul class="pricing-features">
+            <li>✔ 3 Videos per month</li>
+            <li>✔ Standard Quality (720p)</li>
+            <li>✔ StoryPlay Watermark</li>
+            <li>✔ Basic Voices</li>
+          </ul>
+          <a href="/signin" class="btn btn-outline btn-full">Get Started Free</a>
+        </div>
+        <div class="glass-card pricing-card popular">
+          <div class="popular-badge">Most Popular</div>
+          <h3>Creator Pro</h3>
+          <div class="price">$15<span>/mo</span></div>
+          <ul class="pricing-features">
+            <li>✔ Unlimited Videos</li>
+            <li>✔ HD Quality (1080p)</li>
+            <li>✔ No Watermark</li>
+            <li>✔ Premium Voices</li>
+            <li>✔ Custom Backgrounds</li>
+          </ul>
+          <a href="/signin" class="btn btn-primary btn-full">Start Pro Trial</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="faq-section">
+      <div class="section-header" style="text-align: center; margin-bottom: 2rem;">
+        <h2>Frequently Asked Questions</h2>
+      </div>
+      <div class="faq-grid">
+        <div class="glass-card faq-card">
+          <h4>Can I monetize the videos?</h4>
+          <p>Yes! All videos generated on the Pro plan are fully royalty-free and can be monetized on YouTube Shorts, TikTok, and Instagram Reels.</p>
+        </div>
+        <div class="glass-card faq-card">
+          <h4>How long can the videos be?</h4>
+          <p>Currently, videos can be up to 60 seconds long to fit perfectly within YouTube Shorts and TikTok's sweet spot for virality.</p>
+        </div>
+        <div class="glass-card faq-card">
+          <h4>What languages are supported?</h4>
+          <p>Currently, our AI voices are optimized for English, but we plan to roll out multi-language support very soon!</p>
+        </div>
+      </div>
+    </section>
+
   </div><!-- /page -->
 
-  <!-- Demo Modal -->
-  <div id="demoModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);" onclick="this.style.display='none'">
-    <div style="background:#151522;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:3rem;max-width:500px;width:90%;text-align:center;" onclick="event.stopPropagation()">
-      <div style="font-size:3rem;margin-bottom:1rem;">▶️</div>
-      <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;margin-bottom:0.75rem;">Demo Coming Soon</h3>
-      <p style="color:#8B92A5;margin-bottom:1.5rem;">We're putting together an amazing demo video. For now, try creating your first video directly!</p>
-      <a href="app.html" style="display:inline-block;padding:0.85rem 1.75rem;background:linear-gradient(90deg,#7A52FF,#3B6EFF);border-radius:99px;color:#fff;font-weight:600;font-size:0.95rem;">Create Your First Video →</a>
-      <button onclick="document.getElementById('demoModal').style.display='none'" style="display:block;margin:1rem auto 0;background:none;border:none;color:#8B92A5;cursor:pointer;font-size:0.875rem;">✕ Close</button>
-    </div>
-  </div>
-
   <script>
-    document.getElementById('watchDemoBtn').addEventListener('click', function() {
-      document.getElementById('demoModal').style.display = 'flex';
-    });
-
     // Check Auth State
     const userEmail = localStorage.getItem('userEmail');
     if (userEmail) {

@@ -22,11 +22,11 @@ const GAMEPLAY_DIR = path.resolve(STORAGE_ROOT, 'gameplay');
 
 /* ── In-memory catalogue ──────────────────────────────────────────────────── */
 const CATALOGUE = [
-  { id: 'minecraft',      name: 'Minecraft',       file: 'minecraft_small.mp4', tags: ['sandbox', 'survival'] },
-  { id: 'roblox',         name: 'Roblox',          file: 'roblox_small.mp4',    tags: ['casual', 'colorful'] },
-  { id: 'gtav',           name: 'GTA V',           file: 'gtav_small.mp4',      tags: ['action', 'open-world'] },
+  { id: 'minecraft',      name: 'Minecraft',       file: 'minecraft.mp4',       tags: ['sandbox', 'survival'] },
+  { id: 'roblox',         name: 'Roblox',          file: 'roblox.webm',         tags: ['casual', 'colorful'] },
+  { id: 'gtav',           name: 'GTA V',           file: 'gtav.mp4',            tags: ['action', 'open-world'] },
   { id: 'subway-surfers', name: 'Subway Surfers',  file: 'subway-surfers.mp4',  tags: ['endless-runner', 'mobile'] },
-  { id: 'fortnite',       name: 'Fortnite',        file: 'fortnite_small.mp4',  tags: ['battle-royale', 'colorful'] },
+  { id: 'fortnite',       name: 'Fortnite',        file: 'fortnite.mp4',        tags: ['battle-royale', 'colorful'] },
   { id: 'geometry-dash',  name: 'Geometry Dash',   file: 'geometry-dash.mp4',   tags: ['rhythm', 'intense'] },
 ];
 

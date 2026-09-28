@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700;800&display=swap');
 
 :root {
-  --bg-right: #0B0E14;
-  --bg-card: #12151E;
-  --bg-input: #15171E;
+  --bg-right: #09090E;
+  --bg-card: rgba(20, 20, 28, 0.4);
+  --bg-input: rgba(255, 255, 255, 0.03);
   --primary-gradient: linear-gradient(90deg, #606CFF 0%, #B85CF6 50%, #EC4899 100%);
   --text-main: #ffffff;
   --text-muted: #9AA3B5;
-  --border-light: rgba(255, 255, 255, 0.08);
+  --border-light: rgba(255, 255, 255, 0.06);
 }
 
 *, *::before, *::after {
@@ -41,16 +41,13 @@ body {
 }
 
 .bg-video {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  object-fit: cover;
-  z-index: 0;
+  display: none;
 }
 
 .bg-overlay {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(90deg, rgba(11, 14, 20, 0.6) 0%, rgba(11, 14, 20, 0.2) 50%, rgba(11, 14, 20, 0.8) 100%);
+  background: radial-gradient(circle at 50% 0%, rgba(122,82,255,0.08) 0%, transparent 60%), #09090E;
   z-index: 1;
 }
 
@@ -88,6 +85,29 @@ body {
 .header-nav a:hover {
   opacity: 0.8;
 }
+
+/* Nav Dropdowns */
+.nav-item { position: relative; display: inline-block; padding: 10px 0; }
+.nav-dropdown {
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(10px);
+  opacity: 0; visibility: hidden; transition: all 0.2s ease;
+  pointer-events: none; z-index: 400; padding-top: 5px;
+}
+.nav-item:hover .nav-dropdown {
+  opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto;
+}
+.nav-card {
+  background: rgba(15, 15, 20, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  width: 220px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.nav-card-title { font-weight: 700; color: #fff; font-size: 0.9rem; }
+.nav-card-desc { font-size: 0.8rem; color: #a1a1aa; line-height: 1.4; white-space: normal; }
 
 .left-content {
   position: relative;

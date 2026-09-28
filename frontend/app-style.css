@@ -3,9 +3,9 @@
 ═══════════════════════════════════════════════ */
 
 :root {
-  --bg: #07070F;
-  --card: rgba(13,13,28,0.88);
-  --border: rgba(255,255,255,0.08);
+  --bg: #09090E;
+  --card: rgba(20,20,28,0.4);
+  --border: rgba(255,255,255,0.06);
   --purple: #7A52FF;
   --blue: #00C6FF;
   --pink: #FF2A85;
@@ -14,6 +14,8 @@
 }
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+html { font-size: 85%; scroll-behavior: smooth; }
 
 body {
   font-family: 'Inter', sans-serif;
@@ -25,14 +27,11 @@ body {
 
 /* ── Background ── */
 .bg-scene {
-  position: fixed; inset: 0; z-index: 0;
-  background: url('bg-minecraft.jpg') center center / cover no-repeat;
-  filter: blur(2px);
-  transform: scale(1.04);
+  display: none;
 }
 .bg-overlay {
   position: fixed; inset: 0; z-index: 1;
-  background: linear-gradient(135deg, rgba(7,7,20,0.82) 0%, rgba(10,5,25,0.75) 50%, rgba(7,7,20,0.88) 100%);
+  background: radial-gradient(circle at 50% 0%, rgba(122,82,255,0.08) 0%, transparent 60%), var(--bg);
 }
 
 /* ── App Shell ── */

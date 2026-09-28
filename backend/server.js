@@ -50,19 +50,27 @@ app.use(express.static(path.join(__dirname, '../frontend'), {
 
 // Protected App Route
 app.get('/app', (req, res) => {
+  console.log("Received GET request for /app. Cookies:", req.cookies);
   if (!req.cookies.sessionToken) {
+    console.log("No sessionToken cookie found! Redirecting to /signin");
     return res.redirect('/signin');
   }
+  console.log("sessionToken found, serving app.html");
   res.sendFile(path.join(__dirname, '../protected/app.html'));
 });
 
 // Session Login Route
 app.post('/api/auth/session', (req, res) => {
   const { idToken } = req.body;
-  if (!idToken) return res.status(400).send('Missing idToken');
+  console.log("Received login request to /api/auth/session");
+  if (!idToken) {
+    console.log("Missing idToken!");
+    return res.status(400).send('Missing idToken');
+  }
   
   // Set session cookie for 1 day across the whole site
   res.cookie('sessionToken', idToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: false, path: '/' });
+  console.log("Cookie set successfully, returning 200 OK");
   res.sendStatus(200);
 });
 
