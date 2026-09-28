@@ -2,14 +2,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// TODO: Replace the following with your app's Firebase project configuration
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDeZc5KC6ruyJgga7dht65ekOYQgZaKCHU",
+  authDomain: "gameclipper.firebaseapp.com",
+  projectId: "gameclipper",
+  storageBucket: "gameclipper.firebasestorage.app",
+  messagingSenderId: "46620790316",
+  appId: "1:46620790316:web:f9bf4ff84722971077cb89",
+  measurementId: "G-WT4XJMV9R8"
 };
 
 // Initialize Firebase
