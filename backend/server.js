@@ -38,7 +38,15 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 /* ─── Static frontend ───────────────────────────────────────────────────────── */
-app.use(express.static(path.join(__dirname, '../frontend'), { extensions: ['html'] }));
+app.use(express.static(path.join(__dirname, '../frontend'), { 
+  extensions: ['html'],
+  setHeaders: (res, path) => {
+    // Disable cache for all static files to prevent stale frontend code during development
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
 
 // Protected App Route
 app.get('/app', (req, res) => {
