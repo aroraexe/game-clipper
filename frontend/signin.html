@@ -232,6 +232,7 @@
 
     async function handleLoginSuccess(user) {
       const token = await user.getIdToken();
+      localStorage.setItem('firebaseToken', token);
       
       const response = await fetch('/api/auth/session', {
         method: 'POST',
@@ -263,21 +264,25 @@
       }
     });
 
-    document.getElementById('btn-google').addEventListener('click', async () => {
+    document.getElementById('btn-google').addEventListener('click', async (e) => {
+      e.preventDefault();
       try {
         const userCred = await signInWithPopup(auth, provider);
         await handleLoginSuccess(userCred.user);
       } catch(err) {
         console.error(err);
+        alert("Google Sign-In Error: " + err.message);
       }
     });
 
-    document.getElementById('btn-github').addEventListener('click', async () => {
+    document.getElementById('btn-github').addEventListener('click', async (e) => {
+      e.preventDefault();
       try {
         const userCred = await signInWithPopup(auth, githubProvider);
         await handleLoginSuccess(userCred.user);
       } catch(err) {
         console.error(err);
+        alert("GitHub Sign-In Error: " + err.message);
       }
     });
   </script>
