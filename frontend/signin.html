@@ -188,9 +188,11 @@
     const toggleText = document.getElementById('toggle-text');
     const toggleAuthMode = document.getElementById('toggle-auth-mode');
     
-    toggleAuthMode.addEventListener('click', (e) => {
-      e.preventDefault();
-      isSignUp = !isSignUp;
+    const navSignIn = document.getElementById('nav-signin');
+    const navSignUp = document.getElementById('nav-signup');
+
+    function setAuthMode(signUpMode) {
+      isSignUp = signUpMode;
       if (isSignUp) {
         formTitle.textContent = 'Create your StoryPlay account';
         formSubtitle.textContent = 'Start making viral gaming Shorts for free.';
@@ -200,11 +202,30 @@
       } else {
         formTitle.textContent = 'Welcome back';
         formSubtitle.textContent = 'Sign in to continue creating Shorts.';
-        btnSubmit.innerHTML = 'Sign In &rarr;';
+        btnSubmit.innerHTML = 'Sign in &rarr;';
         toggleText.textContent = 'Don\'t have an account?';
         toggleAuthMode.textContent = 'Sign up';
       }
+    }
+
+    toggleAuthMode.addEventListener('click', (e) => {
+      e.preventDefault();
+      setAuthMode(!isSignUp);
     });
+
+    if (navSignIn) {
+      navSignIn.addEventListener('click', (e) => {
+        e.preventDefault();
+        setAuthMode(false);
+      });
+    }
+
+    if (navSignUp) {
+      navSignUp.addEventListener('click', (e) => {
+        e.preventDefault();
+        setAuthMode(true);
+      });
+    }
 
     const emailInput = document.getElementById('input-email');
     const passwordInput = document.getElementById('input-password');
