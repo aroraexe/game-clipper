@@ -447,5 +447,26 @@
       });
     }
   </script>
+  <script>
+    // Pause videos when out of view to save browser/GPU resources
+    document.addEventListener("DOMContentLoaded", function() {
+      const videos = document.querySelectorAll("video");
+      if ("IntersectionObserver" in window) {
+        const videoObserver = new IntersectionObserver((entries, observer) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.play().catch(e => {});
+            } else {
+              entry.target.pause();
+            }
+          });
+        }, { threshold: 0.1 });
+        
+        videos.forEach(video => {
+          videoObserver.observe(video);
+        });
+      }
+    });
+  </script>
 </body>
 </html>
