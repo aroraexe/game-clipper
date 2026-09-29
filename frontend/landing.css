@@ -297,6 +297,8 @@ body::before {
   border-radius: 22px; overflow: hidden;
   box-shadow: 0 24px 60px rgba(0,0,0,0.7);
   border: 1px solid rgba(255,255,255,0.08);
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU compositing */
 }
 .floating-card img, .floating-card video {
   width:100%; height:100%; object-fit:cover; display:block;
@@ -475,7 +477,11 @@ body::before {
 /* ─────────────────────────────────────────────────
    NEW SECTIONS (Features, Examples, Pricing, FAQ)
 ───────────────────────────────────────────────── */
-.features-section, .examples-section, .pricing-section, .faq-section { margin-bottom: 5.5rem; }
+.features-section, .games-section, .examples-section, .pricing-section, .faq-section { 
+  margin-bottom: 5.5rem; 
+  content-visibility: auto; 
+  contain-intrinsic-size: 500px;
+}
 
 .features-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
