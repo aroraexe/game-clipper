@@ -8,36 +8,14 @@ const gameplayService  = require('../services/gameplay.service');
 
 function parseStoryResponse(raw) {
   let text = raw.trim();
-
-  // Remove markdown code fences
+  // Remove markdown code fences if any
   text = text
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
+    .replace(/^```\w*\s*/i, "")
     .replace(/\s*```$/i, "")
     .trim();
-
-  // Find JSON object if model added extra text
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-
-  if (start !== -1 && end !== -1 && end > start) {
-    try {
-      const parsed = JSON.parse(text.slice(start, end + 1));
-      if (parsed && typeof parsed.story === "string" && parsed.story.trim()) {
-        return parsed.story.trim();
-      }
-    } catch (e) {
-      // Fall through to regex extraction if JSON parse fails
-    }
-  }
-
-  // Nemotron-specific fallback: extract the drafted story from its chain of thought
-  const draftMatch = text.match(/Draft:[\s\S]*?\"([^\"]+)\"/i) || text.match(/\"([^\"]+)\"/i);
-  if (draftMatch && draftMatch[1]) {
-    return draftMatch[1].trim();
-  }
-
-  throw new Error("Story generator returned invalid format");
+  
+  if (!text) throw new Error("Empty story response");
+  return text;
 }
 
 /* ── POST /api/videos/generate-story ─────────────────────────────────────── */
@@ -80,12 +58,7 @@ exports.generateStory = async (req, res, next) => {
               messages: [
                 {
                   role: 'system',
-                  content: `You are a strict JSON API. You must respond with exactly one JSON object and absolutely nothing else. No thinking, no counting, no explanations.
-
-OUTPUT FORMAT:
-{
-  "story": "..."
-}
+                  content: `You are a creative writer. You must respond with ONLY the story text and absolutely nothing else. No thinking, no intro, no outro, no JSON.
 
 STORY REQUIREMENTS:
 - Write in first person.
@@ -98,10 +71,11 @@ STORY REQUIREMENTS:
                 },
                 {
                   role: 'user',
-                  content: `Generate the story. Output ONLY JSON: {"story": "your generated story text goes here"}`
+                  content: `Generate the story.`
                 }
               ],
-              max_tokens: 500, // Safe buffer for the JSON
+              max_tokens: 500,
+
               temperature: 0.7
             })
           });
