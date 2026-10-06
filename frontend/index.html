@@ -342,7 +342,7 @@
               }
               const playPromise = video.play();
               if (playPromise !== undefined) {
-                playPromise.catch(e => { console.log('Autoplay prevented:', e); });
+                playPromise.catch(() => {});
               }
             } else {
               video.pause();
