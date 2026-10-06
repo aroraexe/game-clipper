@@ -560,6 +560,6 @@ function toast(msg, type = '') {
 
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
-    el.classList.remove('toast--show');
+    el.classList.remove('visible');
   }, 4000);
 }

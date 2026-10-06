@@ -30,9 +30,21 @@ const VIDEO_W = parseInt(process.env.VIDEO_WIDTH,  10) || 720;
 const VIDEO_H = parseInt(process.env.VIDEO_HEIGHT, 10) || 1280;
 console.log(`[FFmpeg] Output resolution: ${VIDEO_W}×${VIDEO_H}`);
 
-/* ── Configure binary paths from env ─────────────────────────────────────── */
-if (process.env.FFMPEG_PATH)  ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
-if (process.env.FFPROBE_PATH) ffmpeg.setFfprobePath(process.env.FFPROBE_PATH);
+/* ── Configure binary paths from env or static binaries ──────────────────── */
+const ffmpegStatic = require('ffmpeg-static');
+const ffprobeStatic = require('ffprobe-static');
+
+if (process.env.FFMPEG_PATH) {
+  ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
+} else if (ffmpegStatic) {
+  ffmpeg.setFfmpegPath(ffmpegStatic);
+}
+
+if (process.env.FFPROBE_PATH) {
+  ffmpeg.setFfprobePath(process.env.FFPROBE_PATH);
+} else if (ffprobeStatic && ffprobeStatic.path) {
+  ffmpeg.setFfprobePath(ffprobeStatic.path);
+}
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
 
