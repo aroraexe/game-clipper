@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pricing — StoryPlay</title>
-  <meta name="description" content="StoryPlay is free while it is in early access. No paid plans and no card required.">
+  <meta name="description" content="StoryPlay pricing: a free tier and a Pro monthly plan. Free videos are kept for 1 hour; Pro keeps them for 7 days with no watermark.">
   <link rel="stylesheet" href="landing.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -39,35 +39,57 @@
 
   <div class="subpage-head">
     <h1>Pricing</h1>
-    <p>StoryPlay is in early access and costs nothing to use.</p>
+    <p>Start free. Upgrade when you want your videos to stick around.</p>
   </div>
 
-  <div class="subpage-section">
+  <div class="subpage-section doc-grid">
+
     <div class="glass-card price-panel">
-      <h2 style="font-size:1.4rem;font-weight:700;">Early access</h2>
-      <div class="amount">Free</div>
-      <div class="per">no card, no trial period, no paid tier</div>
+      <h2 style="font-size:1.4rem;font-weight:700;">Free</h2>
+      <div class="amount">&pound;0</div>
+      <div class="per">no card, no trial period</div>
       <ul>
-        <li>Every feature that exists today, with no watermark</li>
-        <li>All four games and all four caption styles</li>
         <li>720&times;1280 export with burned-in captions</li>
-        <li>Renders run one or two at a time, so expect a short queue</li>
+        <li>All four games and all four caption styles</li>
+        <li>2 renders at a time, so the queue stays short</li>
+        <li>Stories up to 1,500 characters</li>
+        <li><strong>Videos are deleted after 1 hour</strong> &mdash; download anything you want to keep</li>
       </ul>
-      <a href="/signin" class="btn btn-primary btn-large">Create a video</a>
+      <a href="/signin" class="btn btn-ghost btn-large">Create a video</a>
     </div>
+
+    <div class="glass-card price-panel">
+      <h2 style="font-size:1.4rem;font-weight:700;">Pro</h2>
+      <!-- TODO(price): replace this amount with your real Stripe monthly price
+           before launch. Also update "per" below to match the billing period. -->
+      <div class="amount">&pound;9</div>
+      <div class="per">per month &mdash; cancel any time</div>
+      <ul>
+        <li>Everything in Free</li>
+        <li><strong>Videos are kept for 7 days</strong> and can be re-downloaded</li>
+        <li>No watermark</li>
+        <li>6 renders at a time</li>
+        <li>Stories up to 3,000 characters</li>
+        <li>Priority queue during busy periods</li>
+      </ul>
+      <a href="/signin" class="btn btn-primary btn-large">Go Pro</a>
+    </div>
+
   </div>
 
   <div class="subpage-section">
-    <h2>Why there are no paid plans</h2>
+    <h2>How billing works</h2>
     <div class="glass-card doc-card">
-      <p>There is no billing system behind this yet, so there is nothing to upgrade to. If paid plans are added later they will appear here, and nothing you have made will change or be taken away.</p>
+      <p>Pro is a monthly subscription that renews automatically. You can cancel at any time and you keep Pro until the end of the period you have already paid for, after which your account returns to Free. If a renewal payment fails, Pro and the 7-day retention end until the payment succeeds.</p>
+      <p style="margin-top:1rem;">Payments are taken by Stripe, so your card details never reach our servers. Prices exclude any local sales tax or VAT that may apply.</p>
     </div>
   </div>
 
   <div class="subpage-section">
     <h2>The actual limits</h2>
     <div class="glass-card doc-card">
-      <p>Usage is limited by the server rather than by a plan. Renders are processed one or two at a time depending on the machine, and finished videos are deleted from the server an hour after they are created. Heavy use may queue or be refused; there is no quota to buy more of.</p>
+      <p>Renders are processed a couple at a time depending on the machine, so a burst of requests may queue briefly. Free accounts can keep 2 renders in flight at once and Pro accounts 6. Story length is capped per plan &mdash; 1,500 characters on Free and 3,000 on Pro. Finished videos are held for 1 hour on Free and 7 days on Pro, after which they are deleted from the server.</p>
+      <p style="margin-top:1rem;">Plan limits are defined in one place in the codebase, so they can change as capacity does. If we ever reduce the retention period you have already paid for, we will tell you first.</p>
     </div>
   </div>
 
