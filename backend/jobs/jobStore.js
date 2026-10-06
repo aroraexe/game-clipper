@@ -119,6 +119,8 @@ function setStatus(jobId, status, extra = {}) {
 }
 
 function markFailed(jobId, err) {
+  const job = jobs.get(jobId);
+  if (job && (job.status === 'completed' || job.status === 'failed')) return job;
   const message = err instanceof Error ? err.message : String(err);
   return update(jobId, {
     status:  'failed',
@@ -129,6 +131,8 @@ function markFailed(jobId, err) {
 }
 
 function markCompleted(jobId, outputPath) {
+  const job = jobs.get(jobId);
+  if (job && (job.status === 'completed' || job.status === 'failed')) return job;
   return update(jobId, {
     status:     'completed',
     stage:      'finalizing',

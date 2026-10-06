@@ -249,16 +249,28 @@ exports.createJob = async (req, res, next) => {
 
     const idempotencyKey = req.headers['idempotency-key'];
     if (idempotencyKey) {
-      const existingJob = jobStore.findByIdempotencyKey(idempotencyKey, req.user.uid);
-      if (existingJob) {
-        console.log(`[Idempotency] Reusing job ${existingJob.jobId.slice(0, 8)} for key ${idempotencyKey.slice(0, 12)}`);
-        return res.status(200).json({
-          jobId: existingJob.jobId,
-          status: existingJob.status,
-          message: 'Job already exists (idempotent request)',
-        });
+      const existing = jobStore.findByIdempotencyKey(idempotencyKey, req.user.uid);
+      if (existing) {
+        console.log(`[Queue] Replaying existing job ${existing.jobId} for idempotency key`);
+        return res.status(200).json({ jobId: existing.jobId, status: existing.status, replayed: true });
       }
     }
+
+    // Queue limits to prevent unbounded resource consumption (DOS)
+    const allJobs = jobStore.list();
+    const activeJobs = allJobs.filter(j => ['queued', 'processing'].includes(j.status));
+    
+    // Global queue cap
+    if (activeJobs.length >= 100) {
+      return res.status(503).json({ error: 'System is currently at maximum capacity. Please try again later.' });
+    }
+    
+    // Per-user concurrency cap
+    const userActiveJobs = activeJobs.filter(j => j.userId === req.user.uid);
+    if (userActiveJobs.length >= 3) {
+      return res.status(429).json({ error: 'You already have 3 active jobs. Please wait for them to finish before creating more.' });
+    }
+
 
     /* Create job */
     const jobId = uuidv4();
@@ -330,6 +342,11 @@ exports.getOutput = async (req, res, next) => {
     if (!job.outputPath || !require('fs').existsSync(job.outputPath)) {
       return res.status(500).json({ error: 'Output file missing or deleted from server' });
     }
+
+    // Signed URLs are short-lived and per-user. Without no-store an intermediary
+    // can cache the body and keep serving it after the signature expires.
+    res.setHeader('Cache-Control', 'private, no-store, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
 
     if (req.query.download === 'true') {
       return res.download(job.outputPath, `storyplay_${req.params.jobId}.mp4`, (err) => {

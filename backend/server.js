@@ -14,7 +14,7 @@ const healthRouter    = require('./routes/health.routes');
 const gameplayRouter  = require('./routes/gameplay.routes');
 const videosRouter    = require('./routes/videos.routes');
 const { initStorage } = require('./utils/storage.util');
-const { requireAuth, getRequestToken, verifyFirebaseToken } = require('./middleware/auth.middleware');
+const { requireAuth, getRequestToken, verifyFirebaseToken, authPreflight, DEV_AUTH_ENABLED } = require('./middleware/auth.middleware');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -150,7 +150,7 @@ app.post('/api/auth/session', async (req, res, next) => {
 
     const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('sessionToken', idToken, {
-      maxAge:   24 * 60 * 60 * 1000,
+      maxAge:   60 * 60 * 1000, // 1 hour (matches Firebase ID token lifetime)
       httpOnly: true,
       secure:   isProduction,   // HTTPS-only in prod
       sameSite: 'lax',
@@ -205,6 +205,21 @@ app.use((err, req, res, _next) => {
 
 /* ─── Startup ───────────────────────────────────────────────────────────────── */
 async function start() {
+  // Fail loudly and EARLY on a config that would serve unauthenticated traffic.
+  // This used to be discovered on the first request instead.
+  const problems = authPreflight();
+  if (problems.length > 0) {
+    for (const p of problems) console.error(`[Startup] CONFIG ERROR: ${p}`);
+    if (IS_PROD) {
+      console.error('[Startup] Refusing to start in production with the above problems.');
+      process.exit(1);
+    }
+    console.warn('[Startup] Continuing in non-production despite the problems above.');
+  }
+  if (DEV_AUTH_ENABLED) {
+    console.warn('[Startup] ⚠️  DEV AUTH MOCK IS ENABLED — all requests resolve to "dev-user". Never do this in production.');
+  }
+
   await initStorage();
 
   // Start the render queue worker (import here so queue starts after storage init)
