@@ -290,7 +290,12 @@
         localStorage.setItem('userEmail', user.email || 'user');
         window.location.href = '/app';
       } else {
-        showAuthMessage('Could not start your secure session. Please try again.');
+        let errMsg = 'Could not start your secure session. Please try again.';
+        try {
+          const data = await response.json();
+          if (data.error) errMsg = data.error;
+        } catch (e) {}
+        showAuthMessage(errMsg);
       }
     }
 

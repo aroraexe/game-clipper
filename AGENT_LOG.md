@@ -286,3 +286,10 @@ Do not modify other agents' entries. Newest entries at the bottom.
 - **Changes:** Removed the process.exit(1) call in server.js during authPreflight() checks. Now, if the user hasn't configured Firebase or output signing secrets in Railway, the server will still boot (so the deployment succeeds) but API endpoints will safely return 500/503 errors until the user fixes their environment variables.
 - **Verified:** Pushed to GitHub (b523279).
 - **Notes:** Fixes Railway crash loop.
+
+### 2026-10-07 03:56 — Antigravity
+- **Task:** Fix sign-in redirect loop caused by dropped cookies
+- **Files:** backend/server.js
+- **Changes:** Changed the 'secure' flag in SESSION_COOKIE_DEFAULTS from a hardcoded NODE_ENV check to conditionally checking req.secure. Previously, if the app was run locally with NODE_ENV=production, it would send 'Secure' cookies over HTTP, which browsers silently drop, causing an immediate redirect back to /signin when trying to access /app.
+- **Verified:** Pushed to GitHub (653e8a9).
+- **Notes:** Resolves the issue where users were stuck in a sign-in loop.
