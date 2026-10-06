@@ -137,7 +137,16 @@ function _runInWorker(item) {
   // Clear queue position now that it's running
   try { jobStore.update(jobId, { queuePosition: 0, etaMs: 0 }); } catch (_) {}
 
-  const worker = new Worker(WORKER_PATH, { workerData: { job } });
+  let worker;
+  try {
+    worker = new Worker(WORKER_PATH, { workerData: { job } });
+  } catch (err) {
+    console.error(`[Queue] Failed to spawn worker for job ${jobId}:`, err);
+    jobStore.markFailed(jobId, `System error: could not start rendering worker.`);
+    active--;
+    drain();
+    return;
+  }
 
   worker.on('message', (msg) => {
     try {

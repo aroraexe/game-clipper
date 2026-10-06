@@ -67,7 +67,7 @@ loadStore();
 const VALID_STATUSES = ['queued', 'processing', 'completed', 'failed'];
 const VALID_STAGES   = [
   'preparing_story', 'generating_voice', 'transcribing',
-  'creating_subtitles', 'selecting_gameplay', 'trimming_gameplay',
+  'creating_subtitles', 'generating_assets', 'selecting_gameplay', 'trimming_gameplay',
   'compositing', 'finalizing', 'retrying',
 ];
 
@@ -105,10 +105,16 @@ function update(jobId, patch) {
 }
 
 function setStage(jobId, stage, progress) {
+  if (stage && !VALID_STAGES.includes(stage)) {
+    console.warn(`[JobStore] Warning: Invalid stage '${stage}' for job ${jobId}`);
+  }
   return update(jobId, { stage, progress: progress ?? jobs.get(jobId)?.progress });
 }
 
 function setStatus(jobId, status, extra = {}) {
+  if (status && !VALID_STATUSES.includes(status)) {
+    console.warn(`[JobStore] Warning: Invalid status '${status}' for job ${jobId}`);
+  }
   return update(jobId, { status, ...extra });
 }
 

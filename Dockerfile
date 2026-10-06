@@ -21,13 +21,16 @@ COPY backend/ ./backend/
 COPY frontend/ ./frontend/
 COPY storage/ ./storage/
 
-# Ensure required persistent storage dirs exist
-RUN mkdir -p storage/gameplay storage/output storage/temp
+# Ensure required persistent storage dirs exist and belong to the node user
+RUN mkdir -p storage/gameplay storage/output storage/temp && \
+    chown -R node:node /app
 
 EXPOSE 3000
 
 # Healthcheck so Railway knows when the app is ready
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"
+
+USER node
 
 CMD ["node", "backend/server.js"]

@@ -80,9 +80,22 @@ function parseStoryResponse(raw) {
 exports.generateStory = async (req, res, next) => {
   try {
     const { duration, type } = req.body;
-    const dur = parseInt(duration) || 45;
-    const wordCount = Math.floor(dur * 2.5);
-    const storyType = type || 'reddit';
+
+    // Whitelist both values before they reach the LLM prompt. Previously
+    // `parseInt(duration) || 45` accepted anything, so duration: -1 produced
+    // "Target approximately -3 words", and an unknown `type` silently fell
+    // through the switch to a generic prompt.
+    const ALLOWED_GEN_DURATIONS = [30, 45, 60];
+    const ALLOWED_GEN_TYPES = ['reddit', 'true', 'gaming', 'fiction'];
+
+    const dur = parseInt(duration, 10);
+    if (duration !== undefined && !ALLOWED_GEN_DURATIONS.includes(dur)) {
+      return res.status(400).json({ error: `duration must be one of: ${ALLOWED_GEN_DURATIONS.join(', ')}` });
+    }
+    const effectiveDur = ALLOWED_GEN_DURATIONS.includes(dur) ? dur : 45;
+    const wordCount = Math.floor(effectiveDur * 2.5);
+
+    const storyType = ALLOWED_GEN_TYPES.includes(type) ? type : 'reddit';
 
     let stylePrompt = '';
     switch (storyType) {
@@ -277,8 +290,9 @@ exports.createJob = async (req, res, next) => {
 exports.getJob = (req, res, next) => {
   try {
     const job = jobStore.get(req.params.jobId);
-    if (!job) return res.status(404).json({ error: 'Job not found' });
-    if (job.userId && job.userId !== req.user.uid) return res.status(403).json({ error: 'Access denied' });
+    if (!job || job.userId !== req.user.uid) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
 
     /* Never expose internal paths */
     const safe = {
@@ -307,8 +321,9 @@ exports.getOutput = async (req, res, next) => {
   try {
     const job = jobStore.get(req.params.jobId);
     if (!job) return res.status(404).json({ error: 'Job not found' });
+    
     const allowed = await authorizeOutputRequest(req, job);
-    if (!allowed) return res.status(403).json({ error: 'Access denied' });
+    if (!allowed) return res.status(404).json({ error: 'Job not found' });
     if (job.status !== 'completed')
       return res.status(409).json({ error: 'Job not completed yet', status: job.status });
 

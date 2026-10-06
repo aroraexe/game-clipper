@@ -43,6 +43,21 @@ function validatePath(filePath, label) {
   return resolved;
 }
 
+/**
+ * Escape a filesystem path for safe interpolation into an ffmpeg filtergraph
+ * argument. Backslashes become forward slashes first so the escapes we add are
+ * the only ones present.
+ */
+function escapeFilterPath(filePath) {
+  return String(filePath)
+    .replace(/\\/g, '/')
+    .replace(/:/g, '\\:')
+    .replace(/'/g, "\\'")
+    .replace(/,/g, '\\,')
+    .replace(/\[/g, '\\[')
+    .replace(/\]/g, '\\]');
+}
+
 /* ── probeDuration ───────────────────────────────────────────────────────── */
 /**
  * probeDuration(filePath) → Promise<number>  (seconds)
@@ -145,8 +160,14 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
   if (!fs.existsSync(assPath))
     throw new Error(`Subtitle file not found: ${path.basename(assPath)}`);
 
-  // Escape ASS path for ffmpeg vf filter (Windows: backslash → forward slash)
-  const assEscaped = assPath.replace(/\\/g, '/').replace(/:/g, '\\:');
+  // Escape ASS path for the ffmpeg filtergraph. The value is interpolated into
+  // `ass='...'` inside a filter chain, where several characters are structural:
+  //   \  Windows separator      :  drive letter / protocol separator
+  //   '  quote delimiter        ,  separates filters in a chain
+  //   [  ]  label delimiters
+  // Previously only \ and : were escaped, so a checkout path containing a comma
+  // or bracket (or an apostrophe) would produce a malformed filter chain.
+  const assEscaped = escapeFilterPath(assPath);
 
   return new Promise((resolve, reject) => {
     ffmpeg()
@@ -214,4 +235,4 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
   });
 }
 
-module.exports = { probeDuration, extractSegment, generateMockVideo, compositeVideo };
+module.exports = { probeDuration, extractSegment, generateMockVideo, compositeVideo, escapeFilterPath };

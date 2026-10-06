@@ -368,10 +368,7 @@ async function submitJob() {
 const STAGE_LABELS = {
   preparing_story:   'Preparing story…',
   generating_voice:  'Generating voice narration…',
-  transcribing:      'Transcribing audio with Whisper…',
-  creating_subtitles:'Creating ASS subtitles…',
-  selecting_gameplay:'Selecting gameplay segment…',
-  trimming_gameplay: 'Trimming gameplay (efficient seek)…',
+  generating_assets: 'Extracting gameplay & styling captions…',
   compositing:       'Compositing video…',
   finalizing:        'Finalizing…',
   retrying:          'Retrying render…',
@@ -380,10 +377,7 @@ const STAGE_LABELS = {
 const STAGE_ORDER = [
   'preparing_story',
   'generating_voice',
-  'transcribing',
-  'creating_subtitles',
-  'selecting_gameplay',
-  'trimming_gameplay',
+  'generating_assets',
   'compositing',
   'finalizing',
 ];

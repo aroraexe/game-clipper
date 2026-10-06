@@ -126,7 +126,7 @@ function generate(words, outputPath, style = 'bold-yellow', customColorHex = nul
   return outputPath;
 }
 
-module.exports = { generate, PRESETS, hexToAssColor, toAssTime };
+module.exports = { generate, PRESETS, hexToAssColor, toAssTime, sanitizeAssText };
 
 /* ── ASS Header ──────────────────────────────────────────────────────────── */
 function buildHeader(p) {
@@ -148,6 +148,20 @@ Style: Highlight,${p.fontName},${p.fontSize},${p.highlightColor || p.primaryColo
 /* ── Event lines ─────────────────────────────────────────────────────────── */
 const WORDS_PER_LINE = 4;    // words shown at once
 const SHOW_AHEAD_S   = 0;    // strict timing to prevent ASS subtitle stacking
+
+/**
+ * ASS is a markup format: `{...}` opens an override block and a raw newline
+ * starts a new event line. Subtitle text is derived from the user's submitted
+ * story, so it must be scrubbed before it reaches the Dialogue: line or a
+ * crafted story could inject styling overrides or forge extra events.
+ * Applied to user words only — never to the override tags we emit ourselves.
+ */
+function sanitizeAssText(text) {
+  return String(text ?? '')
+    .replace(/[{}]/g, '')
+    .replace(/[\r\n]+/g, ' ')
+    .trim();
+}
 
 function buildEvents(words, preset) {
   const lines = [];
@@ -172,7 +186,7 @@ function buildEvents(words, preset) {
       lines.push(...buildPopChunk(chunk, preset));
     } else {
       // Simple: show whole line at once
-      const text = chunk.map((w) => w.word).join(' ');
+      const text = chunk.map((w) => sanitizeAssText(w.word)).join(' ');
       lines.push(`Dialogue: 0,${toAssTime(lineStart)},${toAssTime(lineEnd)},Default,,0,0,0,,${text}`);
     }
   }
@@ -188,8 +202,9 @@ function buildHighlightedChunk(chunk, lineStart, lineEnd, preset) {
     const w = chunk[wi];
     // Build karaoke-style: highlighted word in Highlight style, others in Default
     const parts = chunk.map((cw, ci) => {
-      if (ci === wi) return `{\\rHighlight}${cw.word}{\\rDefault}`;
-      return cw.word;
+      const word = sanitizeAssText(cw.word);
+      if (ci === wi) return `{\\rHighlight}${word}{\\rDefault}`;
+      return word;
     }).join(' ');
 
     const start = w.start;
@@ -209,7 +224,7 @@ function buildPopChunk(chunk, preset) {
     // Keep word on screen until next word starts (or its own end if it's the last word)
     const end = wi < chunk.length - 1 ? chunk[wi + 1].start : w.end;
     // ASS override for scale animation (simple version: just show larger briefly)
-    const text  = `{\\t(0,80,\\fscx120\\fscy120)\\t(80,160,\\fscx100\\fscy100)}${w.word}`;
+    const text  = `{\\t(0,80,\\fscx120\\fscy120)\\t(80,160,\\fscx100\\fscy100)}${sanitizeAssText(w.word)}`;
     return `Dialogue: 0,${toAssTime(start)},${toAssTime(end)},Default,,0,0,0,,${text}`;
   });
 }
