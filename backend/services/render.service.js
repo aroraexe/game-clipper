@@ -70,10 +70,9 @@ async function renderPipeline(job) {
       audioPath = await ttsService.synthesize(cleanStory, audioOutPath, voice);
       
       // Get the true duration of the generated audio so the video doesn't cut off or drag on
-      const { execSync } = require('child_process');
       try {
-        const durStr = execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`, { encoding: 'utf8' }).trim();
-        if (durStr) trueDurationS = parseFloat(durStr) + 0.5; // Add 0.5s padding at the end
+        const dur = await ffmpegService.probeDuration(audioPath);
+        if (dur) trueDurationS = dur + 0.5; // Add 0.5s padding at the end
       } catch (e) {
         console.warn('Could not read true audio duration, falling back to UI duration');
       }
@@ -81,17 +80,16 @@ async function renderPipeline(job) {
     checkTimeout(timedOut);
 
     // Run subtitles and video extraction in parallel now that we know the true duration
+    stage(jobId, 'generating_assets', 30);
     
     const subsPromise = (async () => {
       let words;
-      stage(jobId, 'transcribing', 30);
       await timeBlock('Whisper Sync', async () => {
         words = await whisperService.transcribe(audioPath, tempDir, cleanStory);
         fs.writeFileSync(path.join(tempDir, 'timestamps.json'), JSON.stringify(words, null, 2), 'utf8');
       });
       checkTimeout(timedOut);
 
-      stage(jobId, 'creating_subtitles', 45);
       assPath = path.join(tempDir, 'captions.ass');
       await timeBlock('Subtitle Gen', async () => {
         subtitleService.generate(words, assPath, captionStyle, captionColor);
@@ -100,11 +98,9 @@ async function renderPipeline(job) {
     })();
 
     const videoPromise = (async () => {
-      stage(jobId, 'selecting_gameplay', 35);
       const segment = await gameplayService.selectSegment(gameplayId, trueDurationS);
       checkTimeout(timedOut);
 
-      stage(jobId, 'trimming_gameplay', 50);
       await timeBlock('Gameplay Trim', async () => {
         if (segment.mock) {
           await ffmpegService.generateMockVideo({ durationS: trueDurationS, outputPath: gameplaySegPath });
@@ -141,7 +137,6 @@ async function renderPipeline(job) {
 
     /* 8 ─ Finalise */
     stage(jobId, 'finalizing', 95);
-    cleanup(tempDir, finalPath);
 
     reportCompleted(jobId, finalPath);
     const tTotal = Date.now() - tStart;
@@ -213,8 +208,9 @@ function checkTimeout(timedOut) {
   if (timedOut) throw new Error('Render timeout exceeded');
 }
 
-function cleanup(tempDir, keepPath) {
+function cleanup(tempDir) {
   try {
+    if (!fs.existsSync(tempDir)) return;
     const files = fs.readdirSync(tempDir);
     for (const f of files) {
       const fullPath = path.join(tempDir, f);

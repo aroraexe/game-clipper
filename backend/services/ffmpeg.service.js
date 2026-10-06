@@ -72,13 +72,10 @@ function extractSegment({ inputPath, startTime, durationS, outputPath }) {
 
   return new Promise((resolve, reject) => {
     ffmpeg(src)
-      .inputOptions([`-ss ${startTime}`])    // fast input seek
+      .inputOptions([`-ss ${startTime}`])    // fast input-side seek (no decode)
       .duration(durationS)
       .outputOptions([
-        '-c:v', 'libx264',
-        '-preset', 'ultrafast',
-        '-crf', '23',
-        '-c:a', 'copy',
+        '-c', 'copy',                  // stream copy — no re-encode, near-instant
         '-avoid_negative_ts', 'make_zero',
       ])
       .output(outputPath)
@@ -96,17 +93,28 @@ function extractSegment({ inputPath, startTime, durationS, outputPath }) {
  */
 function generateMockVideo({ durationS, outputPath }) {
   return new Promise((resolve, reject) => {
-    const { exec } = require('child_process');
-    const cmd = `ffmpeg -f lavfi -i "color=c=0x1a1a2e:s=${VIDEO_W}x${VIDEO_H}:r=30" -f lavfi -i "anullsrc=r=44100:cl=stereo" -map 0:v -map 1:a -c:v libx264 -preset ultrafast -tune zerolatency -crf 35 -pix_fmt yuv420p -c:a aac -threads 1 -t ${durationS} -y "${outputPath}"`;
-    
-    console.log('[FFmpeg:mockVideo] start (raw exec)');
-    exec(cmd, (error) => {
-      if (error) {
-        reject(new Error(`FFmpeg mock video failed: ${error.message}`));
-      } else {
-        resolve(outputPath);
-      }
-    });
+    ffmpeg()
+      .input(`color=c=0x1a1a2e:s=${VIDEO_W}x${VIDEO_H}:r=30`)
+      .inputFormat('lavfi')
+      .input('anullsrc=r=44100:cl=stereo')
+      .inputFormat('lavfi')
+      .outputOptions([
+        '-map', '0:v',
+        '-map', '1:a',
+        '-c:v', 'libx264',
+        '-preset', 'ultrafast',
+        '-crf', '35',
+        '-pix_fmt', 'yuv420p',
+        '-c:a', 'aac',
+        '-threads', '1',
+        '-t', String(durationS),
+        '-y'
+      ])
+      .output(outputPath)
+      .on('start', () => console.log('[FFmpeg:mockVideo] start'))
+      .on('end', () => resolve(outputPath))
+      .on('error', (err) => reject(new Error(`FFmpeg mock video failed: ${err.message}`)))
+      .run();
   });
 }
 
@@ -164,9 +172,9 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
 
         // CPU-only video codec — balanced speed/quality settings
         '-c:v', 'libx264',
-        '-preset', 'veryfast',   // veryfast vs ultrafast: ~15% slower but ~4× smaller file
-        '-tune', 'zerolatency',  // disables lookahead → faster encode start
+        '-preset', 'ultrafast',  // fastest encode for cloud CPU boxes
         '-crf', '23',
+        '-bf', '2',              // B-frames: better compression without -zerolatency penalty
         '-profile:v', 'main',
         '-level', '4.0',
         '-pix_fmt', 'yuv420p',
