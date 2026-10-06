@@ -34,7 +34,7 @@ async function clean(story) {
           apiKey: process.env.NVIDIA_API_KEY,
           baseURL: 'https://integrate.api.nvidia.com/v1',
         });
-        aiModel = 'nvidia/nemotron-3-ultra-550b-a55b';
+        aiModel = 'nvidia/llama-3.1-nemotron-70b-instruct';
       } else {
         openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         aiModel = 'gpt-4o-mini';

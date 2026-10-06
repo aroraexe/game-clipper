@@ -101,7 +101,7 @@ exports.generateStory = async (req, res, next) => {
 
       for (let i = 0; i < retries; i++) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 45000);
         const startTime = Date.now();
         
         try {
@@ -113,7 +113,7 @@ exports.generateStory = async (req, res, next) => {
             },
             signal: controller.signal,
             body: JSON.stringify({
-              model: 'nvidia/nemotron-3-ultra-550b-a55b',
+              model: 'nvidia/llama-3.1-nemotron-70b-instruct',
               messages: [
                 {
                   role: 'system',
@@ -133,7 +133,7 @@ STORY REQUIREMENTS:
                   content: `Generate the story.`
                 }
               ],
-              max_tokens: 500,
+              max_tokens: 1024,
               temperature: 0.7
             })
           });
