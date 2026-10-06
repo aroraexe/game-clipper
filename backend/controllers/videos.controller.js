@@ -113,7 +113,7 @@ exports.generateStory = async (req, res, next) => {
             },
             signal: controller.signal,
             body: JSON.stringify({
-              model: 'nvidia/llama-3.1-nemotron-70b-instruct',
+              model: 'nvidia/nemotron-3-ultra-550b-a55b',
               messages: [
                 {
                   role: 'system',
