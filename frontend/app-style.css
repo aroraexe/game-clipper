@@ -161,7 +161,7 @@ body {
 .step-main { display: flex; flex-direction: column; gap: 1rem; }
 
 /* Phone preview */
-.step-preview { display: flex; justify-content: center; align-items: flex-start; }
+.step-preview { display: flex; justify-content: center; align-items: flex-start; padding-top: 3rem; }
 .preview-phone {
   width: 200px;
   border-radius: 24px;
