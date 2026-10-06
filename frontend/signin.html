@@ -320,7 +320,7 @@
         const userCred = await signInWithPopup(auth, provider);
         await handleLoginSuccess(userCred.user);
       } catch(err) {
-        console.error(err);
+        console.error('[Auth] Google sign-in error:', err.message || err);
         showAuthMessage(friendlyAuthMessage(err));
       }
     });
@@ -332,7 +332,7 @@
         const userCred = await signInWithPopup(auth, githubProvider);
         await handleLoginSuccess(userCred.user);
       } catch(err) {
-        console.error(err);
+        console.error('[Auth] GitHub sign-in error:', err.message || err);
         showAuthMessage(friendlyAuthMessage(err));
       }
     });

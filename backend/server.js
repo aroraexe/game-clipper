@@ -81,6 +81,18 @@ const getLimiter = rateLimit({
 });
 app.use('/api', (req, res, next) => req.method === 'POST' ? postLimiter(req, res, next) : getLimiter(req, res, next));
 
+/* ─── Session cookie attributes ─────────────────────────────────────────────── */
+// Defined once and reused. clearCookie must be given the SAME attributes the
+// cookie was set with (path, secure, sameSite) or the browser treats it as a
+// different cookie and leaves the original in place — which is why logout
+// silently failed to log anyone out.
+const SESSION_COOKIE_DEFAULTS = {
+  httpOnly: true,
+  secure:   process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  path:     '/',
+};
+
 /* ─── Protected app shell ────────────────────────────────────────────────────── */
 // This MUST be registered before express.static. With `extensions: ['html']` the
 // static handler resolves /app -> app.html and serves it to anyone, which made
@@ -99,7 +111,7 @@ app.get('/app', async (req, res, next) => {
   } catch (err) {
     console.error("[Auth] /app redirecting to /signin because verifyFirebaseToken threw:", err.message);
     if (err.status === 503) return next(err);   // server misconfigured — don't hide it
-    res.clearCookie('sessionToken', { path: '/' });
+    res.clearCookie('sessionToken', SESSION_COOKIE_DEFAULTS);
     return res.redirect('/signin');
   }
 });
@@ -148,13 +160,13 @@ app.post('/api/auth/session', async (req, res, next) => {
     // granting a 200 OK and then bouncing the user in a redirect loop on /app.
     await verifyFirebaseToken(idToken);
 
-    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('sessionToken', idToken, {
-      maxAge:   60 * 60 * 1000, // 1 hour (matches Firebase ID token lifetime)
-      httpOnly: true,
-      secure:   isProduction,   // HTTPS-only in prod
-      sameSite: 'lax',
-      path:     '/',
+      ...SESSION_COOKIE_DEFAULTS,
+      // A Firebase ID token expires after 1 hour. A 24h cookie outlives the
+      // credential it carries, so users were silently bounced to /signin at the
+      // 1h mark with no explanation. Match the cookie to the token; a real fix
+      // is refreshing the token client-side (see AGENT_LOG notes).
+      maxAge: 60 * 60 * 1000,
     });
     console.log("Cookie set successfully, returning 200 OK");
     res.sendStatus(200);
@@ -166,7 +178,7 @@ app.post('/api/auth/session', async (req, res, next) => {
 });
 
 app.post('/api/auth/logout', (req, res) => {
-  res.clearCookie('sessionToken', { path: '/' });
+  res.clearCookie('sessionToken', SESSION_COOKIE_DEFAULTS);
   res.sendStatus(200);
 });
 

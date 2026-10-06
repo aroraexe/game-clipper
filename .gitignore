@@ -1,3 +1,12 @@
+# Agent worktrees / scratch state.
+# IMPORTANT: these were previously only listed in .git/info/exclude, which is
+# per-clone and never shared through git. A fresh clone had no such rule, so
+# `git add .` would have staged .kilo/worktrees/** — which contains a hardcoded
+# NVIDIA API key in an old copy of videos.controller.js. Keep this in
+# .gitignore (shared) as well as .git/info/exclude (local).
+.kilo/
+.kilocode/
+
 # Dependencies
 node_modules/
 

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { generate, hexToAssColor, toAssTime, PRESETS } from '../backend/services/subtitle.service';
+import { generate, hexToAssColor, toAssTime, sanitizeAssText, PRESETS } from '../backend/services/subtitle.service';
 
 let tmpDir;
 beforeAll(() => { tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sub-test-')); });
@@ -43,6 +43,63 @@ describe('hexToAssColor', () => {
     expect(hexToAssColor('red')).toBeNull();
     expect(hexToAssColor('#GGGGGG')).toBeNull();
     expect(hexToAssColor('rgb(1,2,3)')).toBeNull();
+  });
+});
+
+describe('sanitizeAssText', () => {
+  it('strips braces so a story cannot inject ASS override blocks', () => {
+    // '{\b1}bold' -> braces removed -> '\b1bold' (backslash is literal text, no block)
+    expect(sanitizeAssText('{' + String.raw`\b1` + '}bold')).toBe(String.raw`\b1bold`);
+    expect(sanitizeAssText('a}b{c')).toBe('abc');
+  });
+
+  it('collapses newlines so a story cannot forge extra Dialogue events', () => {
+    expect(sanitizeAssText('one\r\ntwo')).toBe('one two');
+    expect(sanitizeAssText('one\nDialogue: 0,0,0,Default,,0,0,0,,forged'))
+      .toBe('one Dialogue: 0,0,0,Default,,0,0,0,,forged');
+  });
+
+  it('leaves ordinary caption text untouched', () => {
+    expect(sanitizeAssText('Hello there, friend!')).toBe('Hello there, friend!');
+  });
+
+  it('handles null/undefined without throwing', () => {
+    expect(sanitizeAssText(null)).toBe('');
+    expect(sanitizeAssText(undefined)).toBe('');
+  });
+});
+
+describe('generate — ASS injection via user story', () => {
+  const OVERRIDE = '{' + String.raw`\c&HFF0000&` + '}red';
+
+  it('never emits a brace-delimited override block from user text', () => {
+    const out = path.join(tmpDir, 'inject.ass');
+    generate([{ word: OVERRIDE, start: 0, end: 1 }], out, 'bold-yellow');
+    const content = fs.readFileSync(out, 'utf8');
+
+    // The override payload may survive as literal text, but it must not be
+    // wrapped in braces, which is what would make libass act on it.
+    const dialogue = content.split('\n').filter(l => l.startsWith('Dialogue:'));
+    expect(dialogue).toHaveLength(1);
+    expect(dialogue[0]).not.toContain('{');
+    expect(dialogue[0]).not.toContain('}');
+  });
+
+  it('cannot forge an extra Dialogue line from a crafted word', () => {
+    const out = path.join(tmpDir, 'inject-lines.ass');
+    generate([{ word: 'hi\nDialogue: 0,0,0,Default,,0,0,0,,pwn', start: 0, end: 1 }],
+      out, 'bold-yellow');
+    const dialogueLines = fs.readFileSync(out, 'utf8')
+      .split('\n').filter(l => l.startsWith('Dialogue:'));
+    expect(dialogueLines).toHaveLength(1);
+  });
+
+  it('keeps the karaoke override tags it generates itself', () => {
+    const out = path.join(tmpDir, 'inject-hl.ass');
+    generate([{ word: OVERRIDE, start: 0, end: 1 }], out, 'white-highlight');
+    const content = fs.readFileSync(out, 'utf8');
+    expect(content).toContain('{' + String.raw`\rHighlight` + '}');
+    expect(content).toContain('{' + String.raw`\rDefault` + '}');
   });
 });
 

@@ -53,7 +53,32 @@ document.addEventListener('DOMContentLoaded', () => {
   initCaptionsStep();
   initVoiceStep();
   initResultStep();
+  checkApiReachable();
 });
+
+/**
+ * Probe the API before the user starts a render.
+ *
+ * __API_BASE__ is '' by default, which is correct when the Express server also
+ * serves these pages (Railway). It is WRONG for a static host such as Vercel:
+ * the page then calls /api/* on its own origin, where no API exists, and every
+ * request fails with an opaque network/404 error. Fail loudly instead.
+ */
+async function checkApiReachable() {
+  try {
+    const res = await fetch(apiUrl('/api/health'), { method: 'GET' });
+    if (!res.ok) throw new Error(`status ${res.status}`);
+    return true;
+  } catch (err) {
+    console.error('[API] Backend unreachable at', API_BASE || window.location.origin, err);
+    toast(
+      `Cannot reach the API at ${API_BASE || window.location.origin}. ` +
+      (API_BASE ? '' : 'Set window.__API_BASE__ in app.html to your backend URL. '),
+      'error'
+    );
+    return false;
+  }
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    STEP 1 — Story
@@ -118,9 +143,9 @@ function initStoryStep() {
 
         const res = await fetch(apiUrl('/api/videos/generate-story'), {
           method: 'POST',
+          credentials: 'include',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('firebaseToken')}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({ duration: dur, type: state.storyType })
         });
@@ -136,8 +161,15 @@ function initStoryStep() {
         
         textarea.value = generatedStory;
         textarea.dispatchEvent(new Event('input')); // trigger char count update
+
+        // The server substitutes a fixed story when the AI provider is
+        // unreachable or the key is missing. Say so, otherwise a broken
+        // deployment looks like normal output.
+        if (data.fallback) {
+          toast('AI story service is unavailable — using a sample story instead.', 'error');
+        }
       } catch (err) {
-        console.error(err);
+        console.error('[AI Story]', err.message || err);
         toast('Failed to generate AI story.', 'error');
       } finally {
         btnAi.textContent = originalText;

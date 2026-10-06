@@ -43,22 +43,22 @@
   </div>
 
   <div class="subpage-section">
-    <div class="examples-cluster">
-      <div class="phone-card phone-left">
-        <video src="media/example_2.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
-        <div class="phone-label"><span class="phone-tag">Bold yellow</span><strong>GTA V</strong></div>
-      </div>
-      <div class="phone-card phone-main">
+    <div class="examples-grid">
+      <div class="example-card">
         <video src="media/example_1.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
-        <div class="phone-label"><span class="phone-tag">Word pop</span><strong>Minecraft</strong></div>
+        <div class="example-meta"><span class="example-tag">Word pop</span><strong>Minecraft, Reddit story</strong></div>
       </div>
-      <div class="phone-card phone-right">
+      <div class="example-card">
+        <video src="media/example_2.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
+        <div class="example-meta"><span class="example-tag">Bold yellow</span><strong>GTA V, true scary story</strong></div>
+      </div>
+      <div class="example-card">
         <video src="media/example_3.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
-        <div class="phone-label"><span class="phone-tag">White highlight</span><strong>Roblox</strong></div>
+        <div class="example-meta"><span class="example-tag">White highlight</span><strong>Roblox, fun facts</strong></div>
       </div>
-      <div class="phone-card phone-far">
+      <div class="example-card">
         <video src="media/example_4.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
-        <div class="phone-label"><span class="phone-tag">Clean</span><strong>Fortnite</strong></div>
+        <div class="example-meta"><span class="example-tag">Clean</span><strong>Fortnite, funny story</strong></div>
       </div>
     </div>
   </div>
@@ -87,7 +87,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  const videos = document.querySelectorAll('.phone-card video');
+  const videos = document.querySelectorAll('.example-card video');
   if (!('IntersectionObserver' in window)) return;
 
   const io = new IntersectionObserver((entries) => {

@@ -20,6 +20,12 @@ const jobStore    = require('./jobStore');
 // CPU-only: libx264 with -threads 0 uses ALL cores per job.
 // Running N concurrent jobs splits cores N-ways — 1 job at a time is fastest
 // per-job, but we allow 2 so the server stays responsive under load.
+//
+// NOTE: this used to be `Math.max(2, cpus)`, which was backwards. Because each
+// encode passes `-threads 0` (all cores), concurrency of `cpus` means cpus²
+// threads competing for cpus cores. On a 16-core host that is 256 threads
+// thrashing — slower than serial, not faster. Concurrency must stay a small
+// constant, not a multiple of the core count.
 const cpus  = os.cpus().length;
 const ramGb = os.totalmem() / 1024 / 1024 / 1024;
 console.log(`[Hardware] CPU Cores: ${cpus} | RAM: ${ramGb.toFixed(1)}GB | NVIDIA GPU: No`);
@@ -27,7 +33,7 @@ console.log(`[Hardware] CPU Cores: ${cpus} | RAM: ${ramGb.toFixed(1)}GB | NVIDIA
 const envMax = parseInt(process.env.MAX_CONCURRENT_RENDERS, 10);
 const MAX_CONCURRENT = !isNaN(envMax) && envMax > 0
   ? envMax
-  : Math.max(2, cpus);   // MAX OPTIMIZATION: aggressively use all available cores for parallel jobs
+  : Math.min(2, Math.max(1, Math.floor(cpus / 2)));   // 1 job on <=3 cores, 2 on 4+
 
 const MAX_RETRIES = parseInt(process.env.JOB_MAX_RETRIES, 10) || 2;
 

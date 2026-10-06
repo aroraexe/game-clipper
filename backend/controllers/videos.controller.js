@@ -10,13 +10,24 @@ const { getRequestToken, verifyFirebaseToken } = require('../middleware/auth.mid
 
 const OUTPUT_URL_TTL_MS = 15 * 60 * 1000;
 
+// Generated once per process, dev only. Previously the non-production fallback
+// was the literal string 'dev-output-url-secret', which is public — fine for
+// local work, but it meant a dev box produced URLs signed with a guessable key.
+// A random per-boot secret removes that. It does NOT survive a restart, which
+// is acceptable locally: signatures are only valid for OUTPUT_URL_TTL_MS.
+let DEV_SIGNING_SECRET = null;
+
 function outputSigningSecret() {
-  const secret = process.env.OUTPUT_URL_SECRET || process.env.SESSION_SECRET;
+  const secret = process.env.OUTPUT_URL_SECRET;
   if (!secret) {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('CRITICAL: OUTPUT_URL_SECRET must be set in production to secure video downloads.');
     }
-    return 'dev-output-url-secret';
+    if (!DEV_SIGNING_SECRET) {
+      DEV_SIGNING_SECRET = crypto.randomBytes(32).toString('hex');
+      console.warn('[OutputURL] OUTPUT_URL_SECRET is not set — using a random per-process dev secret. Do not rely on this outside local development.');
+    }
+    return DEV_SIGNING_SECRET;
   }
   return secret;
 }
@@ -200,19 +211,24 @@ STORY REQUIREMENTS:
     };
 
     let story = "";
+    let usedFallback = false;
     try {
       story = await generateWithRetry(3);
     } catch (e) {
-      console.error("[Story Gen Fallback Triggered]:", e);
-      // Fallback story so the user is never completely blocked
+      console.error("[Story Gen Fallback Triggered]:", e.message);
+      // Fallback story so the user is never completely blocked.
+      // `usedFallback` is returned to the client so the UI can say so. Without
+      // this, an unset/invalid NVIDIA_API_KEY looks identical to success: every
+      // user silently gets this one fixed story rendered at full TTS+encode cost.
+      usedFallback = true;
       story = "I stared at the flickering screen, the last boss's health bar a thin red line. My fingers trembled over the controller, each heartbeat syncing with the pulsing music. One final combo, a perfect parry, and the arena erupted in light. The victory screen flashed—then the console whispered my real name, and the lights in my room went out.";
     }
 
     // Server-side validation just to log it (client handles UX)
     const words = story.trim().split(/\s+/).length;
-    console.log(`[AI] Generated story: ${words} words (target: ${wordCount})`);
+    console.log(`[AI] Generated story: ${words} words (target: ${wordCount})${usedFallback ? ' [FALLBACK]' : ''}`);
 
-    res.json({ story });
+    res.json({ story, fallback: usedFallback });
   } catch (err) {
     next(err);
   }

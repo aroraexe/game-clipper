@@ -513,7 +513,7 @@
       const app = initializeApp(firebaseConfig);
       auth = getAuth(app);
     } catch (e) {
-      console.warn("Firebase not configured yet.", e.message);
+      console.warn('[Auth] Firebase init failed.', e.message);
     }
 
     const userEmail = localStorage.getItem('userEmail');
@@ -540,7 +540,7 @@
           await signOut(auth);
         }
       } catch(e) {
-        console.error("Sign out error", e);
+        console.error('[Auth] Sign out error:', e.message);
       }
       localStorage.removeItem('userEmail');
       localStorage.removeItem('firebaseToken');
@@ -548,7 +548,7 @@
         const base = (window.__API_BASE__ || '').replace(/\/$/, '');
         await fetch(`${base}/api/auth/logout`, { method: 'POST' });
       } catch (err) {
-        console.error("Logout request failed", err);
+        console.error('[Auth] Logout request failed:', err.message);
       }
       window.location.href = '/signin';
     });

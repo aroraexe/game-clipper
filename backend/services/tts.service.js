@@ -8,7 +8,6 @@
 const fs      = require('fs');
 const path    = require('path');
 const { EdgeTTS } = require('node-edge-tts');
-const { execSync } = require('child_process');
 const { OpenAI } = require('openai');
 
 /**

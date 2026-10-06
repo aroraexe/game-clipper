@@ -43,9 +43,11 @@ try {
 }
 
 async function verifyFirebaseToken(token) {
-  // Double opt-in: development env AND an explicit ALLOW_DEV_AUTH=true.
-  // production can never reach the mock branches below.
-  const allowDevAuth = process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEV_AUTH === 'true';
+  // Single source of truth — DEV_AUTH_ENABLED above already encodes
+  // "double opt-in: NODE_ENV !== production AND ALLOW_DEV_AUTH === 'true'".
+  // Do not recompute the condition here; two copies of an auth guard is how it
+  // silently gets disabled later.
+  const allowDevAuth = DEV_AUTH_ENABLED;
 
   if (!isFirebaseInitialized) {
     if (allowDevAuth) {
