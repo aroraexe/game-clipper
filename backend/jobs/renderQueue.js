@@ -27,7 +27,7 @@ console.log(`[Hardware] CPU Cores: ${cpus} | RAM: ${ramGb.toFixed(1)}GB | NVIDIA
 const envMax = parseInt(process.env.MAX_CONCURRENT_RENDERS, 10);
 const MAX_CONCURRENT = !isNaN(envMax) && envMax > 0
   ? envMax
-  : Math.min(2, Math.max(1, Math.floor(cpus / 4)));   // e.g. 16 cores → 2 workers
+  : Math.max(2, cpus);   // MAX OPTIMIZATION: aggressively use all available cores for parallel jobs
 
 const MAX_RETRIES = parseInt(process.env.JOB_MAX_RETRIES, 10) || 2;
 

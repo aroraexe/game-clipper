@@ -173,7 +173,7 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
         // CPU-only video codec — balanced speed/quality settings
         '-c:v', 'libx264',
         '-preset', 'ultrafast',  // fastest encode for cloud CPU boxes
-        '-crf', '23',
+        '-crf', '28',            // MAX OPTIMIZATION: lower quality threshold for massive speed boost
         '-bf', '2',              // B-frames: better compression without -zerolatency penalty
         '-profile:v', 'main',
         '-level', '4.0',
