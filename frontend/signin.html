@@ -170,6 +170,10 @@
   <script type="module">
     import { auth, provider, githubProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from './firebase-config.js';
 
+    // Self-heal: If the user lands here, their session is definitively dead or intentionally signed out.
+    // Clear the ghost state so the landing page doesn't incorrectly show them as signed in.
+    localStorage.removeItem('userEmail');
+
     let isSignUp = true;
     const formTitle = document.getElementById('form-title');
     const formSubtitle = document.getElementById('form-subtitle');
@@ -274,7 +278,6 @@
 
     async function handleLoginSuccess(user) {
       const token = await user.getIdToken();
-      localStorage.setItem('userEmail', user.email || 'user');
       
       const base = (window.__API_BASE__ || '').replace(/\/$/, '');
       const response = await fetch(`${base}/api/auth/session`, {
@@ -284,6 +287,7 @@
       });
       
       if (response.ok) {
+        localStorage.setItem('userEmail', user.email || 'user');
         window.location.href = '/app';
       } else {
         showAuthMessage('Could not start your secure session. Please try again.');
