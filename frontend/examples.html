@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Examples — StoryPlay</title>
+  <meta name="description" content="Finished StoryPlay videos, one per caption style.">
+  <link rel="stylesheet" href="landing.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-left">
+      <div class="nav-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="#FFFFFF"/>
+        </svg>
+        <span>StoryPlay</span>
+      </div>
+      <nav class="nav-links">
+        <a href="/features">Features</a>
+        <a href="/how-it-works">How It Works</a>
+        <a href="/#games">Games</a>
+        <a href="/examples">Examples</a>
+        <a href="/faq">FAQ</a>
+      </nav>
+    </div>
+    <div class="nav-actions">
+      <a href="/signin" class="btn btn-ghost">Sign In</a>
+      <a href="/signin" class="btn btn-primary">Create Video</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page subpage">
+
+  <div class="subpage-head">
+    <h1>Examples</h1>
+    <p>Four finished videos, one per caption style. Sound is off.</p>
+  </div>
+
+  <div class="subpage-section">
+    <div class="showcase-grid">
+      <div class="showcase-item">
+        <video src="media/example_1.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
+        <div class="showcase-meta">
+          <div class="showcase-tag">Word pop</div>
+          <strong>Minecraft, Reddit story</strong>
+        </div>
+      </div>
+      <div class="showcase-item">
+        <video src="media/example_2.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
+        <div class="showcase-meta">
+          <div class="showcase-tag">Bold yellow</div>
+          <strong>GTA V, true scary story</strong>
+        </div>
+      </div>
+      <div class="showcase-item">
+        <video src="media/example_3.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
+        <div class="showcase-meta">
+          <div class="showcase-tag">White highlight</div>
+          <strong>Roblox, fun facts</strong>
+        </div>
+      </div>
+      <div class="showcase-item">
+        <video src="media/example_4.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
+        <div class="showcase-meta">
+          <div class="showcase-tag">Clean</div>
+          <strong>Fortnite, funny story</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subpage-section">
+    <h2>Try your own</h3>
+    <div class="glass-card doc-card">
+      <p>Every video above was made by pasting a story, picking a game and pressing one button. It takes a couple of minutes because the render happens on the server.</p>
+    </div>
+  </div>
+
+  <div class="subpage-footer">
+    <nav>
+      <a href="/">Home</a>
+      <a href="/features">Features</a>
+      <a href="/how-it-works">How it works</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/faq">FAQ</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </nav>
+    <span class="copy">StoryPlay</span>
+  </div>
+
+</div>
+
+<script>
+// Lazy-load and play each clip only when it scrolls into view.
+document.addEventListener('DOMContentLoaded', function () {
+  const videos = document.querySelectorAll('.showcase-item video');
+  if (!('IntersectionObserver' in window)) return;
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const v = entry.target;
+      if (entry.isIntersecting) {
+        v.setAttribute('preload', 'auto');
+        const p = v.play();
+        if (p !== undefined) p.catch(() => {});
+      } else {
+        v.pause();
+        if (v.currentTime > 0) v.currentTime = 0;
+      }
+    });
+  }, { rootMargin: '25% 0px', threshold: 0.15 });
+
+  videos.forEach((v) => io.observe(v));
+});
+</script>
+
+</body>
+</html>

@@ -21,13 +21,15 @@ const STORAGE_ROOT = process.env.STORAGE_ROOT || './storage';
 const GAMEPLAY_DIR = path.resolve(STORAGE_ROOT, 'gameplay');
 
 /* ── In-memory catalogue ──────────────────────────────────────────────────── */
+// Each entry lists the preferred (full-size) file and an optional fallback.
+// On Railway only *_small.mp4 files are committed to git; the service
+// automatically uses the fallback when the full-size file is absent.
+// subway-surfers and geometry-dash have no files at all → excluded.
 const CATALOGUE = [
-  { id: 'minecraft',      name: 'Minecraft',       file: 'minecraft.mp4',       tags: ['sandbox', 'survival'] },
-  { id: 'roblox',         name: 'Roblox',          file: 'roblox.webm',         tags: ['casual', 'colorful'] },
-  { id: 'gtav',           name: 'GTA V',           file: 'gtav.mp4',            tags: ['action', 'open-world'] },
-  { id: 'subway-surfers', name: 'Subway Surfers',  file: 'subway-surfers.mp4',  tags: ['endless-runner', 'mobile'] },
-  { id: 'fortnite',       name: 'Fortnite',        file: 'fortnite.mp4',        tags: ['battle-royale', 'colorful'] },
-  { id: 'geometry-dash',  name: 'Geometry Dash',   file: 'geometry-dash.mp4',   tags: ['rhythm', 'intense'] },
+  { id: 'minecraft', name: 'Minecraft', file: 'minecraft.mp4', fallback: 'minecraft_small.mp4', tags: ['sandbox', 'survival'] },
+  { id: 'roblox',    name: 'Roblox',    file: 'roblox.webm',   fallback: 'roblox_small.mp4',    tags: ['casual', 'colorful'] },
+  { id: 'gtav',      name: 'GTA V',     file: 'gtav.mp4',      fallback: 'gtav_small.mp4',      tags: ['action', 'open-world'] },
+  { id: 'fortnite',  name: 'Fortnite',  file: 'fortnite.mp4',  fallback: 'fortnite_small.mp4',  tags: ['battle-royale', 'colorful'] },
 ];
 
 // Per-file duration cache: fileId → seconds
@@ -41,13 +43,37 @@ const COOLDOWN_RANGE = 30;            // avoid start timestamps within ±30s of 
 
 /* ── Public API ───────────────────────────────────────────────────────────── */
 
+/**
+ * resolveFile(entry) → { resolvedFile, usingFallback } | null
+ * Returns the best available file for an entry, or null if none exist.
+ */
+function resolveFile(entry) {
+  const primary = path.join(GAMEPLAY_DIR, entry.file);
+  if (fs.existsSync(primary)) return { resolvedFile: entry.file, usingFallback: false };
+
+  if (entry.fallback) {
+    const fb = path.join(GAMEPLAY_DIR, entry.fallback);
+    if (fs.existsSync(fb)) {
+      console.warn(`[Gameplay] Full file '${entry.file}' missing — using fallback '${entry.fallback}'`);
+      return { resolvedFile: entry.fallback, usingFallback: true };
+    }
+  }
+
+  return null; // neither exists
+}
+
 function listAll() {
-  return CATALOGUE.map((c) => ({
-    id:        c.id,
-    name:      c.name,
-    tags:      c.tags,
-    available: fs.existsSync(path.join(GAMEPLAY_DIR, c.file)),
-  }));
+  return CATALOGUE.map((c) => {
+    const resolved = resolveFile(c);
+    return {
+      id:              c.id,
+      name:            c.name,
+      tags:            c.tags,
+      available:       resolved !== null,
+      usingFallback:   resolved?.usingFallback ?? false,
+      availabilityNote: resolved?.usingFallback ? 'Using compressed preview' : null,
+    };
+  });
 }
 
 function getById(id) {
@@ -65,13 +91,14 @@ async function selectSegment(gameId, durationS) {
   const entry = getById(gameId);
   if (!entry) throw new Error(`Unknown gameplay id: ${gameId}`);
 
-  const filePath = path.join(GAMEPLAY_DIR, entry.file);
-
-  // If source file doesn't exist, use mock mode
-  if (!fs.existsSync(filePath)) {
-    console.warn(`[Gameplay] Source file missing: ${entry.file}. Using mock segment.`);
-    return { filePath: null, startTime: 0, endTime: durationS, mock: true };
+  // Resolve best available file (full → fallback → error)
+  const resolved = resolveFile(entry);
+  if (!resolved) {
+    // No file available at all — hard fail so caller knows render cannot proceed
+    throw new Error(`No gameplay file available for '${gameId}'. Upload ${entry.file} or ${entry.fallback} to storage/gameplay/.`);
   }
+
+  const filePath = path.join(GAMEPLAY_DIR, resolved.resolvedFile);
 
   // Get (or probe) the file duration
   const totalDuration = await getFileDuration(gameId, filePath);

@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700;800&display=swap');
 
 :root {
-  --bg-right: #09090E;
-  --bg-card: rgba(20, 20, 28, 0.4);
-  --bg-input: rgba(255, 255, 255, 0.03);
-  --primary-gradient: linear-gradient(90deg, #606CFF 0%, #B85CF6 50%, #EC4899 100%);
+  --bg-right: #000000;
+  --bg-card: #0C0C0C;
+  --bg-input: rgba(255, 255, 255, 0.05);
+  --primary-gradient: linear-gradient(90deg, #FFFFFF 0%, #888888 100%);
   --text-main: #ffffff;
-  --text-muted: #9AA3B5;
-  --border-light: rgba(255, 255, 255, 0.06);
+  --text-muted: #8E8E93;
+  --border-light: rgba(255, 255, 255, 0.12);
 }
 
 *, *::before, *::after {
@@ -51,7 +51,7 @@ body {
 .bg-overlay {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: radial-gradient(circle at 50% 0%, rgba(122,82,255,0.15) 0%, transparent 70%), rgba(9, 9, 14, 0.3);
+  background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.06) 0%, transparent 70%), rgba(0, 0, 0, 0.5);
   z-index: 1;
 }
 
@@ -125,9 +125,9 @@ body {
   display: inline-block;
   padding: 6px 16px;
   border-radius: 99px;
-  background: transparent;
-  border: 1px solid rgba(138, 146, 255, 0.3);
-  color: #C491FF;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 24px;
@@ -176,8 +176,8 @@ body {
 .feature-icon {
   width: 40px; height: 40px;
   border-radius: 10px;
-  background: rgba(138, 146, 255, 0.1);
-  color: #A855F7;
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
   display: flex; align-items: center; justify-content: center;
 }
 .feature-text h4 {
@@ -243,12 +243,12 @@ body {
   background: rgba(255,255,255,0.05);
 }
 .btn-nav-solid {
-  background: linear-gradient(90deg, #A855F7 0%, #8B5CF6 100%);
-  color: white;
+  background: #FFFFFF;
+  color: #000000;
   border: none;
 }
 .btn-nav-solid:hover {
-  opacity: 0.9;
+  background: #EAEAEA;
 }
 
 .right-content {
@@ -264,6 +264,34 @@ body {
   border-radius: 24px;
   padding: 40px;
   width: 100%;
+}
+
+.panel-header {
+  min-height: 82px;
+  margin-bottom: 24px;
+  text-align: center;
+  display: grid;
+  align-content: start;
+}
+
+.panel-header h2 {
+  min-height: 58px;
+  margin: 0 0 8px;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 700;
+  transition: none;
+  animation: none;
+}
+
+.panel-subtitle {
+  margin: 0;
+  min-height: 17px;
+  font-size: 14px;
+  line-height: 1.2;
+  opacity: 0.7;
+  transition: none;
+  animation: none;
 }
 
 .btn-oauth {
@@ -333,6 +361,130 @@ body {
 }
 .btn-submit:hover {
   opacity: 0.9;
+}
+
+.auth-message {
+  display: none;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #F5F5F5;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.auth-message.is-visible {
+  display: block;
+}
+
+.auth-message--error {
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.notification-stack {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  z-index: 1000;
+  display: grid;
+  gap: 12px;
+  width: min(380px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.notification {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(12, 12, 12, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  color: #FFFFFF;
+}
+
+.notification.is-hiding {
+  opacity: 0;
+}
+
+.notification__body {
+  flex: 1;
+}
+
+.notification__title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.notification__text {
+  color: #C7C7CC;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.notification__close {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #FFFFFF;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.legal-page {
+  min-height: 100vh;
+  height: auto;
+  overflow-y: auto;
+  background: #000000;
+}
+
+.legal-shell {
+  width: min(760px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 64px 0;
+}
+
+.legal-back {
+  color: #E5E5E5;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.legal-shell h1 {
+  margin: 28px 0 8px;
+  font-size: clamp(36px, 7vw, 72px);
+  line-height: 1;
+  letter-spacing: -1.5px;
+}
+
+.legal-updated {
+  color: var(--text-muted);
+  margin-bottom: 40px;
+}
+
+.legal-shell section {
+  padding: 28px 0;
+  border-top: 1px solid var(--border-light);
+}
+
+.legal-shell h2 {
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.legal-shell p {
+  color: #C7C7CC;
+  line-height: 1.7;
+  font-size: 15px;
 }
 
 .trusted-footer {

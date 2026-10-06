@@ -5,59 +5,129 @@ const express       = require('express');
 const cors          = require('cors');
 const helmet        = require('helmet');
 const rateLimit     = require('express-rate-limit');
+const compression   = require('compression');
 const path          = require('path');
+const crypto        = require('crypto');
 const cookieParser  = require('cookie-parser');
 
 const healthRouter    = require('./routes/health.routes');
 const gameplayRouter  = require('./routes/gameplay.routes');
 const videosRouter    = require('./routes/videos.routes');
 const { initStorage } = require('./utils/storage.util');
-const { requireAuth } = require('./middleware/auth.middleware');
+const { requireAuth, getRequestToken, verifyFirebaseToken } = require('./middleware/auth.middleware');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
+const IS_PROD = process.env.NODE_ENV === 'production';
 
 /* ─── Security / middleware ─────────────────────────────────────────────────── */
-app.use(helmet({ 
-  contentSecurityPolicy: false,
-  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:     ["'self'"],
+      // Inline <script> blocks are used in all three HTML pages; 'unsafe-inline'
+      // stays until they are externalised. Removing it is the next hardening step.
+      scriptSrc:      ["'self'", "'unsafe-inline'", 'https://apis.google.com', 'https://www.gstatic.com'],
+      styleSrc:       ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc:        ["'self'", 'https://fonts.gstatic.com', 'data:'],
+      imgSrc:         ["'self'", 'data:', 'blob:'],
+      mediaSrc:       ["'self'", 'blob:'],
+      connectSrc:     ["'self'", 'https://*.googleapis.com', 'https://*.firebaseio.com',
+                       'wss://*.firebaseio.com', 'https://*.firebaseapp.com'],
+      frameSrc:       ["'self'", 'https://*.firebaseapp.com', 'https://accounts.google.com'],
+      objectSrc:      ["'none'"],
+      baseUri:        ["'self'"],
+      frameAncestors: ["'none'"],
+      formAction:     ["'self'"],
+    },
+  },
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
 }));
 app.use(cors());
+app.use(compression());                       // gzip/br for text assets
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+/* ── Request ID — lets a user report map to a server log line ─────────────── */
+app.use((req, res, next) => {
+  req.id = req.headers['x-request-id'] || crypto.randomBytes(8).toString('hex');
+  res.setHeader('X-Request-Id', req.id);
+  next();
+});
+
+/* ── Trust proxy (Railway / Render / Heroku sit behind a load-balancer) ──────── */
+// Without this every request appears to share one IP, collapsing all users
+// into a single rate-limit bucket.
+app.set('trust proxy', 1);
+
+
 /* ─── Rate limiting ─────────────────────────────────────────────────────────── */
-const limiter = rateLimit({
+// POST limiter — controls expensive operations (job creation, story gen)
+const postLimiter = rateLimit({
   windowMs: 60_000,
-  max: 60,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests, please slow down.' },
 });
-app.use('/api', limiter);
+// GET limiter — allows polling every 1.5 s comfortably for 2+ concurrent users
+const getLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please slow down.' },
+});
+app.use('/api', (req, res, next) => req.method === 'POST' ? postLimiter(req, res, next) : getLimiter(req, res, next));
 
-/* ─── Static frontend ───────────────────────────────────────────────────────── */
-app.use(express.static(path.join(__dirname, '../frontend'), { 
-  extensions: ['html'],
-  setHeaders: (res, path) => {
-    // Disable cache for all static files to prevent stale frontend code during development
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-  }
-}));
+/* ─── Protected app shell ────────────────────────────────────────────────────── */
+// This MUST be registered before express.static. With `extensions: ['html']` the
+// static handler resolves /app -> app.html and serves it to anyone, which made
+// the auth gate below unreachable. `extensions` is now removed and app.html is
+// additionally blocked from static serving so it is only reachable via /app.
+app.get('/app', async (req, res, next) => {
+  try {
+    const token = getRequestToken(req);
+    if (!token) return res.redirect('/signin');
 
-// Protected App Route
-app.get('/app', (req, res) => {
-  console.log("Received GET request for /app. Cookies:", req.cookies);
-  if (!req.cookies.sessionToken) {
-    console.log("No sessionToken cookie found! Redirecting to /signin");
+    await verifyFirebaseToken(token);   // throws on invalid/expired
+    return res.sendFile(path.join(__dirname, '../frontend/app.html'));
+  } catch (err) {
+    if (err.status === 503) return next(err);   // server misconfigured — don't hide it
+    res.clearCookie('sessionToken', { path: '/' });
     return res.redirect('/signin');
   }
-  console.log("sessionToken found, serving app.html");
-  res.sendFile(path.join(__dirname, '../protected/app.html'));
 });
+
+// Block direct access to the protected shell.
+app.use((req, res, next) => {
+  if (req.path === '/app.html' || req.path === '/app/') {
+    return res.redirect('/signin');
+  }
+  next();
+});
+
+/* ─── Static frontend ───────────────────────────────────────────────────────── */
+app.use(express.static(path.join(__dirname, '../frontend'), {
+  // Required so /signin resolves to signin.html. Safe now that the /app gate and
+  // the app.html blocker above are registered first.
+  extensions: ['html'],
+  setHeaders: (res, filePath) => {
+    // Fingerprinted / long-lived caching for heavy media, short cache for code.
+    if (!IS_PROD) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      return;
+    }
+    if (/\.(mp4|webm|mp3|png|jpg|jpeg|webp|svg)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30 days
+    } else if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');                  // revalidate shell
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=3600');      // css/js/other
+    }
+  },
+}));
 
 // Session Login Route
 app.post('/api/auth/session', (req, res) => {
@@ -67,10 +137,21 @@ app.post('/api/auth/session', (req, res) => {
     console.log("Missing idToken!");
     return res.status(400).send('Missing idToken');
   }
-  
-  // Set session cookie for 1 day across the whole site
-  res.cookie('sessionToken', idToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: false, path: '/' });
+
+  const isProduction = process.env.NODE_ENV === 'production';
+  res.cookie('sessionToken', idToken, {
+    maxAge:   24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure:   isProduction,   // HTTPS-only in prod
+    sameSite: 'lax',
+    path:     '/',
+  });
   console.log("Cookie set successfully, returning 200 OK");
+  res.sendStatus(200);
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  res.clearCookie('sessionToken', { path: '/' });
   res.sendStatus(200);
 });
 
@@ -78,69 +159,33 @@ app.post('/api/auth/session', (req, res) => {
 app.use('/api/health',    healthRouter);
 app.use('/api/gameplay',  requireAuth, gameplayRouter);
 
-// --- TEMPORARY DOWNLOAD ROUTE FOR RAILWAY ---
-app.get('/api/download-gameplay', (req, res) => {
-  const url = req.query.url;
-  const name = req.query.name || 'minecraft.mp4';
-  if (!url) return res.status(400).send('Missing url parameter');
-  
-  const fs = require('fs');
-  const path = require('path');
-  const dest = path.resolve(process.env.STORAGE_ROOT || './storage', 'gameplay', name);
-  
-  const https = require('https');
-  const http = require('http');
-  const client = url.startsWith('https') ? https : http;
-  
-  const file = fs.createWriteStream(dest);
-  client.get(url, (response) => {
-    if (response.statusCode === 301 || response.statusCode === 302) {
-      return client.get(response.headers.location, (res2) => {
-        res2.pipe(file);
-        file.on('finish', () => res.send(`✅ Downloaded to ${dest}`));
-      });
-    }
-    response.pipe(file);
-    file.on('finish', () => res.send(`✅ Downloaded to ${dest}`));
-  }).on('error', (err) => res.status(500).send(err.message));
-});
+app.use('/api/videos',    videosRouter);
 
-// --- MASSIVE FILE UPLOAD ROUTE (STREAMS DIRECTLY TO DISK) ---
-app.post('/api/upload-stream', (req, res) => {
-  const name = req.query.name;
-  if (!name) return res.status(400).send('Missing name');
-  
-  const fs = require('fs');
-  const path = require('path');
-  const dest = path.resolve(process.env.STORAGE_ROOT || './storage', 'gameplay', name);
-  
-  // If append=true, we add to the file. Otherwise we overwrite it.
-  const stream = fs.createWriteStream(dest, { flags: req.query.append === 'true' ? 'a' : 'w' });
-  
-  req.pipe(stream);
-  
-  req.on('end', () => {
-    res.send(`✅ Chunk for ${name} saved.`);
-  });
-  
-  req.on('error', (err) => {
-    console.error('Upload stream error:', err);
-    res.status(500).send('Stream error');
-  });
-});
-// --------------------------------------------
-app.use('/api/videos',    requireAuth, videosRouter);
 
 /* ─── 404 handler ───────────────────────────────────────────────────────────── */
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-/* ─── Global error handler ──────────────────────────────────────────────────── */
+/* ─── Global error handler ─────────────────────────────────────────────────── */
+// 4xx messages are safe to echo. 5xx messages are not — FFmpeg errors carry
+// absolute file paths and raw stderr — so those are logged and replaced.
 app.use((err, req, res, _next) => {
-  const status = err.status || 500;
-  console.error('[GlobalError]', err.message);
-  res.status(status).json({ error: err.message || 'Internal server error' });
+  const status  = err.status || err.statusCode || 500;
+  const isServer = status >= 500;
+
+  if (isServer) {
+    console.error(`[GlobalError] id=${req.id} ${req.method} ${req.originalUrl} -> ${status}`, err);
+  } else {
+    console.warn(`[GlobalError] id=${req.id} ${req.method} ${req.originalUrl} -> ${status}: ${err.message}`);
+  }
+
+  if (res.headersSent) return;
+
+  res.status(status).json({
+    error: isServer ? 'Internal server error' : err.message,
+    requestId: req.id,
+  });
 });
 
 /* ─── Startup ───────────────────────────────────────────────────────────────── */
@@ -150,24 +195,28 @@ async function start() {
   // Start the render queue worker (import here so queue starts after storage init)
   require('./jobs/renderQueue');
 
-  // Cache/Storage Auto-Cleanup for Render Free Tier (runs every 30 mins)
+  // Storage auto-cleanup for Render/Railway free tiers (runs every 30 mins).
+  // Only terminal jobs are removed — never a job that is still queued or
+  // rendering, otherwise the render finishes to a file nobody can fetch.
   setInterval(() => {
     try {
       const { list, removeJob } = require('./jobs/jobStore');
       const fs = require('fs');
       const oneHourAgo = Date.now() - (60 * 60 * 1000);
-      const jobs = list();
       let cleared = 0;
-      for (const job of jobs) {
-        if (new Date(job.createdAt).getTime() < oneHourAgo) {
-          removeJob(job.jobId);
-          if (job.outputPath) {
-            try { fs.rmSync(job.outputPath); } catch(e) {}
-          }
-          cleared++;
+      let skipped = 0;
+      for (const job of list()) {
+        const terminal = job.status === 'completed' || job.status === 'failed';
+        if (!terminal) { skipped++; continue; }
+        if (new Date(job.updatedAt || job.createdAt).getTime() >= oneHourAgo) continue;
+
+        removeJob(job.jobId);
+        if (job.outputPath) {
+          try { fs.rmSync(job.outputPath); } catch (e) { /* already gone */ }
         }
+        cleared++;
       }
-      if (cleared > 0) console.log(`[Cleanup] Cleared ${cleared} old jobs & MP4 files to save memory/disk space.`);
+      if (cleared > 0) console.log(`[Cleanup] Cleared ${cleared} finished job(s) & MP4s (${skipped} in-flight left alone).`);
     } catch (e) {
       console.error('[Cleanup] Error:', e.message);
     }
@@ -183,9 +232,12 @@ async function start() {
   });
 }
 
-start().catch((err) => {
-  console.error('[Fatal] Could not start server:', err.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  start().catch((err) => {
+    console.error('[Fatal] Could not start server:', err.message);
+    process.exit(1);
+  });
+}
 
 module.exports = app;
+module.exports.start = start;

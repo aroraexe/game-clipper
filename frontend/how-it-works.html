@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How It Works — StoryPlay</title>
+  <meta name="description" content="From pasting a story to downloading a finished 9:16 video: the four steps and what happens behind each one.">
+  <link rel="stylesheet" href="landing.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-left">
+      <div class="nav-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="#FFFFFF"/>
+        </svg>
+        <span>StoryPlay</span>
+      </div>
+      <nav class="nav-links">
+        <a href="/features">Features</a>
+        <a href="/how-it-works">How It Works</a>
+        <a href="/#games">Games</a>
+        <a href="/examples">Examples</a>
+        <a href="/faq">FAQ</a>
+      </nav>
+    </div>
+    <div class="nav-actions">
+      <a href="/signin" class="btn btn-ghost">Sign In</a>
+      <a href="/signin" class="btn btn-primary">Create Video</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page subpage">
+
+  <div class="subpage-head">
+    <h1>How it works</h1>
+    <p>Four steps. The interesting part happens after you press create, on a server, while you wait.</p>
+  </div>
+
+  <div class="subpage-section">
+    <div class="steps-list">
+      <div class="step-row">
+        <div class="step-num"></div>
+        <div>
+          <h3>Paste your story</h3>
+          <p>Bring a Reddit post, a true story, or something you wrote yourself. Between 50 and 3000 characters. If you would rather not paste anything, the generator can write a draft for you from a one-line prompt, and you can edit it before rendering.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num"></div>
+        <div>
+          <h3>Pick a game and a style</h3>
+          <p>Choose the gameplay, a voice, a caption style and colour, and roughly how long you want it. Thirty, forty-five and sixty seconds are the options.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num"></div>
+        <div>
+          <h3>The render runs on the server</h3>
+          <p>Your job goes into a queue and is picked up by a background worker. It is not processed by the page you are looking at. The worker strips formatting from the script, generates the voiceover, measures how long that audio actually is, then works out caption timings and picks a gameplay segment in parallel. It reports progress at each stage, so you can watch it move.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num"></div>
+        <div>
+          <h3>Download it</h3>
+          <p>Gameplay and narration are combined with the captions burned into the picture and written out as an H.264 MP4 at 720&times;1280. Finished videos are deleted from the server an hour after they are created, so download before you close the tab.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subpage-section">
+    <h2>If a render fails</h2>
+    <div class="glass-card doc-card">
+      <p>Failed jobs are retried twice with a short delay before they are marked as failed. If a retry also fails you get the error text on the job rather than a silent hang. Common causes are the text-to-speech service being unreachable or FFmpeg running out of disk space.</p>
+    </div>
+  </div>
+
+  <div class="subpage-footer">
+    <nav>
+      <a href="/">Home</a>
+      <a href="/features">Features</a>
+      <a href="/examples">Examples</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/faq">FAQ</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </nav>
+    <span class="copy">StoryPlay</span>
+  </div>
+
+</div>
+
+</body>
+</html>

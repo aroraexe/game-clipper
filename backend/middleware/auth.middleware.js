@@ -25,28 +25,49 @@ try {
   console.error("Firebase Admin initialization error:", error);
 }
 
-const requireAuth = async (req, res, next) => {
-  // Allow bypassing auth in dev if needed, or if Firebase admin isn't set up yet
+async function verifyFirebaseToken(token) {
+  // Firebase Admin not initialized → hard reject rather than allowing unauthenticated access.
+  // Set FIREBASE_SERVICE_ACCOUNT_BASE64 in the deployment environment to enable auth.
   if (!isFirebaseInitialized) {
-    console.warn("Auth bypassed because Firebase Admin is not initialized.");
-    return next(); // For safety, you might want to return 401 here in production.
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[Auth] Mocking Firebase token for local development.');
+      return { uid: 'dev-user', email: 'dev@localhost' };
+    }
+    console.error('[Auth] Firebase Admin not initialized — rejecting request. Set FIREBASE_SERVICE_ACCOUNT_BASE64.');
+    const err = new Error('Service unavailable: authentication not configured.');
+    err.status = 503;
+    throw err;
   }
 
+  if (!token) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[Auth] Mocking Firebase token for local development (no token provided).');
+      return { uid: 'dev-user', email: 'dev@localhost' };
+    }
+    const err = new Error('Unauthorized: Missing or invalid token');
+    err.status = 401;
+    throw err;
+  }
+
+  return admin.auth().verifyIdToken(token);
+}
+
+function getRequestToken(req) {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Unauthorized: Missing or invalid token' });
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.split('Bearer ')[1];
   }
+  return req.cookies?.sessionToken || null;
+}
 
-  const token = authHeader.split('Bearer ')[1];
-
+const requireAuth = async (req, res, next) => {
   try {
-    const decodedToken = await admin.auth().verifyIdToken(token);
-    req.user = decodedToken;
+    req.user = await verifyFirebaseToken(getRequestToken(req));
     next();
   } catch (error) {
     console.error('Error verifying auth token:', error);
-    return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    return res.status(error.status || 401).json({ error: error.status ? error.message : 'Unauthorized: Invalid token' });
   }
 };
 
-module.exports = { requireAuth };
+module.exports = { requireAuth, getRequestToken, verifyFirebaseToken };

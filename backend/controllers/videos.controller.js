@@ -1,10 +1,61 @@
 'use strict';
 const { v4: uuidv4 }  = require('uuid');
 const path             = require('path');
+const crypto           = require('crypto');
 const jobStore         = require('../jobs/jobStore');
 const { enqueue }      = require('../jobs/renderQueue');
 const storyService     = require('../services/story.service');
 const gameplayService  = require('../services/gameplay.service');
+const { getRequestToken, verifyFirebaseToken } = require('../middleware/auth.middleware');
+
+const OUTPUT_URL_TTL_MS = 15 * 60 * 1000;
+
+function outputSigningSecret() {
+  return process.env.OUTPUT_URL_SECRET || process.env.FIREBASE_SERVICE_ACCOUNT_BASE64 || process.env.SESSION_SECRET || 'dev-output-url-secret';
+}
+
+function signOutputUrl(jobId, userId, expiresAt) {
+  return crypto
+    .createHmac('sha256', outputSigningSecret())
+    .update(`${jobId}.${userId}.${expiresAt}`)
+    .digest('hex');
+}
+
+function createOutputPath(jobId, userId, download = false) {
+  const expiresAt = Date.now() + OUTPUT_URL_TTL_MS;
+  const sig = signOutputUrl(jobId, userId, expiresAt);
+  const params = new URLSearchParams({ expires: String(expiresAt), sig });
+  if (download) params.set('download', 'true');
+  return `/api/videos/${jobId}/output?${params.toString()}`;
+}
+
+function hasValidOutputSignature(req, job) {
+  const expiresAt = Number(req.query.expires);
+  const sig = String(req.query.sig || '');
+  if (!expiresAt || !sig || Date.now() > expiresAt) return false;
+
+  const expected = signOutputUrl(job.jobId, job.userId || '', expiresAt);
+  if (sig.length !== expected.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+}
+
+async function authorizeOutputRequest(req, job) {
+  if (hasValidOutputSignature(req, job)) return true;
+
+  // Jobs with no owner recorded are legacy/unowned — never hand them out.
+  if (!job.userId) return false;
+
+  const token = getRequestToken(req);
+  if (!token) return false;
+
+  let user;
+  try {
+    user = await verifyFirebaseToken(token);
+  } catch (_) {
+    return false;
+  }
+  return job.userId === user.uid;
+}
 
 function parseStoryResponse(raw) {
   let text = raw.trim();
@@ -45,14 +96,22 @@ exports.generateStory = async (req, res, next) => {
     }
 
     const generateWithRetry = async (retries = 3) => {
+      const nvidiaApiKey = process.env.NVIDIA_API_KEY;
+      if (!nvidiaApiKey) throw new Error('NVIDIA_API_KEY environment variable is not set');
+
       for (let i = 0; i < retries; i++) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const startTime = Date.now();
+        
         try {
           const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer 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'
+              'Authorization': `Bearer ${nvidiaApiKey}`
             },
+            signal: controller.signal,
             body: JSON.stringify({
               model: 'nvidia/nemotron-3-ultra-550b-a55b',
               messages: [
@@ -75,20 +134,32 @@ STORY REQUIREMENTS:
                 }
               ],
               max_tokens: 500,
-
               temperature: 0.7
             })
           });
+          
+          clearTimeout(timeoutId);
 
           if (!response.ok) {
             const errText = await response.text();
-            console.error(`[NVIDIA API Error Attempt ${i+1}]:`, errText);
+            console.error(`[NVIDIA API Error Attempt ${i+1}]: ${response.status}`, errText);
+            
+            if ([400, 401, 403].includes(response.status)) {
+              throw new Error(`NVIDIA API Fatal Error ${response.status}: ` + errText);
+            }
             if (i === retries - 1) throw new Error('NVIDIA API Error: ' + errText);
-            await new Promise(resolve => setTimeout(resolve, 1500)); // wait 1.5s before retry
+            
+            const retryAfter = response.headers.get('Retry-After');
+            const delay = retryAfter ? parseInt(retryAfter, 10) * 1000 : (Math.pow(2, i) * 1000) + Math.random() * 500;
+            await new Promise(resolve => setTimeout(resolve, delay));
             continue;
           }
 
           const data = await response.json();
+          const latency = Date.now() - startTime;
+          const tokens = data.usage?.total_tokens || 'unknown';
+          console.log(`[NVIDIA API Success] Latency: ${latency}ms | Tokens: ${tokens}`);
+          
           let rawContent = data.choices[0].message.content || "";
           
           try {
@@ -99,7 +170,11 @@ STORY REQUIREMENTS:
             continue;
           }
         } catch (err) {
-          if (i === retries - 1) throw err;
+          clearTimeout(timeoutId);
+          console.error(`[NVIDIA Network/Timeout Error Attempt ${i+1}]:`, err.message);
+          if (err.message.includes('Fatal Error') || i === retries - 1) throw err;
+          const delay = (Math.pow(2, i) * 1000) + Math.random() * 500;
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     };
@@ -152,6 +227,19 @@ exports.createJob = async (req, res, next) => {
     if (captionColor && !/^#[0-9A-Fa-f]{6}$/.test(captionColor))
       return res.status(400).json({ error: `captionColor must be a valid hex color code` });
 
+    const idempotencyKey = req.headers['idempotency-key'];
+    if (idempotencyKey) {
+      const existingJob = jobStore.findByIdempotencyKey(idempotencyKey, req.user.uid);
+      if (existingJob) {
+        console.log(`[Idempotency] Reusing job ${existingJob.jobId.slice(0, 8)} for key ${idempotencyKey.slice(0, 12)}`);
+        return res.status(200).json({
+          jobId: existingJob.jobId,
+          status: existingJob.status,
+          message: 'Job already exists (idempotent request)',
+        });
+      }
+    }
+
     /* Create job */
     const jobId = uuidv4();
     const job = jobStore.create(jobId, {
@@ -161,6 +249,8 @@ exports.createJob = async (req, res, next) => {
       captionColor: captionColor || '#ffffff',
       voice:        voice        || 'default',
       duration:     dur          || 45,
+      userId:       req.user.uid,
+      idempotencyKey: idempotencyKey || null,
     });
 
     /* Enqueue for async processing */
@@ -181,6 +271,7 @@ exports.getJob = (req, res, next) => {
   try {
     const job = jobStore.get(req.params.jobId);
     if (!job) return res.status(404).json({ error: 'Job not found' });
+    if (job.userId && job.userId !== req.user.uid) return res.status(403).json({ error: 'Access denied' });
 
     /* Never expose internal paths */
     const safe = {
@@ -192,7 +283,10 @@ exports.getJob = (req, res, next) => {
       updatedAt: job.updatedAt,
       error:     job.error || null,
       outputUrl: job.status === 'completed'
-        ? `/api/videos/${job.jobId}/output`
+        ? createOutputPath(job.jobId, req.user.uid)
+        : null,
+      downloadUrl: job.status === 'completed'
+        ? createOutputPath(job.jobId, req.user.uid, true)
         : null,
     };
     res.json(safe);
@@ -202,10 +296,12 @@ exports.getJob = (req, res, next) => {
 };
 
 /* ── GET /api/videos/:jobId/output ──────────────────────────────────────── */
-exports.getOutput = (req, res, next) => {
+exports.getOutput = async (req, res, next) => {
   try {
     const job = jobStore.get(req.params.jobId);
     if (!job) return res.status(404).json({ error: 'Job not found' });
+    const allowed = await authorizeOutputRequest(req, job);
+    if (!allowed) return res.status(403).json({ error: 'Access denied' });
     if (job.status !== 'completed')
       return res.status(409).json({ error: 'Job not completed yet', status: job.status });
 

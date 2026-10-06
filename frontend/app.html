@@ -24,7 +24,7 @@
 
     <!-- ── STEP INDICATOR ── -->
     <header class="app-header">
-      <div class="app-logo">
+      <a class="app-logo" href="/" aria-label="Go to StoryPlay landing page">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="url(#appLg)"/>
           <defs><linearGradient id="appLg" x1="5" y1="4.5" x2="19" y2="19.5" gradientUnits="userSpaceOnUse">
@@ -33,7 +33,7 @@
         </svg>
         <span>StoryPlay</span>
         <span class="beta-badge">Beta</span>
-      </div>
+      </a>
       <div class="step-indicators">
         <div class="step-dot active" data-step="1">1</div>
         <div class="step-dot" data-step="2">2</div>
@@ -400,7 +400,7 @@
           <div class="progress-orb-inner"><span id="progressPct">0%</span></div>
           <svg class="progress-ring" viewBox="0 0 120 120">
             <defs><linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#00E6FF"/><stop offset="100%" stop-color="#8A2BE2"/>
+              <stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#888888"/>
             </linearGradient></defs>
             <circle class="ring-bg" cx="60" cy="60" r="54"/>
             <circle class="ring-fill" id="progressRing" cx="60" cy="60" r="54"/>
@@ -574,7 +574,12 @@
       }
       localStorage.removeItem('userEmail');
       localStorage.removeItem('firebaseToken');
-      document.cookie = "sessionToken=; path=/; max-age=0";
+      try {
+        const base = (window.__API_BASE__ || '').replace(/\/$/, '');
+        await fetch(`${base}/api/auth/logout`, { method: 'POST' });
+      } catch (err) {
+        console.error("Logout request failed", err);
+      }
       window.location.href = '/signin';
     });
   </script>

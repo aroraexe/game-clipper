@@ -1,0 +1,41 @@
+# ── Build context exclusions ──────────────────────────────────────────────────
+# Prevents 7+ GB of gameplay footage and dev artefacts from being sent to the
+# Docker daemon on every build. The Dockerfile only COPYs what it needs.
+
+# Gameplay source videos (NEVER bake into image — too large, use runtime mount or R2)
+storage/gameplay/*.mp4
+storage/gameplay/*.webm
+# Keep the _small.mp4 previews that ARE committed to git and used at runtime
+!storage/gameplay/*_small.mp4
+
+# Generated outputs and temp files (ephemeral, not needed in image)
+storage/outputs/
+storage/output/
+storage/temp/
+storage/audio/
+storage/subtitles/
+
+# Node modules (rebuilt in Docker via npm ci)
+node_modules/
+
+# Dev / OS files
+.env
+.git/
+.gitignore
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+*.bak
+
+# Root-level test & scratch files
+/*.mp4
+/*.mp3
+/*.png
+tts_test.*
+test_*
+test-*
+generate_*.js
+upload.js
+bgsample1.png
+.kilo/

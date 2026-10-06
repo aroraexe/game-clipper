@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy — StoryPlay</title>
+  <meta name="description" content="What StoryPlay stores, for how long, and who it shares it with.">
+  <link rel="stylesheet" href="landing.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-left">
+      <div class="nav-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="#FFFFFF"/>
+        </svg>
+        <span>StoryPlay</span>
+      </div>
+      <nav class="nav-links">
+        <a href="/features">Features</a>
+        <a href="/how-it-works">How It Works</a>
+        <a href="/#games">Games</a>
+        <a href="/examples">Examples</a>
+        <a href="/faq">FAQ</a>
+      </nav>
+    </div>
+    <div class="nav-actions">
+      <a href="/signin" class="btn btn-ghost">Sign In</a>
+      <a href="/signin" class="btn btn-primary">Create Video</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page subpage">
+
+  <div class="subpage-head">
+    <h1>Privacy</h1>
+    <div class="doc-updated">Last updated 5 October 2026</div>
+  </div>
+
+  <div class="doc-body">
+
+    <h2>What is stored about you</h2>
+    <p>Signing in is handled by Firebase Authentication. That means your provider holds your email address or username and confirms who you are; StoryPlay receives a verified identifier and an email address shown in the app. No password is ever stored by StoryPlay.</p>
+
+    <h2>What happens to the stories you paste</h2>
+    <p>Your script is sent to the servers that generate the voiceover. If you use the story generator rather than pasting, your prompt is sent to a language model provider along with a short system instruction.</p>
+    <p>Your script, and the audio generated from it, are written to temporary files on the render server so the video can be built. These temporary files are deleted when the render finishes or fails.</p>
+
+    <h2>How long finished videos are kept</h2>
+    <p>Finished videos and their job records are deleted from the server <strong>one hour after they are created</strong>, whether or not you downloaded them. There is no archive. If you want to keep a video, download it.</p>
+
+    <h2>Who else sees your data</h2>
+    <p>Three categories of processor handle data on your behalf:</p>
+    <ul>
+      <li><strong>Firebase Authentication</strong> — verifying who you are.</li>
+      <li><strong>A text-to-speech provider</strong> — turning your script into audio.</li>
+      <li><strong>A language model provider</strong> — only if you use the story generator.</li>
+    </ul>
+    <p>Each receives only what its step requires. None of them are given your email address. StoryPlay does not sell data, and there is no advertising or analytics tracking on this site.</p>
+
+    <h2>Cookies</h2>
+    <p>One cookie is set, called <strong>sessionToken</strong>. It holds your sign-in token, is marked HttpOnly so scripts cannot read it, is marked Secure so it only travels over HTTPS, and is limited to one day. It is deleted when you sign out.</p>
+
+    <h2>Deleting your account</h2>
+    <p>Because finished videos expire after an hour, the main thing to remove is the authentication record itself. Delete your account with your identity provider, and your StoryPlay access ends with it.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about this page can go through the project's repository.</p>
+
+  </div>
+
+  <div class="subpage-footer">
+    <nav>
+      <a href="/">Home</a>
+      <a href="/features">Features</a>
+      <a href="/how-it-works">How it works</a>
+      <a href="/examples">Examples</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/faq">FAQ</a>
+      <a href="/terms">Terms</a>
+    </nav>
+    <span class="copy">StoryPlay</span>
+  </div>
+
+</div>
+
+</body>
+</html>

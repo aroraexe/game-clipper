@@ -81,16 +81,17 @@ async function renderPipeline(job) {
     checkTimeout(timedOut);
 
     // Run subtitles and video extraction in parallel now that we know the true duration
+    
     const subsPromise = (async () => {
-      stage(jobId, 'transcribing', 30);
       let words;
+      stage(jobId, 'transcribing', 30);
       await timeBlock('Whisper Sync', async () => {
         words = await whisperService.transcribe(audioPath, tempDir, cleanStory);
         fs.writeFileSync(path.join(tempDir, 'timestamps.json'), JSON.stringify(words, null, 2), 'utf8');
       });
       checkTimeout(timedOut);
 
-      stage(jobId, 'creating_subtitles', 42);
+      stage(jobId, 'creating_subtitles', 45);
       assPath = path.join(tempDir, 'captions.ass');
       await timeBlock('Subtitle Gen', async () => {
         subtitleService.generate(words, assPath, captionStyle, captionColor);
@@ -99,11 +100,11 @@ async function renderPipeline(job) {
     })();
 
     const videoPromise = (async () => {
-      stage(jobId, 'selecting_gameplay', 10);
+      stage(jobId, 'selecting_gameplay', 35);
       const segment = await gameplayService.selectSegment(gameplayId, trueDurationS);
       checkTimeout(timedOut);
 
-      stage(jobId, 'trimming_gameplay', 20);
+      stage(jobId, 'trimming_gameplay', 50);
       await timeBlock('Gameplay Trim', async () => {
         if (segment.mock) {
           await ffmpegService.generateMockVideo({ durationS: trueDurationS, outputPath: gameplaySegPath });

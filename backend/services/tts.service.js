@@ -24,9 +24,13 @@ async function synthesize(text, outputPath, voice = 'onyx') {
     try {
       const openai = new OpenAI();
       
-      // Map frontend voice to OpenAI voice (alloy, echo, fable, onyx, nova, shimmer)
-      const validVoices = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
-      const aiVoice = validVoices.includes(voice) ? voice : 'onyx';
+      const voiceMap = {
+        'default': 'onyx',
+        'energetic': 'nova',
+        'calm': 'shimmer',
+        'narrator': 'fable'
+      };
+      const aiVoice = voiceMap[voice] || 'onyx';
 
       const mp3 = await openai.audio.speech.create({
         model: 'tts-1',

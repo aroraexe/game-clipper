@@ -126,7 +126,7 @@ function generate(words, outputPath, style = 'bold-yellow', customColorHex = nul
   return outputPath;
 }
 
-module.exports = { generate, PRESETS };
+module.exports = { generate, PRESETS, hexToAssColor, toAssTime };
 
 /* ── ASS Header ──────────────────────────────────────────────────────────── */
 function buildHeader(p) {

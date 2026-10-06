@@ -24,10 +24,10 @@ const fs         = require('fs');
 console.log('[FFmpeg] Running in CPU-only mode (libx264)');
 
 /* ── Output resolution (env-configurable) ───────────────────────────── */
-// Default: 720x1280 (HD)
-// Override: VIDEO_WIDTH=1080 VIDEO_HEIGHT=1920 for local HD renders
-const VIDEO_W = parseInt(process.env.VIDEO_WIDTH,  10) || 360;
-const VIDEO_H = parseInt(process.env.VIDEO_HEIGHT, 10) || 640;
+// Default: 720x1280 (HD vertical short)
+// Override: VIDEO_WIDTH=1080 VIDEO_HEIGHT=1920 for local 4K renders
+const VIDEO_W = parseInt(process.env.VIDEO_WIDTH,  10) || 720;
+const VIDEO_H = parseInt(process.env.VIDEO_HEIGHT, 10) || 1280;
 console.log(`[FFmpeg] Output resolution: ${VIDEO_W}×${VIDEO_H}`);
 
 /* ── Configure binary paths from env ─────────────────────────────────────── */
@@ -75,7 +75,9 @@ function extractSegment({ inputPath, startTime, durationS, outputPath }) {
       .inputOptions([`-ss ${startTime}`])    // fast input seek
       .duration(durationS)
       .outputOptions([
-        '-c:v', 'copy',    // copy stream — no re-encode during extraction
+        '-c:v', 'libx264',
+        '-preset', 'ultrafast',
+        '-crf', '23',
         '-c:a', 'copy',
         '-avoid_negative_ts', 'make_zero',
       ])
@@ -160,11 +162,11 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
         '-map', '[vout]',
         '-map', '1:a',
 
-        // CPU-only video codec — maximum speed settings
+        // CPU-only video codec — balanced speed/quality settings
         '-c:v', 'libx264',
-        '-preset', 'ultrafast',
-        '-tune', 'zerolatency',   // disables lookahead → faster encode start
-        '-crf', '16',
+        '-preset', 'veryfast',   // veryfast vs ultrafast: ~15% slower but ~4× smaller file
+        '-tune', 'zerolatency',  // disables lookahead → faster encode start
+        '-crf', '23',
         '-profile:v', 'main',
         '-level', '4.0',
         '-pix_fmt', 'yuv420p',

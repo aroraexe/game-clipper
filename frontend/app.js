@@ -14,6 +14,8 @@ const state = {
   voice:      'default',
   duration:   45,
   jobId:      null,
+  outputUrl:  null,
+  downloadUrl: null,
   pollTimer:  null,
   storyType:  'reddit',
 };
@@ -21,6 +23,7 @@ const state = {
 // Backend URL: empty = same origin (local dev)
 // Set window.__API_BASE__ in app.html for Vercel → Railway cross-origin deployment
 const API_BASE = (window.__API_BASE__ || '').replace(/\/$/, '');
+const apiUrl = (path) => `${API_BASE}${path}`;
 
 const GAMEPLAY_EMOJIS = {
   minecraft:        '🧊',
@@ -32,12 +35,12 @@ const GAMEPLAY_EMOJIS = {
 };
 
 const GAMEPLAY_IMAGES = {
-  'minecraft': 'c4a88e00-77b4-44cb-897f-7be0e2ebcedd.png',
-  'roblox': 'd714ab01-aa65-4ff2-9011-85014b3535b7.png',
-  'gtav': '5bb6cefa-1149-459f-8fa3-029475806cd3.png',
-  'subway-surfers': 'c4a88e00-77b4-44cb-897f-7be0e2ebcedd.png',
-  'fortnite': '4c892349-45ea-495d-ac04-f977280ebc4e.png',
-  'geometry-dash': 'd714ab01-aa65-4ff2-9011-85014b3535b7.png'
+  'minecraft': 'card-media/pick-minecraft.jpg',
+  'roblox': 'card-media/pick-roblox.jpg',
+  'gtav': 'card-media/pick-gtav.jpg',
+  'subway-surfers': 'card-media/pick-minecraft.jpg',
+  'fortnite': 'card-media/pick-fortnite.jpg',
+  'geometry-dash': 'card-media/pick-roblox.jpg'
 };
 
 /* ── DOM refs ────────────────────────────────────────────────────────────── */
@@ -113,7 +116,7 @@ function initStoryStep() {
         // For 30s -> ~75 words, 45s -> ~112 words, 60s -> ~150 words.
         const wordCount = Math.floor(dur * 2.5);
 
-        const res = await fetch('/api/videos/generate-story', {
+        const res = await fetch(apiUrl('/api/videos/generate-story'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -178,10 +181,11 @@ async function loadGameplay() {
 
   let items;
   try {
-    const res  = await fetch('/api/gameplay', {
+    const res  = await fetch(apiUrl('/api/gameplay'), {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('firebaseToken')}` }
     });
     const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Failed to load gameplay options.');
     items = json.gameplay;
   } catch (err) {
     grid.innerHTML = '<div class="gameplay-loading" style="color:#ef476f">Failed to load gameplay options.</div>';
@@ -208,6 +212,11 @@ async function loadGameplay() {
     `;
 
     card.addEventListener('click', () => {
+      // Hard stop — do not allow selecting a card whose file doesn't exist on the server
+      if (!item.available) {
+        toast(`${item.name} is not available on this server. Choose another game.`, 'error');
+        return;
+      }
       document.querySelectorAll('.gameplay-card--selected').forEach((c) =>
         c.classList.remove('gameplay-card--selected')
       );
@@ -326,7 +335,7 @@ function initVoiceStep() {
    ═══════════════════════════════════════════════════════════════════════════ */
 async function submitJob() {
   try {
-    const res = await fetch(`${API_BASE}/api/videos`, {
+    const res = await fetch(apiUrl('/api/videos'), {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -364,11 +373,20 @@ const STAGE_LABELS = {
   selecting_gameplay:'Selecting gameplay segment…',
   trimming_gameplay: 'Trimming gameplay (efficient seek)…',
   compositing:       'Compositing video…',
-  encoding:          'Encoding H.264/AAC…',
   finalizing:        'Finalizing…',
+  retrying:          'Retrying render…',
 };
 
-const STAGE_ORDER = Object.keys(STAGE_LABELS);
+const STAGE_ORDER = [
+  'preparing_story',
+  'generating_voice',
+  'transcribing',
+  'creating_subtitles',
+  'selecting_gameplay',
+  'trimming_gameplay',
+  'compositing',
+  'finalizing',
+];
 
 function startPolling(jobId) {
   clearInterval(state.pollTimer);
@@ -376,7 +394,7 @@ function startPolling(jobId) {
 
   state.pollTimer = setInterval(async () => {
     try {
-      const res  = await fetch(`${API_BASE}/api/videos/${jobId}`, {
+      const res  = await fetch(apiUrl(`/api/videos/${jobId}`), {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('firebaseToken')}` }
       });
       const data = await res.json();
@@ -390,6 +408,8 @@ function startPolling(jobId) {
 
       if (data.status === 'completed') {
         clearInterval(state.pollTimer);
+        state.outputUrl = data.outputUrl ? apiUrl(data.outputUrl) : null;
+        state.downloadUrl = data.downloadUrl ? apiUrl(data.downloadUrl) : null;
         showResult(jobId);
       } else if (data.status === 'failed') {
         clearInterval(state.pollTimer);
@@ -408,6 +428,8 @@ function updateProgress(pct, stage) {
   if (ring) ring.style.strokeDashoffset = offset;
 
   $('progressPct').textContent = `${Math.round(pct)}%`;
+  const stageText = $('progressStage');
+  if (stageText) stageText.textContent = STAGE_LABELS[stage] || 'Turning your story into a cinematic video...';
 
   // Pipeline steps
   STAGE_ORDER.forEach((s, i) => {
@@ -432,6 +454,8 @@ function updateProgress(pct, stage) {
 function initResultStep() {
   $('btnCreateAnother').addEventListener('click', () => {
     state.jobId = null;
+    state.outputUrl = null;
+    state.downloadUrl = null;
     $('storyInput').value = '';
     $('charCount').textContent = '0';
     document.querySelectorAll('.gameplay-card--selected').forEach((c) =>
@@ -444,7 +468,8 @@ function initResultStep() {
 }
 
 function showResult(jobId) {
-  const videoUrl = `${API_BASE}/api/videos/${jobId}/output`;
+  const videoUrl = state.outputUrl || apiUrl(`/api/videos/${jobId}/output`);
+  const downloadUrl = state.downloadUrl || `${videoUrl}${videoUrl.includes('?') ? '&' : '?'}download=true`;
 
   const video = $('resultVideo');
   video.src = videoUrl;
@@ -452,7 +477,7 @@ function showResult(jobId) {
 
   $('btnDownload').onclick = () => {
     const a = document.createElement('a');
-    a.href = videoUrl + '?download=true';
+    a.href = downloadUrl;
     a.download = `storyplay_${jobId}.mp4`;
     a.click();
   };

@@ -73,7 +73,23 @@ function enqueue(jobId, priority = 'normal') {
   drain();
 }
 
-module.exports = { enqueue };
+function initQueue() {
+  const allJobs = jobStore.list();
+  const pending = allJobs.filter(j => j.status === 'queued' || j.status === 'processing');
+  if (pending.length > 0) {
+    console.log(`[Queue] Recovering ${pending.length} pending jobs from store...`);
+    // Ensure any 'processing' jobs are reset to 'queued' since they died mid-flight
+    pending.forEach(job => {
+      if (job.status === 'processing') jobStore.setStatus(job.jobId, 'queued');
+      enqueue(job.jobId);
+    });
+  }
+}
+
+// Run init immediately on load
+initQueue();
+
+module.exports = { enqueue, initQueue };
 
 /* ── Internal ────────────────────────────────────────────────────────────── */
 
@@ -105,6 +121,8 @@ function _updateQueuePositions() {
 function _runInWorker(item) {
   const { jobId } = item;
   const startTime = Date.now();
+  let completed = false;
+  let terminalError = null;
 
   console.log(`[Queue] ▶ Starting job ${jobId.slice(0,8)}  (active: ${active}, queued: ${_totalDepth()})`);
 
@@ -122,29 +140,38 @@ function _runInWorker(item) {
   const worker = new Worker(WORKER_PATH, { workerData: { job } });
 
   worker.on('message', (msg) => {
-    if (msg.type === 'STAGE')     jobStore.setStage(msg.jobId, msg.stageName, msg.progress);
-    if (msg.type === 'UPDATE')    jobStore.update(msg.jobId, msg.patch);
-    if (msg.type === 'STATUS')    jobStore.setStatus(msg.jobId, msg.status);
-    if (msg.type === 'COMPLETED') {
-      jobStore.markCompleted(msg.jobId, msg.outputPath);
-      recordCompletionTime(Date.now() - startTime);
+    try {
+      if (msg.type === 'STAGE')     jobStore.setStage(msg.jobId, msg.stageName, msg.progress);
+      if (msg.type === 'UPDATE')    jobStore.update(msg.jobId, msg.patch);
+      if (msg.type === 'STATUS')    jobStore.setStatus(msg.jobId, msg.status);
+      if (msg.type === 'COMPLETED') {
+        jobStore.markCompleted(msg.jobId, msg.outputPath);
+        recordCompletionTime(Date.now() - startTime);
+        completed = true;
+      }
+      if (msg.type === 'FATAL') {
+        terminalError = new Error(msg.error || 'Worker failed');
+      }
+      if (msg.type === 'ERROR')     terminalError = new Error(msg.error || 'Worker failed');
+    } catch (err) {
+      console.warn(`[Queue] Failed to update job ${msg.jobId}: ${err.message}`);
     }
-    if (msg.type === 'ERROR')     jobStore.markFailed(msg.jobId, new Error(msg.error));
   });
 
   worker.on('error', (err) => {
     console.error(`[Queue] Worker error for job ${jobId.slice(0,8)}:`, err.message);
-    _handleFailure(jobId, item, err);
+    terminalError = err;
   });
 
   worker.on('exit', (code) => {
     active--;
-    if (code !== 0) {
-      console.error(`[Queue] Worker for job ${jobId.slice(0,8)} exited with code ${code}`);
-      _handleFailure(jobId, item, new Error(`Worker exited with code ${code}`));
-    } else {
+    if (completed && code === 0) {
       console.log(`[Queue] ✓ Job ${jobId.slice(0,8)} done  (active: ${active})`);
       retryMap.delete(jobId);
+    } else {
+      const err = terminalError || new Error(`Worker exited before completion${code !== 0 ? ` with code ${code}` : ''}`);
+      if (code !== 0) console.error(`[Queue] Worker for job ${jobId.slice(0,8)} exited with code ${code}`);
+      _handleFailure(jobId, item, err);
     }
     _updateQueuePositions();
     drain();
