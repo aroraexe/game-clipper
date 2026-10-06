@@ -14,12 +14,12 @@
 <nav class="navbar">
   <div class="nav-container">
     <div class="nav-left">
-      <div class="nav-logo">
+      <a href="/" class="nav-logo" style="text-decoration:none;color:inherit;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="#FFFFFF"/>
         </svg>
         <span>StoryPlay</span>
-      </div>
+      </a>
       <nav class="nav-links">
         <a href="/features">Features</a>
         <a href="/how-it-works">How It Works</a>
@@ -43,34 +43,22 @@
   </div>
 
   <div class="subpage-section">
-    <div class="showcase-grid">
-      <div class="showcase-item">
-        <video src="media/example_1.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
-        <div class="showcase-meta">
-          <div class="showcase-tag">Word pop</div>
-          <strong>Minecraft, Reddit story</strong>
-        </div>
-      </div>
-      <div class="showcase-item">
+    <div class="examples-cluster">
+      <div class="phone-card phone-left">
         <video src="media/example_2.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
-        <div class="showcase-meta">
-          <div class="showcase-tag">Bold yellow</div>
-          <strong>GTA V, true scary story</strong>
-        </div>
+        <div class="phone-label"><span class="phone-tag">Bold yellow</span><strong>GTA V</strong></div>
       </div>
-      <div class="showcase-item">
+      <div class="phone-card phone-main">
+        <video src="media/example_1.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
+        <div class="phone-label"><span class="phone-tag">Word pop</span><strong>Minecraft</strong></div>
+      </div>
+      <div class="phone-card phone-right">
         <video src="media/example_3.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
-        <div class="showcase-meta">
-          <div class="showcase-tag">White highlight</div>
-          <strong>Roblox, fun facts</strong>
-        </div>
+        <div class="phone-label"><span class="phone-tag">White highlight</span><strong>Roblox</strong></div>
       </div>
-      <div class="showcase-item">
+      <div class="phone-card phone-far">
         <video src="media/example_4.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
-        <div class="showcase-meta">
-          <div class="showcase-tag">Clean</div>
-          <strong>Fortnite, funny story</strong>
-        </div>
+        <div class="phone-label"><span class="phone-tag">Clean</span><strong>Fortnite</strong></div>
       </div>
     </div>
   </div>
@@ -98,9 +86,8 @@
 </div>
 
 <script>
-// Lazy-load and play each clip only when it scrolls into view.
 document.addEventListener('DOMContentLoaded', function () {
-  const videos = document.querySelectorAll('.showcase-item video');
+  const videos = document.querySelectorAll('.phone-card video');
   if (!('IntersectionObserver' in window)) return;
 
   const io = new IntersectionObserver((entries) => {

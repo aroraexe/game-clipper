@@ -73,6 +73,7 @@ body {
   font-weight: 700; font-size: 1.25rem;
   color: var(--text);
   text-decoration: none;
+  cursor: pointer;
 }
 .beta-badge {
   padding: 0.15rem 0.6rem;
