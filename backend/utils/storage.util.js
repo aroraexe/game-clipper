@@ -9,7 +9,27 @@
 const fs   = require('fs');
 const path = require('path');
 
-const STORAGE_ROOT = path.resolve(process.env.STORAGE_ROOT || './storage');
+const STORAGE_ROOT = path.resolve(resolveStorageRoot());
+
+/**
+ * Where job output, temp files, the job store and the user store live.
+ *
+ * On Railway this MUST be a mounted volume or a redeploy deletes every video
+ * and every subscription record. Railway automatically exposes
+ * RAILWAY_VOLUME_MOUNT_PATH when a volume is attached, so prefer that over a
+ * hardcoded path. Locally it falls back to ./storage.
+ *
+ * Order: explicit STORAGE_ROOT -> Railway volume mount -> ./storage
+ */
+function resolveStorageRoot() {
+  if (process.env.STORAGE_ROOT) return process.env.STORAGE_ROOT;
+  const volumePath = process.env.RAILWAY_VOLUME_MOUNT_PATH;
+  if (process.env.RAILWAY && volumePath) {
+    console.log(`[Storage] Using Railway volume at ${volumePath}`);
+    return volumePath;
+  }
+  return './storage';
+}
 
 const DIRS = [
   'gameplay',

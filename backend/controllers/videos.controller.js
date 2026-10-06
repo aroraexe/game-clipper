@@ -7,6 +7,8 @@ const { enqueue }      = require('../jobs/renderQueue');
 const storyService     = require('../services/story.service');
 const gameplayService  = require('../services/gameplay.service');
 const { getRequestToken, verifyFirebaseToken } = require('../middleware/auth.middleware');
+const { planFor } = require('../config/plans');
+const userStore = require('../jobs/userStore');
 
 const OUTPUT_URL_TTL_MS = 15 * 60 * 1000;
 
@@ -272,10 +274,14 @@ exports.createJob = async (req, res, next) => {
       }
     }
 
-    // Queue limits to prevent unbounded resource consumption (DOS)
+    // Queue limits to prevent unbounded resource consumption (DOS).
+    // The per-user cap comes from the user's plan (free 2, pro 6) so that
+    // paying customers are not throttled at the same level as free ones.
+    const plan = planFor((uid) => userStore.planNameFor(uid), req.user.uid);
+
     const allJobs = jobStore.list();
     const activeJobs = allJobs.filter(j => ['queued', 'processing'].includes(j.status));
-    
+
     // Global queue cap
     if (activeJobs.length >= 100) {
       return res.status(503).json({ error: 'System is currently at maximum capacity. Please try again later.' });
@@ -283,8 +289,13 @@ exports.createJob = async (req, res, next) => {
     
     // Per-user concurrency cap
     const userActiveJobs = activeJobs.filter(j => j.userId === req.user.uid);
-    if (userActiveJobs.length >= 3) {
-      return res.status(429).json({ error: 'You already have 3 active jobs. Please wait for them to finish before creating more.' });
+    if (userActiveJobs.length >= plan.maxActiveJobs) {
+      return res.status(429).json({ error: `You already have ${plan.maxActiveJobs} active jobs on the ${plan.label} plan. Please wait for them to finish before creating more.` });
+    }
+
+    // Per-plan story length cap (free tier is shorter, pro gets the full 3000).
+    if (story.trim().length > plan.maxStoryChars) {
+      return res.status(400).json({ error: `Story exceeds the ${plan.maxStoryChars}-character limit on the ${plan.label} plan.` });
     }
 
 

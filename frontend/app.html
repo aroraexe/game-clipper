@@ -496,7 +496,7 @@
   <script src="app.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+    import { getAuth, signOut, onIdTokenChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDeZc5KC6ruyJgga7dht65ekOYQgZaKCHU",
@@ -520,6 +520,34 @@
     if (userEmail) {
       document.getElementById('user-dropdown-email').innerText = userEmail;
       document.getElementById('user-avatar-initial').innerText = userEmail.charAt(0).toUpperCase();
+    }
+
+    /*
+     * Keep the session token fresh.
+     *
+     * A Firebase ID token expires after 1 hour and the session cookie is capped
+     * to match. Subscribers keep their videos for 7 days, so without a refresh
+     * they would be unable to re-download anything they paid for after the
+     * first hour. onIdTokenChanged fires whenever Firebase rotates the token,
+     * so we mirror it into localStorage and re-arm the cookie.
+     */
+    if (auth) {
+      onIdTokenChanged(auth, async (user) => {
+        if (!user) return;
+        try {
+          const token = await user.getIdToken();
+          localStorage.setItem('firebaseToken', token);
+          localStorage.setItem('userEmail', user.email || 'user');
+          const base = (window.__API_BASE__ || '').replace(/\/$/, '');
+          await fetch(`${base}/api/auth/session`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken: token })
+          });
+        } catch (e) {
+          console.warn('[Auth] Token refresh failed.', e.message);
+        }
+      });
     }
 
     const menuBtn = document.getElementById('user-menu-btn');

@@ -163,7 +163,7 @@ function generateMockVideo({ durationS, outputPath }) {
  * compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, durationS })
  * → Promise<string>  outputPath
  * ──────────────────────────────────────────────────────────────────────────── */
-function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, durationS, onProgress }) {
+function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, durationS, onProgress, signal }) {
   const gp  = validatePath(gameplayPath, 'Gameplay segment');
   const aud = validatePath(audioPath,    'Narration audio');
   // subtitles validated separately — path may contain special chars
@@ -182,7 +182,7 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
   const assEscaped = escapeFilterPath(assPath);
 
   return new Promise((resolve, reject) => {
-    ffmpeg()
+    const cmd = ffmpeg()
       // Input 0: gameplay video (seek already applied in extractSegment)
       .input(gp)
 
@@ -236,14 +236,29 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
         }
       })
       .on('end', () => {
+        if (signal) signal.removeEventListener('abort', onAbort);
         process.stdout.write('\n');
         resolve(outputPath);
       })
       .on('error', (err) => {
+        if (signal) signal.removeEventListener('abort', onAbort);
         process.stdout.write('\n');
         reject(new Error(`FFmpeg composite failed: ${err.message}`));
-      })
-      .run();
+      });
+
+    const onAbort = () => {
+      cmd.kill('SIGKILL');
+      reject(new Error(signal.reason || 'Aborted'));
+    };
+
+    if (signal) {
+      if (signal.aborted) {
+        return reject(new Error(signal.reason || 'Aborted'));
+      }
+      signal.addEventListener('abort', onAbort);
+    }
+
+    cmd.run();
   });
 }
 

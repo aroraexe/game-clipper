@@ -24,10 +24,12 @@ const TIMEOUT_MS = parseInt(process.env.JOB_TIMEOUT_MS || '600000', 10);
 async function renderPipeline(job) {
   const jobId = job.jobId;
 
-  // Watchdog timeout
+  // Watchdog timeout with AbortController
   let timedOut = false;
+  const abortController = new AbortController();
   const timeoutHandle = setTimeout(() => {
     timedOut = true;
+    abortController.abort('Render timeout exceeded');
     reportError(jobId, new Error('Render timeout exceeded'));
   }, TIMEOUT_MS);
 
@@ -130,7 +132,8 @@ async function renderPipeline(job) {
         subtitlePath: assPath,
         outputPath: finalPath,
         durationS: trueDurationS,
-        onProgress: (pct) => stage(jobId, 'compositing', 70 + Math.floor(pct * 0.25))
+        onProgress: (pct) => stage(jobId, 'compositing', 70 + Math.floor(pct * 0.25)),
+        signal: abortController.signal
       });
     });
     checkTimeout(timedOut);

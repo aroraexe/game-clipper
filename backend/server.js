@@ -12,6 +12,7 @@ const cookieParser  = require('cookie-parser');
 
 const healthRouter    = require('./routes/health.routes');
 const gameplayRouter  = require('./routes/gameplay.routes');
+const meRouter        = require('./routes/me.routes');
 const videosRouter    = require('./routes/videos.routes');
 const { initStorage } = require('./utils/storage.util');
 const { requireAuth, getRequestToken, verifyFirebaseToken, authPreflight, DEV_AUTH_ENABLED } = require('./middleware/auth.middleware');
@@ -187,6 +188,7 @@ app.post('/api/auth/logout', (req, res) => {
 
 /* ─── API routes ────────────────────────────────────────────────────────────── */
 app.use('/api/health',    healthRouter);
+app.use('/api/me',        requireAuth, meRouter);
 app.use('/api/gameplay',  requireAuth, gameplayRouter);
 
 app.use('/api/videos',    videosRouter);
@@ -234,26 +236,39 @@ async function start() {
   if (DEV_AUTH_ENABLED) {
     console.warn('[Startup] ⚠️  DEV AUTH MOCK IS ENABLED — all requests resolve to "dev-user". Never do this in production.');
   }
+  try {
+    const ttsCfg = require('./services/tts.service').describeConfig();
+    console.log(`[Startup] TTS provider: ${ttsCfg.provider || 'UNUSABLE'} (voices: ${ttsCfg.voices.join(', ')})`);
+  } catch (_) { /* preflight already reports unusable TTS in production */ }
 
   await initStorage();
 
   // Start the render queue worker (import here so queue starts after storage init)
   require('./jobs/renderQueue');
 
-  // Storage auto-cleanup for Render/Railway free tiers (runs every 30 mins).
+  // Storage cleanup (runs every 30 mins).
+  // Retention is per-user: free tier keeps a finished video for 1 hour, paid
+  // subscribers for 7 days (see backend/config/plans.js). It used to be a
+  // hardcoded 1 hour for everybody, which made the product unsellable.
+  //
   // Only terminal jobs are removed — never a job that is still queued or
   // rendering, otherwise the render finishes to a file nobody can fetch.
   setInterval(() => {
     try {
       const { list, removeJob } = require('./jobs/jobStore');
+      const userStore = require('./jobs/userStore');
+      const { planFor } = require('./config/plans');
       const fs = require('fs');
-      const oneHourAgo = Date.now() - (60 * 60 * 1000);
+      const now = Date.now();
       let cleared = 0;
       let skipped = 0;
       for (const job of list()) {
         const terminal = job.status === 'completed' || job.status === 'failed';
         if (!terminal) { skipped++; continue; }
-        if (new Date(job.updatedAt || job.createdAt).getTime() >= oneHourAgo) continue;
+
+        const plan = planFor((uid) => userStore.planNameFor(uid), job.userId);
+        const finishedAt = new Date(job.updatedAt || job.createdAt).getTime();
+        if (now - finishedAt < plan.retentionMs) continue;
 
         removeJob(job.jobId);
         if (job.outputPath) {

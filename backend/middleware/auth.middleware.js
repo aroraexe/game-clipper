@@ -96,6 +96,18 @@ function authPreflight() {
       problems.push('ALLOW_DEV_AUTH is set in production — remove it.');
     if (!process.env.OUTPUT_URL_SECRET)
       problems.push('OUTPUT_URL_SECRET is not set — completed videos would be signed with an insecure default.');
+
+    // Narration is the product. Catch an unusable TTS configuration at boot
+    // rather than failing every render after a customer has already paid.
+    const tts = require('../services/tts.service');
+    const ttsCfg = tts.describeConfig();
+    if (ttsCfg.error) {
+      problems.push(`TTS is not usable: ${ttsCfg.error}`);
+    } else if (ttsCfg.provider === 'edge') {
+      problems.push('TTS_PROVIDER=edge in production — Microsoft Edge read-aloud is unlicensed for commercial use.');
+    } else if (!process.env.OPENAI_API_KEY) {
+      problems.push('TTS_PROVIDER is openai (the default) but OPENAI_API_KEY is not set — every render would fail.');
+    }
   } else if (!isFirebaseInitialized && process.env.ALLOW_DEV_AUTH !== 'true') {
     problems.push(
       'Firebase Admin is not initialized and ALLOW_DEV_AUTH is not set, so authenticated routes will 503. ' +
