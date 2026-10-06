@@ -45,7 +45,7 @@ async function renderPipeline(job) {
 
   try {
     reportStatus(jobId, 'processing');
-    const { story, gameplayId, captionStyle, captionColor, voice, duration } = job.params;
+    const { story, gameplayId, captionStyle, captionColor, voice, duration, watermark } = job.params;
 
     /* 1 ─ Prepare temp directory */
     stage(jobId, 'preparing_story', 5);
@@ -132,6 +132,7 @@ async function renderPipeline(job) {
         subtitlePath: assPath,
         outputPath: finalPath,
         durationS: trueDurationS,
+        watermark: watermark,
         onProgress: (pct) => stage(jobId, 'compositing', 70 + Math.floor(pct * 0.25)),
         signal: abortController.signal
       });

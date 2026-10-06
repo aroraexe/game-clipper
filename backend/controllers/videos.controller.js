@@ -308,6 +308,7 @@ exports.createJob = async (req, res, next) => {
       captionColor: captionColor || '#ffffff',
       voice:        voice        || 'default',
       duration:     dur          || 45,
+      watermark:    plan.watermark,
       userId:       req.user.uid,
       idempotencyKey: idempotencyKey || null,
     });

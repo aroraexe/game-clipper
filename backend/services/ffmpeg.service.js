@@ -163,7 +163,7 @@ function generateMockVideo({ durationS, outputPath }) {
  * compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, durationS })
  * → Promise<string>  outputPath
  * ──────────────────────────────────────────────────────────────────────────── */
-function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, durationS, onProgress, signal }) {
+function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, durationS, onProgress, signal, watermark }) {
   const gp  = validatePath(gameplayPath, 'Gameplay segment');
   const aud = validatePath(audioPath,    'Narration audio');
   // subtitles validated separately — path may contain special chars
@@ -187,16 +187,25 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
       .input(gp)
 
       // Input 1: narration audio
-      .input(aud)
+      .input(aud);
 
-      .complexFilter([
+      const filterChain = [
         // 1) Scale & crop gameplay to exactly 1080×1920 (9:16)
-        `[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase,` +
-        `crop=${VIDEO_W}:${VIDEO_H},setsar=1[vscaled]`,
-
+        `[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase,crop=${VIDEO_W}:${VIDEO_H},setsar=1[vscaled]`,
+        
         // 2) Burn ASS subtitles into video
-        `[vscaled]ass='${assEscaped}'[vout]`
-      ])
+        watermark
+          ? `[vscaled]ass='${assEscaped}'[vsub]`
+          : `[vscaled]ass='${assEscaped}'[vout]`
+      ];
+
+      if (watermark) {
+        // 3) Add watermark
+        // Using Arial or a generic font. x=w-tw-30 aligns right, y=30 aligns top.
+        filterChain.push(`[vsub]drawtext=text='StoryPlay.app':fontcolor=white@0.5:fontsize=32:x=w-tw-30:y=40[vout]`);
+      }
+
+      cmd.complexFilter(filterChain)
 
       // Map final video + mixed audio
       .outputOptions([
