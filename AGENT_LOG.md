@@ -279,3 +279,10 @@ Do not modify other agents' entries. Newest entries at the bottom.
 - **Changes:** Installed ffmpeg-static and ffprobe-static npm packages and configured ffmpeg.service.js to seamlessly fall back to these static binaries if the environment variables are missing. This allows local Windows renders to work out of the box without system PATH installations. Fixed a class name typo in app.js toast() that caused notifications to remain on screen forever.
 - **Verified:** Tested toast disappearance and pushed to GitHub (5e1593c).
 - **Notes:** Local environment rendering should now correctly find ffmpeg/ffprobe.
+
+### 2026-10-07 03:50 — Antigravity
+- **Task:** Prevent Railway deployment from crashing on missing secrets
+- **Files:** backend/server.js
+- **Changes:** Removed the process.exit(1) call in server.js during authPreflight() checks. Now, if the user hasn't configured Firebase or output signing secrets in Railway, the server will still boot (so the deployment succeeds) but API endpoints will safely return 500/503 errors until the user fixes their environment variables.
+- **Verified:** Pushed to GitHub (b523279).
+- **Notes:** Fixes Railway crash loop.

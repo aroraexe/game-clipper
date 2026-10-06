@@ -88,7 +88,6 @@ app.use('/api', (req, res, next) => req.method === 'POST' ? postLimiter(req, res
 // silently failed to log anyone out.
 const SESSION_COOKIE_DEFAULTS = {
   httpOnly: true,
-  secure:   process.env.NODE_ENV === 'production',
   sameSite: 'lax',
   path:     '/',
 };
@@ -111,7 +110,10 @@ app.get('/app', async (req, res, next) => {
   } catch (err) {
     console.error("[Auth] /app redirecting to /signin because verifyFirebaseToken threw:", err.message);
     if (err.status === 503) return next(err);   // server misconfigured — don't hide it
-    res.clearCookie('sessionToken', SESSION_COOKIE_DEFAULTS);
+    res.clearCookie('sessionToken', {
+      ...SESSION_COOKIE_DEFAULTS,
+      secure: process.env.NODE_ENV === 'production' && req.secure
+    });
     return res.redirect('/signin');
   }
 });
@@ -160,14 +162,12 @@ app.post('/api/auth/session', async (req, res, next) => {
     // granting a 200 OK and then bouncing the user in a redirect loop on /app.
     await verifyFirebaseToken(idToken);
 
-    res.cookie('sessionToken', idToken, {
+    const cookieOptions = {
       ...SESSION_COOKIE_DEFAULTS,
-      // A Firebase ID token expires after 1 hour. A 24h cookie outlives the
-      // credential it carries, so users were silently bounced to /signin at the
-      // 1h mark with no explanation. Match the cookie to the token; a real fix
-      // is refreshing the token client-side (see AGENT_LOG notes).
+      secure: process.env.NODE_ENV === 'production' && req.secure,
       maxAge: 60 * 60 * 1000,
-    });
+    };
+    res.cookie('sessionToken', idToken, cookieOptions);
     console.log("Cookie set successfully, returning 200 OK");
     res.sendStatus(200);
   } catch (err) {
@@ -178,7 +178,10 @@ app.post('/api/auth/session', async (req, res, next) => {
 });
 
 app.post('/api/auth/logout', (req, res) => {
-  res.clearCookie('sessionToken', SESSION_COOKIE_DEFAULTS);
+  res.clearCookie('sessionToken', {
+    ...SESSION_COOKIE_DEFAULTS,
+    secure: process.env.NODE_ENV === 'production' && req.secure
+  });
   res.sendStatus(200);
 });
 
