@@ -177,3 +177,24 @@ Do not modify other agents' entries. Newest entries at the bottom.
 - **Changes:** Moved the `NVIDIA_API_KEY` presence check into the retry loop so that an unset API key correctly triggers the fallback dummy story instead of throwing a hard 500 error and breaking the frontend flow.
 - **Verified:** Ensured structure allows `try/catch` to properly intercept the `Error` and trigger the fallback path.
 - **Notes:** Now users can create videos without an NVIDIA API key via the fallback story feature.
+
+### 2026-10-07 02:52 — Antigravity
+- **Task:** Push all accumulated changes to GitHub
+- **Files:** (all tracked files — 59 files changed)
+- **Changes:** Staged all modified/untracked files and committed with a comprehensive message summarising all multi-agent work since the last push. Pushed to `origin/main` (cce498a..0fa225f).
+- **Verified:** `git push` exited 0; GitHub confirmed `main -> main`.
+- **Notes:** None.
+
+### 2026-10-07 02:55 — Antigravity
+- **Task:** Fix NVIDIA NIM story generation API calls
+- **Files:** backend/controllers/videos.controller.js, backend/services/story.service.js
+- **Changes:** (1) Replaced non-existent model `nvidia/nemotron-3-ultra-550b-a55b` with the real NIM model `nvidia/llama-3.1-nemotron-70b-instruct` in both files. (2) Increased AbortController timeout from 10 s to 45 s — 70B models take longer to respond. (3) Increased `max_tokens` from 500 to 1024 to prevent stories being cut off mid-sentence.
+- **Verified:** Manual code review; pushed to GitHub (0fa225f..b69c6b7).
+- **Notes:** NVIDIA_API_KEY is not set in the local `.env` — the fallback story still triggers locally. Set the key in Railway/Render env vars to enable live generation.
+
+### 2026-10-07 03:00 — Antigravity
+- **Task:** Confirm working NVIDIA NIM model and test live story generation
+- **Files:** backend/controllers/videos.controller.js, backend/services/story.service.js
+- **Changes:** Tested all available models against the API key. `nvidia/nemotron-3-ultra-550b-a55b` is the only confirmed working model — reverted both files back to it. Retained the 45s timeout and 1024 max_tokens improvements from the previous fix. Verified full story generation works end-to-end.
+- **Verified:** Live API test returned a full story (201 tokens) successfully.
+- **Notes:** `nvidia/llama-3.1-nemotron-70b-instruct` and most other listed models return 404 for this account — the original model is the correct one to use.
