@@ -28,3 +28,6 @@ Thumbs.db
 tts_test.*
 test_*
 test-*
+
+storage/jobStore.json
+

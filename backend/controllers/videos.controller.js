@@ -11,7 +11,14 @@ const { getRequestToken, verifyFirebaseToken } = require('../middleware/auth.mid
 const OUTPUT_URL_TTL_MS = 15 * 60 * 1000;
 
 function outputSigningSecret() {
-  return process.env.OUTPUT_URL_SECRET || process.env.FIREBASE_SERVICE_ACCOUNT_BASE64 || process.env.SESSION_SECRET || 'dev-output-url-secret';
+  const secret = process.env.OUTPUT_URL_SECRET || process.env.SESSION_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('CRITICAL: OUTPUT_URL_SECRET must be set in production to secure video downloads.');
+    }
+    return 'dev-output-url-secret';
+  }
+  return secret;
 }
 
 function signOutputUrl(jobId, userId, expiresAt) {

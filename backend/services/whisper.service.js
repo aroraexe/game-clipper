@@ -18,7 +18,7 @@
 
 const fs   = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 /**
  * transcribe(audioPath, outputDir, cleanStory)
@@ -36,8 +36,9 @@ async function transcribe(audioPath, _outputDir, cleanStory) {
   /* ── 1. Get real audio duration via ffprobe ─────────────────────── */
   let durationS = 10.0;
   try {
-    const cmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`;
-    const out  = execSync(cmd, { encoding: 'utf8' }).trim();
+    const ffprobeBin = process.env.FFPROBE_PATH || 'ffprobe';
+    const args = ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', audioPath];
+    const out  = execFileSync(ffprobeBin, args, { encoding: 'utf8' }).trim();
     durationS  = parseFloat(out) || 10.0;
   } catch (e) {
     console.warn('[Timing] Could not read audio duration, defaulting to 10s');

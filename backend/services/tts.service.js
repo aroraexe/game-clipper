@@ -51,9 +51,9 @@ async function synthesize(text, outputPath, voice = 'onyx') {
 
   // Convert MP3 to clean WAV asynchronously (don't block the worker event loop)
   await new Promise((resolve, reject) => {
-    const { exec } = require('child_process');
+    const { execFile } = require('child_process');
     const ffmpegBin = process.env.FFMPEG_PATH || 'ffmpeg';
-    exec(`"${ffmpegBin}" -i "${mp3Path}" -c:a pcm_s16le -ar 44100 "${outputPath}" -y`, (err) => {
+    execFile(ffmpegBin, ['-i', mp3Path, '-c:a', 'pcm_s16le', '-ar', '44100', outputPath, '-y'], (err) => {
       if (err) reject(new Error(`TTS WAV conversion failed: ${err.message}`));
       else resolve();
     });

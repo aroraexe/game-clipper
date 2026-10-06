@@ -89,11 +89,15 @@ app.use('/api', (req, res, next) => req.method === 'POST' ? postLimiter(req, res
 app.get('/app', async (req, res, next) => {
   try {
     const token = getRequestToken(req);
-    if (!token) return res.redirect('/signin');
+    if (!token) {
+      console.log("[Auth] /app redirecting to /signin because no token found in cookies.");
+      return res.redirect('/signin');
+    }
 
     await verifyFirebaseToken(token);   // throws on invalid/expired
     return res.sendFile(path.join(__dirname, '../frontend/app.html'));
   } catch (err) {
+    console.error("[Auth] /app redirecting to /signin because verifyFirebaseToken threw:", err.message);
     if (err.status === 503) return next(err);   // server misconfigured — don't hide it
     res.clearCookie('sessionToken', { path: '/' });
     return res.redirect('/signin');
@@ -130,7 +134,7 @@ app.use(express.static(path.join(__dirname, '../frontend'), {
 }));
 
 // Session Login Route
-app.post('/api/auth/session', (req, res) => {
+app.post('/api/auth/session', async (req, res, next) => {
   const { idToken } = req.body;
   console.log("Received login request to /api/auth/session");
   if (!idToken) {
@@ -138,16 +142,27 @@ app.post('/api/auth/session', (req, res) => {
     return res.status(400).send('Missing idToken');
   }
 
-  const isProduction = process.env.NODE_ENV === 'production';
-  res.cookie('sessionToken', idToken, {
-    maxAge:   24 * 60 * 60 * 1000,
-    httpOnly: true,
-    secure:   isProduction,   // HTTPS-only in prod
-    sameSite: 'lax',
-    path:     '/',
-  });
-  console.log("Cookie set successfully, returning 200 OK");
-  res.sendStatus(200);
+  try {
+    // CRITICAL FIX: Verify the token BEFORE setting it as a session cookie
+    // This catches project mismatches or expired tokens instantly, instead of
+    // granting a 200 OK and then bouncing the user in a redirect loop on /app.
+    await verifyFirebaseToken(idToken);
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('sessionToken', idToken, {
+      maxAge:   24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure:   isProduction,   // HTTPS-only in prod
+      sameSite: 'lax',
+      path:     '/',
+    });
+    console.log("Cookie set successfully, returning 200 OK");
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("[Auth] Session login failed verification:", err.message);
+    if (err.status === 503) return next(err);
+    res.status(401).send('Unauthorized: Invalid token');
+  }
 });
 
 app.post('/api/auth/logout', (req, res) => {
