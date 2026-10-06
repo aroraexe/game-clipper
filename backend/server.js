@@ -223,10 +223,10 @@ async function start() {
   if (problems.length > 0) {
     for (const p of problems) console.error(`[Startup] CONFIG ERROR: ${p}`);
     if (IS_PROD) {
-      console.error('[Startup] Refusing to start in production with the above problems.');
-      process.exit(1);
+      console.error('[Startup] Running in production with missing secrets! API routes will return 503/500 errors until configured in your environment variables.');
+    } else {
+      console.warn('[Startup] Continuing in non-production despite the problems above.');
     }
-    console.warn('[Startup] Continuing in non-production despite the problems above.');
   }
   if (DEV_AUTH_ENABLED) {
     console.warn('[Startup] ⚠️  DEV AUTH MOCK IS ENABLED — all requests resolve to "dev-user". Never do this in production.');
