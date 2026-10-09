@@ -230,7 +230,7 @@ async function loadGameplay() {
     card.className = 'gameplay-card' + (item.available ? '' : ' gameplay-card--unavailable');
     card.dataset.id = item.id;
     card.innerHTML = `
-      <img src="${GAMEPLAY_IMAGES[item.id] || 'bg-minecraft.png'}" alt="${item.name}" class="gameplay-card__bg">
+      <video src="card-media/card-${item.id}.mp4" aria-label="${item.name}" class="gameplay-card__bg" loop muted playsinline autoplay></video>
       <div class="gameplay-card__overlay"></div>
       <div class="gameplay-card__status ${item.available ? 'gameplay-card__status--ok' : 'gameplay-card__status--missing'}">
         ${item.available 

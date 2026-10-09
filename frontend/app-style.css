@@ -58,6 +58,7 @@ body {
 
 /* ── Header ── */
 .app-header {
+  position: relative; z-index: 100;
   width: 100%; max-width: 900px;
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 2rem;
@@ -331,7 +332,7 @@ body {
 /* ── Gameplay grid ── */
 .gameplay-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.2rem; margin-bottom: 1.5rem;
 }
 .gameplay-loading {
@@ -738,6 +739,7 @@ body {
 @media (max-width: 700px) {
   .step-layout { grid-template-columns:1fr; }
   .step-preview { display:none; }
+  .gameplay-grid { grid-template-columns:repeat(2,1fr); }
   .caption-grid { grid-template-columns:repeat(2,1fr); }
   .voice-grid { grid-template-columns:repeat(2,1fr); }
   .step-title { font-size:1.75rem; }
