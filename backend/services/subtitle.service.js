@@ -55,7 +55,7 @@ const PRESETS = {
     alignment:    5,
     marginV:      0,
     highlight:    true,
-    highlightColor: '&H88FFFFFF', // White Glow for highlight
+    highlightColor: '&H0000FFFF', // Yellow for highlight
     wordsPerLine: 3,
   },
   'word-pop': {
@@ -203,7 +203,10 @@ function buildHighlightedChunk(chunk, lineStart, lineEnd, preset) {
     // Build karaoke-style: highlighted word in Highlight style, others in Default
     const parts = chunk.map((cw, ci) => {
       const word = sanitizeAssText(cw.word);
-      if (ci === wi) return `{\\rHighlight}${word}{\\rDefault}`;
+      if (ci === wi) {
+        const hc = preset.highlightColor || '&H0000FFFF';
+        return `{\\c${hc}&\\fscx110\\fscy110}${word}{\\c\\fscx100\\fscy100}`;
+      }
       return word;
     }).join(' ');
 

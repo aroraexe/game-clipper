@@ -1,4 +1,5 @@
-const admin = require('firebase-admin');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
 
 let isFirebaseInitialized = false;
 
@@ -31,8 +32,8 @@ try {
   // Set FIREBASE_SERVICE_ACCOUNT_BASE64 in your .env
   if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
     const serviceAccount = JSON.parse(Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString());
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+    initializeApp({
+      credential: cert(serviceAccount)
     });
     isFirebaseInitialized = true;
   } else {
@@ -76,7 +77,7 @@ async function verifyFirebaseToken(token) {
     throw err;
   }
 
-  return admin.auth().verifyIdToken(token);
+  return getAuth().verifyIdToken(token);
 }
 
 /**
@@ -100,13 +101,13 @@ function authPreflight() {
     // Narration is the product. Catch an unusable TTS configuration at boot
     // rather than failing every render after a customer has already paid.
     const tts = require('../services/tts.service');
-    const ttsCfg = tts.describeConfig();
+    const ttsCfg = tts.describeConfigSync();
     if (ttsCfg.error) {
       problems.push(`TTS is not usable: ${ttsCfg.error}`);
     } else if (ttsCfg.provider === 'edge') {
       problems.push('TTS_PROVIDER=edge in production — Microsoft Edge read-aloud is unlicensed for commercial use.');
-    } else if (!process.env.OPENAI_API_KEY) {
-      problems.push('TTS_PROVIDER is openai (the default) but OPENAI_API_KEY is not set — every render would fail.');
+    } else if (ttsCfg.provider === 'openai' && !process.env.OPENAI_API_KEY) {
+      problems.push('TTS_PROVIDER=openai but OPENAI_API_KEY is not set — every render would fail.');
     }
   } else if (!isFirebaseInitialized && process.env.ALLOW_DEV_AUTH !== 'true') {
     problems.push(
@@ -136,4 +137,23 @@ const requireAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { requireAuth, getRequestToken, verifyFirebaseToken, authPreflight, DEV_AUTH_ENABLED };
+/**
+ * Populates req.user when a valid token is present, otherwise continues anonymously.
+ *
+ * Used by pages a signed-out visitor must still render (the pricing page needs to
+ * know which payment buttons to draw). A 503 is deliberately re-thrown rather than
+ * treated as "anonymous": that means the server is misconfigured, and swallowing it
+ * would show a pricing page with no buy buttons and no error anywhere.
+ */
+const optionalAuth = async (req, res, next) => {
+  const token = getRequestToken(req);
+  if (!token) return next();
+  try {
+    req.user = await verifyFirebaseToken(token);
+  } catch (error) {
+    if (error.status === 503) return next(error);
+  }
+  return next();
+};
+
+module.exports = { requireAuth, optionalAuth, getRequestToken, verifyFirebaseToken, authPreflight, DEV_AUTH_ENABLED };

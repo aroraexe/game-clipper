@@ -2,6 +2,9 @@
    StoryPlay Landing Page — Refined Visual System
 ═══════════════════════════════════════════════════ */
 
+[hidden] { display: none !important; }
+
+
 /* Floating animations */
 @keyframes floatMain {
   0%, 100% { transform: translate(-50%, -50%) rotate(5deg) translateY(0px); }
@@ -70,8 +73,48 @@ body::after {
 }
 
 /* ─────────────────────────────────────────────────
+   ACCOUNT MENU (shared by the landing nav)
+   ───────────────────────────────────────────────── */
+.user-menu { position: relative; }
+.user-menu-btn {
+  background: none; border: none; cursor: pointer; color: #fff;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0.25rem; border-radius: 999px;
+}
+.user-menu-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.user-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 14px; text-transform: uppercase;
+}
+.user-avatar--brand { background: #7A52FF; }
+.user-dropdown {
+  display: none;
+  position: absolute; top: 100%; right: 0; margin-top: 8px;
+  background: rgba(15, 15, 20, 0.95);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 8px; min-width: 180px;
+  backdrop-filter: blur(10px);
+  z-index: 400; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.user-dropdown.open { display: block; }
+.user-dropdown-head {
+  padding: 8px; font-size: 13px; color: rgba(255,255,255,0.7);
+  border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px;
+  word-break: break-all;
+}
+.user-menu-item {
+  width: 100%; text-align: left; padding: 8px; margin-bottom: 4px;
+  background: rgba(255,255,255,0.05); border: 1px solid transparent;
+  color: #fff; cursor: pointer; border-radius: 6px;
+  display: flex; align-items: center; gap: 8px; font-size: 14px;
+  font-family: inherit; transition: background 0.2s;
+}
+.user-menu-item:hover { background: rgba(255,255,255,0.1); }
+
+/* ─────────────────────────────────────────────────
    NAVBAR
-───────────────────────────────────────────────── */
+   ───────────────────────────────────────────────── */
 .navbar {
   position: fixed; top:0; width:100%; height: var(--nav-h);
   background: rgba(9, 9, 14, 0.85);
@@ -82,6 +125,7 @@ body::after {
   display: flex; align-items: center;
 }
 .nav-container {
+  position: relative;
   max-width: 1380px; margin: 0 auto; padding: 0 2.5rem;
   width: 100%; height: 100%;
   display: flex; align-items: center; justify-content: space-between;
@@ -110,6 +154,13 @@ body::after {
 .nav-links a:hover { color: #fff; }
 
 .nav-actions { display:flex; align-items:center; gap:0.8rem; flex-shrink:0; }
+
+.nav-toggle {
+  display: none;
+  background: none; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+  color: #fff; cursor: pointer; padding: 6px;
+}
+.nav-toggle:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 /* Buttons */
 .btn {
@@ -151,7 +202,9 @@ body::after {
   display: grid;
   grid-template-columns: 48% 52%;
   align-items: center;
-  height: 690px;        /* fixed desktop height */
+  /* min-height, not height: a fixed 690px clipped the phone cluster on short
+     laptop viewports (e.g. 1366x600) instead of letting the page scroll. */
+  min-height: 690px;
   padding-top: var(--nav-h);
   gap: 1rem;
 }
@@ -307,16 +360,21 @@ body::after {
   animation-delay: 1.6s;
 }
 
-/* Expand arrows between cards */
-.expand-arrow {
-  position: absolute;
-  z-index: 20;
-  color: rgba(255,255,255,0.3);
-  font-size: 1.1rem;
-  letter-spacing: -2px;
+/* .expand-arrow removed: the arrows were deleted from index.html by an earlier
+   pass ("Removed confusing expand hint arrows") and the CSS was left behind as a
+   dead selector. */
+
+/* prefers-reduced-motion: the hero phones and the typewriter caret are the two
+   things that move on this page. Freezing them stops the compositor from running
+   three infinite transforms forever. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .main-phone, .left-card, .right-card, .preview-phone { animation: none !important; }
+  .game-card, .game-card img, .game-card video,
+  .floating-card { transition: none !important; }
+  .game-card:hover, .game-card:hover video { transform: none; }
+  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
-.expand-arrow.arr-left  { left: 220px; top: 50%; transform: translateY(-50%); }
-.expand-arrow.arr-right { right: 210px; top: 50%; transform: translateY(-50%); }
 
 /* ─────────────────────────────────────────────────
    HOW IT WORKS
@@ -377,16 +435,15 @@ body::after {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 1.65rem; font-weight: 700;
 }
-.games-grid {
+.games-row {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.9rem;
 }
 .game-card {
   position: relative; border-radius: 14px; overflow: hidden;
   aspect-ratio: 4/3;
   border: 1px solid var(--border);
-  cursor: pointer;
   transition: transform 0.28s ease, box-shadow 0.28s ease;
 }
 .game-card img, .game-card video {
@@ -406,10 +463,13 @@ body::after {
 /* ─────────────────────────────────────────────────
    NEW SECTIONS (Features, Examples, FAQ)
 ───────────────────────────────────────────────── */
-.features-section, .games-section, .examples-section, .faq-section { 
-  margin-bottom: 5.5rem; 
-  content-visibility: auto; 
-  contain-intrinsic-size: 500px;
+/* content-visibility skips rendering work for offscreen sections, but a single
+   hard-coded 500px intrinsic size made the scrollbar jump as each section
+   resolved to its real height. Per-axis sizes remove most of that. */
+.features-section, .games-section, .examples-section, .faq-section {
+  margin-bottom: 5.5rem;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
 }
 
 .features-grid {
@@ -435,20 +495,34 @@ body::after {
   .main-phone { width:220px; height:440px; }
   .left-card  { width:165px; height:325px; }
   .right-card { width:155px; height:305px; }
-  .games-grid { grid-template-columns: repeat(3, 1fr); }
+  .games-row { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 860px) {
   .hero {
-    grid-template-columns: 1fr; height:auto;
+    grid-template-columns: 1fr; min-height:auto;
     padding-top:80px; padding-bottom:2rem; text-align:center;
   }
   .hero-left { align-items:center; padding-right:0; }
-  .hero-pill { align-self:center; }
-  .hero-features { justify-content:center; flex-wrap:wrap; gap:1rem; }
   .hero-right { height:480px; width:100%; }
   .hero-phone-container { width:420px; height:460px; margin:0 auto; }
-  .nav-links { display:none; }
+
+  /* Mobile nav: the links used to be display:none below 860px with no
+     replacement, so Features/Examples/FAQ were unreachable on a phone. */
+  .nav-toggle { display: flex; }
+  .nav-links {
+    display: none;
+    position: absolute; top: var(--nav-h); left: 0; right: 0;
+    flex-direction: column; align-items: flex-start; gap: 0;
+    background: rgba(9,9,14,0.98);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 0.5rem 2.5rem 1rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { padding: 0.75rem 0; width: 100%; }
+
   .how-it-works { grid-template-columns:1fr; gap:1.25rem; }
   .step-arrow { transform:rotate(90deg); align-self:center; }
   .features-grid, .examples-grid, .faq-grid { grid-template-columns: 1fr; }
@@ -456,10 +530,11 @@ body::after {
 
 @media (max-width: 520px) {
   .page { padding:0 1.1rem; }
+  .nav-links { padding-left:1.1rem; padding-right:1.1rem; }
   .hero-phone-container { width:280px; height:380px; }
   .main-phone { width:160px; height:320px; }
   .left-card, .right-card { display:none; }
-  .games-grid { grid-template-columns:repeat(2, 1fr); }
+  .games-row { grid-template-columns: repeat(2, 1fr); }
   .hero-title { font-size:2.2rem; letter-spacing:-1px; }
 }
 
@@ -531,16 +606,43 @@ body::after {
 .price-panel li { color: var(--muted); font-size: 0.95rem; padding-left: 1.5rem; position: relative; }
 .price-panel li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 7px; height: 7px; border-radius: 50%; background: var(--text); }
 
-/* Examples grid — simple ordered layout */
-.examples-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; max-width: 560px; margin: 0 auto; }
-.example-card { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--card-bg); }
+/* Examples grid — 1x4 on desktop, folding down to 2x2 then 1x1.
+   The two media queries used to sit AFTER the 860px block that also targets
+   .examples-grid, so at 600-860px the later `max-width: 1160px` rule won and
+   overrode the 1-column intent with a 2-column grid. Both breakpoints now
+   live together, in descending order. */
+.examples-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem; max-width: 1160px; margin: 0 auto;
+}
+.example-card {
+  position: relative; margin: 0; padding: 0;
+  border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; background: var(--card-bg);
+}
 .example-card video { width: 100%; display: block; aspect-ratio: 9/16; object-fit: contain; background: #000; }
+.example-card figcaption {
+  position: absolute; bottom: 15px; left: 15px; right: 15px;
+  background: rgba(0,0,0,0.6); padding: 8px 12px; border-radius: 8px;
+  font-weight: 600; font-size: 0.85rem; text-align: left;
+  backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1);
+}
 .example-meta { padding: 0.85rem 1rem 1rem; }
-.example-tag { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); display: block; margin-bottom: 0.35rem; }
+.example-tag {
+  font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--muted); display: block; margin-bottom: 0.35rem;
+}
 .example-meta strong { font-size: 0.92rem; font-weight: 600; }
 
+@media (max-width: 1160px) {
+  .examples-grid { grid-template-columns: repeat(2, 1fr); max-width: 560px; }
+}
 @media (max-width: 860px) {
-  .examples-grid { grid-template-columns: 1fr; max-width: 280px; }
+  /* Folded to one column here — previously lost to the 1160px rule above. */
+  .examples-grid { grid-template-columns: 1fr; max-width: 320px; }
+}
+@media (max-width: 600px) {
+  .examples-grid { max-width: 280px; }
 }
 
 /* Footer used on every subpage */
