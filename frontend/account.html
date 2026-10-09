@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account — StoryPlay</title>
+  <meta name="description" content="Your StoryPlay plan, usage, and billing.">
+  <script>
+    if (!localStorage.getItem('userEmail')) {
+      window.location.href = '/signin';
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="landing.css?v=3">
+  <script src="/billing.js" defer></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-left">
+      <a href="/" class="nav-logo" style="text-decoration:none;color:inherit;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="#FFFFFF"/>
+        </svg>
+        <span>StoryPlay</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/app">Create</a>
+        <a href="/account" aria-current="page">Account</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="nav-actions">
+      <a href="/app" class="btn btn-primary">New video</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page subpage">
+
+  <div class="subpage-head">
+    <h1>Account</h1>
+    <p id="account-email">Loading…</p>
+  </div>
+
+  <div class="subpage-section doc-grid">
+    <div class="glass-card price-panel">
+      <h2 style="font-size:1.4rem;font-weight:700;">Plan</h2>
+      <div class="amount" id="account-plan-name">—</div>
+      <div class="per" id="account-plan-status">—</div>
+      <ul id="account-plan-perks">
+        <li>Loading plan details…</li>
+      </ul>
+      <div id="account-billing-actions" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
+      <p id="account-billing-note" style="margin-top:0.9rem;font-size:0.85rem;color:rgba(255,255,255,0.55);"></p>
+    </div>
+
+    <div class="glass-card price-panel">
+      <h2 style="font-size:1.4rem;font-weight:700;">Usage today</h2>
+      <div class="amount" id="account-usage-count">—</div>
+      <div class="per" id="account-usage-label">renders in the last 24 hours</div>
+      <ul>
+        <li id="account-usage-remaining">—</li>
+        <li>Limits reset on a rolling 24-hour window, not at midnight.</li>
+      </ul>
+      <a href="/app" class="btn btn-ghost btn-large">Create a video</a>
+    </div>
+  </div>
+
+  <div class="subpage-section">
+    <h2>Recent videos</h2>
+    <div class="glass-card doc-card">
+      <div id="account-library" class="account-library">
+        <p style="color:var(--muted);">Loading your library…</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="subpage-footer">
+    <nav>
+      <a href="/">Home</a>
+      <a href="/app">Create</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </nav>
+    <span class="copy">StoryPlay</span>
+  </div>
+
+</div>
+
+<style>
+.account-library { display: flex; flex-direction: column; gap: 0.75rem; }
+.account-job {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.account-job:last-child { border-bottom: none; padding-bottom: 0; }
+.account-job-meta { min-width: 0; }
+.account-job-title {
+  font-weight: 600; font-size: 0.95rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.account-job-sub { color: var(--muted); font-size: 0.82rem; margin-top: 0.2rem; }
+.account-job-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+.account-job-actions .btn { padding: 0.45rem 0.8rem; font-size: 0.8rem; }
+.status-pill {
+  display: inline-block; margin-right: 0.4rem;
+  padding: 0.1rem 0.45rem; border-radius: 4px;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em;
+  background: rgba(255,255,255,0.08); color: #fff;
+  text-transform: uppercase;
+}
+.status-pill--completed { background: rgba(255,255,255,0.16); }
+.status-pill--failed { background: rgba(255,80,80,0.2); color: #ffb4b4; }
+.status-pill--processing,
+.status-pill--queued { background: rgba(255,255,255,0.1); }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  function $(id) { return document.getElementById(id); }
+
+  function fmtExpiry(iso) {
+    if (!iso) return '';
+    var ms = new Date(iso).getTime() - Date.now();
+    if (ms <= 0) return 'expires soon';
+    var mins = Math.round(ms / 60000);
+    if (mins < 60) return 'expires in ' + mins + 'm';
+    var hours = Math.round(mins / 60);
+    if (hours < 48) return 'expires in ' + hours + 'h';
+    return 'expires in ' + Math.round(hours / 24) + 'd';
+  }
+
+  function say(msg) {
+    var note = $('account-billing-note');
+    if (note) note.textContent = msg || '';
+  }
+
+  function renderPlan(me, cfg) {
+    var plan = me.plan || {};
+    var sub = me.subscription || {};
+    var isPro = plan.name === 'pro';
+    $('account-plan-name').textContent = isPro ? 'Pro' : 'Free';
+
+    var statusBits = [];
+    if (sub.status && sub.status !== 'none') statusBits.push(sub.status);
+    if (sub.cancelAtPeriodEnd) statusBits.push('cancels at period end');
+    if (sub.currentPeriodEnd) {
+      try {
+        statusBits.push('renews/ends ' + new Date(sub.currentPeriodEnd).toLocaleDateString());
+      } catch (_) {}
+    }
+    $('account-plan-status').textContent = statusBits.length
+      ? statusBits.join(' · ')
+      : (isPro ? 'monthly subscription' : 'no card on file');
+
+    $('account-plan-perks').innerHTML =
+      '<li>' + plan.maxJobsPerDay + ' renders / 24h</li>' +
+      '<li>' + plan.maxActiveJobs + ' at a time</li>' +
+      '<li>Stories up to ' + plan.maxStoryChars + ' characters</li>' +
+      '<li>' + (plan.watermark ? 'Watermark on free exports' : 'No watermark') + '</li>' +
+      '<li>Videos kept ' + (isPro ? '7 days' : '1 hour') + '</li>';
+
+    var actions = $('account-billing-actions');
+    actions.innerHTML = '';
+    var live = (cfg.providers || []).filter(function (p) { return p.enabled; });
+
+    if (!isPro) {
+      if (!live.length) {
+        say('Checkout is not configured yet. Use Pricing once payment is live.');
+        var link = document.createElement('a');
+        link.href = '/pricing';
+        link.className = 'btn btn-primary btn-large';
+        link.textContent = 'View pricing';
+        actions.appendChild(link);
+        return;
+      }
+      live.forEach(function (provider) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-primary btn-large';
+        btn.textContent = 'Upgrade with ' + provider.label;
+        btn.addEventListener('click', function () {
+          btn.disabled = true;
+          var original = btn.textContent;
+          btn.textContent = 'Opening checkout…';
+          window.StoryPlayBilling.startCheckout(provider.provider, 'pro', {
+            onSuccess: function () { window.location.href = '/account?upgraded=1'; },
+            onDismiss: function () { btn.disabled = false; btn.textContent = original; },
+            onError: function (err) {
+              btn.disabled = false;
+              btn.textContent = original;
+              say(err.message || 'Could not start checkout.');
+            }
+          }).catch(function (err) {
+            btn.disabled = false;
+            btn.textContent = original;
+            say(err.message || 'Could not start checkout.');
+          });
+        });
+        actions.appendChild(btn);
+      });
+      return;
+    }
+
+    var manage = document.createElement('button');
+    manage.type = 'button';
+    manage.className = 'btn btn-ghost btn-large';
+    manage.textContent = 'Manage billing';
+    manage.addEventListener('click', function () {
+      manage.disabled = true;
+      window.StoryPlayBilling.openPortal(sub.provider || 'stripe')
+        .then(function (result) {
+          if (result && result.cancelledAtPeriodEnd) {
+            say('Cancelled. You keep Pro until the period ends.');
+            setTimeout(function () { window.location.reload(); }, 1000);
+          }
+        })
+        .catch(function (err) {
+          manage.disabled = false;
+          say(err.message || 'Could not open billing.');
+        });
+    });
+    actions.appendChild(manage);
+  }
+
+  function renderUsage(me) {
+    var u = me.usage || {};
+    $('account-usage-count').textContent = (u.jobsToday || 0) + ' / ' + (u.maxJobsPerDay || '—');
+    $('account-usage-remaining').textContent =
+      (u.remainingToday || 0) + ' renders left in this window';
+  }
+
+  function renderLibrary(jobs) {
+    var root = $('account-library');
+    if (!jobs.length) {
+      root.innerHTML = '<p style="color:var(--muted);">No videos yet. <a href="/app">Create your first one</a>.</p>';
+      return;
+    }
+    root.innerHTML = '';
+    jobs.forEach(function (job) {
+      var row = document.createElement('div');
+      row.className = 'account-job';
+      var title = job.storyPreview || (job.gameplayId || 'Video');
+      var expiry = job.status === 'completed' ? fmtExpiry(job.expiresAt) : '';
+      row.innerHTML =
+        '<div class="account-job-meta">' +
+          '<div class="account-job-title">' + escapeHtml(title) + '</div>' +
+          '<div class="account-job-sub">' +
+            '<span class="status-pill status-pill--' + escapeHtml(job.status) + '">' + escapeHtml(job.status) + '</span>' +
+            (job.gameplayId ? escapeHtml(job.gameplayId) + ' · ' : '') +
+            new Date(job.createdAt).toLocaleString() +
+            (expiry ? ' · ' + expiry : '') +
+            (job.error ? ' · ' + escapeHtml(job.error) : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="account-job-actions"></div>';
+      var actions = row.querySelector('.account-job-actions');
+      if (job.downloadUrl) {
+        var a = document.createElement('a');
+        a.className = 'btn btn-primary';
+        a.href = job.downloadUrl;
+        a.textContent = 'Download';
+        a.setAttribute('download', 'storyplay_' + job.jobId + '.mp4');
+        actions.appendChild(a);
+      }
+      root.appendChild(row);
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function boot() {
+    var email = localStorage.getItem('userEmail') || '';
+    $('account-email').textContent = email || 'Signed in';
+
+    var B = window.StoryPlayBilling;
+    if (!B) {
+      say('Billing script failed to load.');
+      return;
+    }
+
+    Promise.all([B.api('/api/me'), B.loadConfig()])
+      .then(function (pair) {
+        var me = pair[0];
+        var cfg = pair[1];
+        if (me.email) $('account-email').textContent = me.email;
+        renderPlan(me, cfg);
+        renderUsage(me);
+        if (new URLSearchParams(location.search).get('upgraded')) {
+          history.replaceState({}, '', '/account');
+          say(me.plan && me.plan.name === 'pro'
+            ? 'Welcome to Pro — videos are kept for 7 days.'
+            : 'Payment received. Refresh if Pro is not showing yet.');
+        }
+      })
+      .catch(function (err) {
+        say(err.message || 'Could not load account.');
+      });
+
+    B.api('/api/videos')
+      .then(function (data) { renderLibrary(data.jobs || []); })
+      .catch(function () {
+        $('account-library').innerHTML =
+          '<p style="color:var(--muted);">Could not load your library. Try again from the app.</p>';
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>
+</body>
+</html>

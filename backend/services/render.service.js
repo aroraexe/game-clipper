@@ -45,7 +45,35 @@ async function renderPipeline(job) {
 
   try {
     reportStatus(jobId, 'processing');
-    const { story, gameplayId, captionStyle, captionColor, voice, duration, watermark } = job.params;
+    const { story, gameplayId, captionStyle, captionColor, voice, duration } = job.params;
+
+    /*
+     * Watermark is re-resolved HERE, not read from job.params.
+     *
+     * job.params.watermark was frozen at createJob time. A render can sit in the
+     * queue for a long time (Railway runs MAX_CONCURRENT_RENDERS=1), so a user
+     * who was Pro when they submitted — and whose subscription has since lapsed,
+     * leaving them on the free tier — would still get an unwatermarked video.
+     * The plan is the authority at the moment the bytes are produced, not at the
+     * moment the job was accepted.
+     *
+     * Falls back to the enqueue-time value only if the store cannot be read, so
+     * a transient failure here can never silently drop a paid watermark.
+     */
+    let watermark = job.params.watermark;
+    try {
+      const userStore = require('../jobs/userStore');
+      const { planFor } = require('../config/plans');
+      if (job.userId) {
+        watermark = planFor((uid) => userStore.planNameFor(uid), job.userId).watermark;
+      }
+    } catch (e) {
+      console.warn('[Render] Could not re-resolve plan for watermark; using enqueue-time value:', e.message);
+    }
+
+    if (!gameplayId) {
+      throw new Error(`Unknown gameplay id: undefined`);
+    }
 
     /* 1 ─ Prepare temp directory */
     stage(jobId, 'preparing_story', 5);
@@ -118,8 +146,15 @@ async function renderPipeline(job) {
       checkTimeout(timedOut);
     })();
 
+    // Helper to catch and swallow errors from background promises after Promise.all has already thrown
+    // This prevents unhandled promise rejections from orphaned promises.
+    const safePromise = (p) => p.catch(err => {
+      if (timedOut || abortController.signal.aborted) return;
+      throw err;
+    });
+
     // Wait for both independent pipelines to finish
-    await Promise.all([subsPromise, videoPromise]);
+    await Promise.all([safePromise(subsPromise), safePromise(videoPromise)]);
 
     /* 7 ─ Composite */
     stage(jobId, 'compositing', 70);
@@ -155,6 +190,9 @@ async function renderPipeline(job) {
     console.log('============================================\n');
     console.log('[Render Worker] ✨ Job ' + jobId + ' completed');
   } catch (err) {
+    // Abort any still-running promises to prevent orphaned processes and unhandled rejections
+    if (!abortController.signal.aborted) abortController.abort();
+    
     if (!timedOut) {
       const errMsg = err && err.message ? err.message : String(err);
       console.error(`[Render Worker] ✗ Job ${jobId} failed:`, errMsg, err);

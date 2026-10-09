@@ -110,9 +110,19 @@ function upsert(uid, patch = {}) {
                           ? String(patch.subscriptionStatus || '').toLowerCase()
                           : (existing?.subscriptionStatus || 'none'),
     stripeCustomerId:   patch.stripeCustomerId ?? existing?.stripeCustomerId ?? null,
+    // Generic billing identity. Stripe ids land in stripeCustomerId, Razorpay's
+    // `cust_...` ids land here, and keeping them separate avoids a Razorpay
+    // customer id being mistaken for a Stripe one by a webhook replay.
+    billingProvider:    patch.billingProvider ?? existing?.billingProvider ?? null,
+    billingCustomerId:  patch.billingCustomerId ?? existing?.billingCustomerId ?? null,
     subscriptionId:     patch.subscriptionId ?? existing?.subscriptionId ?? null,
     currentPeriodEnd:   patch.currentPeriodEnd ?? existing?.currentPeriodEnd ?? null,
     cancelAtPeriodEnd:  patch.cancelAtPeriodEnd ?? existing?.cancelAtPeriodEnd ?? false,
+    // Unix seconds of the newest billing event already applied to this record.
+    // Webhook delivery is NOT ordered across event types: a retried
+    // `subscription.deleted` can arrive after the `...created` it should follow,
+    // which would silently re-grant or wrongly revoke Pro. See applyBillingEvent.
+    billingEventAt:     patch.billingEventAt ?? existing?.billingEventAt ?? null,
     createdAt:          existing?.createdAt || now,
     updatedAt:          now,
   };
@@ -126,11 +136,62 @@ function setPlan(uid, plan, subscriptionStatus = 'active', extra = {}) {
   return upsert(uid, { ...extra, plan, subscriptionStatus });
 }
 
+/**
+ * Reverse lookup: which user does this billing customer id belong to?
+ *
+ * Checkout sessions and most webhooks hand us a customer id but not always the
+ * Firebase uid, and the uid is the only key everything else is stored against.
+ * Linear scan, but the store holds one row per account so it is fine at any size
+ * this product will plausibly reach; it runs once per webhook, not per request.
+ *
+ * @returns {string|null}
+ */
+function findUidByBillingCustomer(provider, customerId) {
+  if (!provider || !customerId) return null;
+  for (const u of users.values()) {
+    if (u.billingProvider === provider && u.billingCustomerId === customerId) return u.uid;
+    if (provider === 'stripe' && u.stripeCustomerId === customerId) return u.uid;
+  }
+  return null;
+}
+
+/**
+ * Apply a subscription state change originating from a payment provider.
+ *
+ * `occurredAt` is the provider's own event timestamp (unix seconds), NOT the time
+ * we processed it. Providers retry events, and a retry of an old cancellation can
+ * land after a newer renewal, so we drop anything older than the last event we
+ * already applied to this user. Without that guard the last-delivered event wins
+ * regardless of which is newer, which is how subscribers end up with Pro they
+ * cancelled or without Pro they paid for.
+ *
+ * @returns {{applied: boolean, reason?: string, record?: object}}
+ */
+function applyBillingEvent(uid, event = {}) {
+  if (!uid) return { applied: false, reason: 'missing-uid' };
+
+  const existing = users.get(uid);
+  const occurredAt = Number(event.occurredAt || 0) || null;
+  const lastApplied = Number(existing?.billingEventAt || 0) || null;
+
+  if (occurredAt && lastApplied && occurredAt < lastApplied) {
+    console.warn(`[UserStore] Ignoring stale billing event for ${uid} (${occurredAt} < ${lastApplied})`);
+    return { applied: false, reason: 'stale' };
+  }
+
+  const record = upsert(uid, {
+    ...event,
+    billingEventAt: occurredAt || lastApplied || undefined,
+  });
+  return { applied: true, record };
+}
+
 function list() {
   return Array.from(users.values());
 }
 
 module.exports = {
   get, upsert, setPlan, list, planNameFor, isEntitled, flush, normalisePlan,
+  findUidByBillingCustomer, applyBillingEvent,
   STORE_PATH,
 };

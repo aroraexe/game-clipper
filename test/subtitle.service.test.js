@@ -98,8 +98,11 @@ describe('generate — ASS injection via user story', () => {
     const out = path.join(tmpDir, 'inject-hl.ass');
     generate([{ word: OVERRIDE, start: 0, end: 1 }], out, 'white-highlight');
     const content = fs.readFileSync(out, 'utf8');
-    expect(content).toContain('{' + String.raw`\rHighlight` + '}');
-    expect(content).toContain('{' + String.raw`\rDefault` + '}');
+    // The highlighted word is marked with inline colour/scale overrides, not the
+    // old {\rHighlight} style swap. What matters here is that our own tags
+    // survive sanitisation while the payload's braces do not.
+    expect(content).toContain('{\\c&H0000FFFF&\\fscx110\\fscy110}');
+    expect(content).toContain('{\\c\\fscx100\\fscy100}');
   });
 });
 
@@ -155,8 +158,12 @@ describe('generate', () => {
     generate(WORDS, out, 'white-highlight');
     const content = fs.readFileSync(out, 'utf8');
 
-    expect(content).toContain('{\\rHighlight}');
-    expect(content).toContain('{\\rDefault}');
+    // One dialogue line per word, with the active word carrying the highlight
+    // colour/scale overrides and the trailing reset block.
+    const dialogueLines = content.split('\n').filter(l => l.startsWith('Dialogue:'));
+    expect(dialogueLines).toHaveLength(WORDS.length);
+    expect(dialogueLines[0]).toContain('{\\c&H0000FFFF&\\fscx110\\fscy110}Hello');
+    expect(dialogueLines[0]).toContain('{\\c\\fscx100\\fscy100}');
   });
 
   it('applies a valid custom colour and ignores an invalid one', () => {

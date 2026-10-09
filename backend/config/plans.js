@@ -20,6 +20,7 @@ const DAY    = 24 * HOUR;
  * @property {number} retentionMs      how long a finished video is kept
  * @property {number} maxActiveJobs    concurrent queued/rendering jobs allowed
  * @property {number} maxStoryChars    server-side cap on submitted story length
+ * @property {number} maxJobsPerDay    rolling 24h create-job cap per account
  * @property {boolean} watermark       burn a watermark into free-tier output
  * @property {string} label            human-readable, for the UI and logs
  */
@@ -27,18 +28,20 @@ const DAY    = 24 * HOUR;
 /** @type {Record<string, Plan>} */
 const PLANS = {
   free: {
-    label:         'Free',
-    retentionMs:   1 * HOUR,
-    maxActiveJobs: 2,
-    maxStoryChars: 1500,
-    watermark:     true,
+    label:           'Free',
+    retentionMs:     1 * HOUR,
+    maxActiveJobs:   2,
+    maxStoryChars:   1500,
+    maxJobsPerDay:   10,
+    watermark:       true,
   },
   pro: {
-    label:         'Pro (monthly)',
-    retentionMs:   7 * DAY,
-    maxActiveJobs: 6,
-    maxStoryChars: 3000,
-    watermark:     false,
+    label:           'Pro (monthly)',
+    retentionMs:     7 * DAY,
+    maxActiveJobs:   6,
+    maxStoryChars:   3000,
+    maxJobsPerDay:   100,
+    watermark:       false,
   },
 };
 

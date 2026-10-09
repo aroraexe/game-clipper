@@ -12,21 +12,16 @@
   <div class="split-layout">
     <!-- LEFT HALF -->
     <div class="left-half">
-      <video class="bg-video" autoplay loop muted playsinline>
-        <source src="bg-video.mp4" type="video/mp4">
-      </video>
+      <!-- 16 MB of video behind a sign-in form. Loaded only once the element is
+           near the viewport, and skipped entirely under reduced-motion. -->
+      <video class="bg-video" data-src="bg-video.mp4" loop muted playsinline
+             preload="none" aria-hidden="true"></video>
       <div class="bg-overlay"></div>
       
       <header class="left-header">
         <a href="/" class="logo" style="text-decoration:none;color:inherit;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="url(#logo-grad)">
-            <defs>
-              <linearGradient id="logo-grad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#606CFF" />
-                <stop offset="100%" stop-color="#EC4899" />
-              </linearGradient>
-            </defs>
-            <polygon points="5 3 19 12 5 21 5 3" />
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="#FFFFFF"/>
           </svg>
           <span class="logo-text">StoryPlay</span>
         </a>
@@ -34,6 +29,7 @@
           <a href="/features">Features</a>
           <a href="/how-it-works">How it works</a>
           <a href="/examples">Examples</a>
+          <a href="/pricing">Pricing</a>
           <a href="/faq">FAQ</a>
         </nav>
       </header>
@@ -130,10 +126,10 @@
               <div class="input-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
               </div>
-              <input type="password" id="input-password" class="form-input" placeholder="Create a password" required>
-              <div class="input-action">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-              </div>
+              <input type="password" id="input-password" class="form-input" placeholder="Create a password" required autocomplete="current-password">
+              <button type="button" class="input-action" id="btn-toggle-password" aria-label="Show password" aria-pressed="false">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
             </div>
 
             <button type="submit" id="btn-submit" class="btn-submit">
@@ -166,6 +162,32 @@
   </div>
 
   <div id="notification-stack" class="notification-stack" aria-live="polite" aria-atomic="false"></div>
+
+  <script>
+    /* Lazy-load the background video. It is 16 MB and sits behind a form, so on a
+       slow connection it was the last thing the user needed and the first thing
+       downloaded. */
+    (function () {
+      'use strict';
+      var video = document.querySelector('.bg-video');
+      if (!video) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      function load() {
+        if (video.getAttribute('src')) return;
+        video.src = 'bg-video.mp4';
+        video.load();
+        var p = video.play();
+        if (p) p.catch(function () {});
+      }
+
+      if (!('IntersectionObserver' in window)) { load(); return; }
+      var io = new IntersectionObserver(function (entries) {
+        if (entries.some(function (e) { return e.isIntersecting; })) { load(); io.disconnect(); }
+      }, { rootMargin: '150px' });
+      io.observe(video);
+    })();
+  </script>
 
   <script type="module">
     import { auth, provider, githubProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from './firebase-config.js';
@@ -252,6 +274,11 @@
         toggleText.textContent = 'Don\'t have an account?';
         toggleAuthMode.textContent = 'Sign up';
       }
+      // The placeholder said "Create a password" in both modes.
+      passwordInput.placeholder = isSignUp ? 'Create a password' : 'Your password';
+      passwordInput.autocomplete = isSignUp ? 'new-password' : 'current-password';
+      btnSubmit.disabled = false;
+      btnSubmit.removeAttribute('aria-busy');
     }
 
     toggleAuthMode.addEventListener('click', (e) => {
@@ -275,6 +302,18 @@
 
     const emailInput = document.getElementById('input-email');
     const passwordInput = document.getElementById('input-password');
+
+    // Show/hide password.
+    const togglePassword = document.getElementById('btn-toggle-password');
+    if (togglePassword) {
+      togglePassword.addEventListener('click', () => {
+        const showing = passwordInput.type === 'text';
+        passwordInput.type = showing ? 'password' : 'text';
+        togglePassword.setAttribute('aria-pressed', showing ? 'false' : 'true');
+        togglePassword.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+        passwordInput.focus();
+      });
+    }
 
     async function handleLoginSuccess(user) {
       const token = await user.getIdToken();
@@ -301,7 +340,16 @@
 
     document.getElementById('form-signin').addEventListener('submit', async (e) => {
       e.preventDefault();
+      // Firebase rejects a concurrent second attempt, and a double-click on Enter
+      // plus the button used to produce a confusing "already in use" on a fresh
+      // account. Disable for the duration instead.
+      if (btnSubmit.disabled) return;
       clearAuthMessage();
+      btnSubmit.disabled = true;
+      btnSubmit.setAttribute('aria-busy', 'true');
+      const submitLabel = btnSubmit.innerHTML;
+      btnSubmit.textContent = isSignUp ? 'Creating account…' : 'Signing in…';
+
       const email = emailInput.value;
       const pass = passwordInput.value;
       try {
@@ -315,6 +363,10 @@
       } catch (err) {
         if (err.code === 'auth/email-already-in-use') setAuthMode(false);
         showAuthMessage(friendlyAuthMessage(err));
+      } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.removeAttribute('aria-busy');
+        if (btnSubmit.innerHTML !== submitLabel) btnSubmit.innerHTML = submitLabel;
       }
     });
 

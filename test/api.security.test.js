@@ -1,13 +1,32 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+
+// jobStore/userStore resolve STORAGE_ROOT at import time and importing
+// server.js loads them, so redirect BEFORE the import below is evaluated.
+// Otherwise this suite reads and writes the real ./storage.
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'api-sec-'));
+process.env.STORAGE_ROOT = tmpDir;
 
 // Firebase is intentionally left unconfigured so requireAuth must fail closed.
-delete process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+// Set to '' rather than deleted: backend/server.js runs dotenv.config(), which
+// only fills in absent keys, so a delete let the local .env install a real
+// service account and this suite silently tested the wrong branch.
+process.env.FIREBASE_SERVICE_ACCOUNT_BASE64 = '';
+
+// Keep the render queue from starting real encodes when server.js is imported.
+process.env.MAX_CONCURRENT_RENDERS = '0';
 
 let app;
 beforeAll(async () => {
   const mod = await import('../backend/server.js');
   app = mod.default || mod;
+});
+
+afterAll(() => {
+  fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
 describe('health', () => {
@@ -43,6 +62,16 @@ describe('auth fail-closed', () => {
     const res = await request(app).get('/api/videos/does-not-exist');
     expect([401, 503]).toContain(res.status);
   });
+
+  it('does not allow anonymous job library listing', async () => {
+    const res = await request(app).get('/api/videos');
+    expect([401, 503]).toContain(res.status);
+  });
+
+  it('does not allow anonymous /api/me', async () => {
+    const res = await request(app).get('/api/me');
+    expect([401, 503]).toContain(res.status);
+  });
 });
 
 describe('/app gate', () => {
@@ -56,6 +85,20 @@ describe('/app gate', () => {
     const res = await request(app).get('/app').set('Cookie', 'sessionToken=forged-value');
     // Must NOT serve the protected page.
     expect(res.status).not.toBe(200);
+  });
+});
+
+describe('/account gate', () => {
+  it('redirects to /signin when no session cookie is present', async () => {
+    const res = await request(app).get('/account');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe('/signin');
+  });
+
+  it('blocks direct account.html access', async () => {
+    const res = await request(app).get('/account.html');
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe('/signin');
   });
 });
 

@@ -11,7 +11,8 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="app-style.css?v=2">
+  <link rel="stylesheet" href="app-style.css?v=3">
+  <script src="/billing.js" defer></script>
 </head>
 <body>
 
@@ -25,11 +26,8 @@
     <!-- ── STEP INDICATOR ── -->
     <header class="app-header">
       <a class="app-logo" href="/" aria-label="Go to StoryPlay landing page">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="url(#appLg)"/>
-          <defs><linearGradient id="appLg" x1="5" y1="4.5" x2="19" y2="19.5" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#A78BFA"/><stop offset="1" stop-color="#3B82F6"/>
-          </linearGradient></defs>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="#FFFFFF"/>
         </svg>
         <span>StoryPlay</span>
         <span class="beta-badge">Beta</span>
@@ -40,20 +38,51 @@
         <div class="step-dot" data-step="3">3</div>
         <div class="step-dot" data-step="4">4</div>
       </div>
-      <div class="user-menu" style="position: relative;">
-        <button id="user-menu-btn" style="background: none; border: none; cursor: pointer; color: white; display: flex; align-items: center; gap: 8px;">
-          <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #A78BFA); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;" id="user-avatar-initial">U</div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      <div class="header-tools">
+        <div class="usage-chip" id="usage-chip" title="Renders in the last 24 hours" hidden>
+          <span id="usage-chip-text">—</span>
+        </div>
+        <button type="button" class="header-tool-btn" id="btn-library" aria-expanded="false" aria-controls="library-panel">
+          Library
         </button>
-        <div id="user-dropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: rgba(15, 15, 20, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px; min-width: 180px; backdrop-filter: blur(10px); z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-          <div style="padding: 8px; font-size: 13px; color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; word-break: break-all;" id="user-dropdown-email">user@example.com</div>
-          <button id="btn-signout" style="width: 100%; text-align: left; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid transparent; color: white; cursor: pointer; border-radius: 6px; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-            Sign out
+        <div class="user-menu">
+          <button id="user-menu-btn" class="user-menu-btn" aria-haspopup="true" aria-expanded="false" aria-controls="user-dropdown" aria-label="Account menu">
+            <div class="user-avatar" id="user-avatar-initial">U</div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
           </button>
+          <div id="user-dropdown" class="user-dropdown" role="menu">
+            <div class="user-dropdown-head" id="user-dropdown-email">user@example.com</div>
+            <div class="user-dropdown-row">
+              <span>Plan</span>
+              <span id="user-plan-name">—</span>
+            </div>
+            <a href="/account" class="user-menu-item user-menu-item--visible" role="menuitem">
+              Account &amp; billing
+            </a>
+            <button id="btn-manage-plan" class="user-menu-item user-menu-item--plan" type="button">
+              <span id="manage-plan-label">Upgrade to Pro</span>
+            </button>
+            <button id="btn-signout" class="user-menu-item user-menu-item--visible" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              Sign out
+            </button>
+          </div>
         </div>
       </div>
     </header>
+
+    <!-- Library drawer -->
+    <div class="library-backdrop" id="library-backdrop" hidden></div>
+    <aside class="library-panel" id="library-panel" hidden aria-label="Your videos">
+      <div class="library-head">
+        <h2>Your videos</h2>
+        <button type="button" class="library-close" id="btn-library-close" aria-label="Close library">×</button>
+      </div>
+      <p class="library-hint">Finished videos expire after your plan’s retention window. Download anything you want to keep.</p>
+      <div class="library-list" id="library-list">
+        <p class="library-empty">Loading…</p>
+      </div>
+    </aside>
 
     <!-- ── STEP 1: Story ── -->
     <section id="step-story" class="step step--active">
@@ -465,9 +494,9 @@
 
     <!-- ── STEP 6: Result ── -->
     <section id="step-result" class="step">
-      <div class="result-badge">🎉 Ready!</div>
+      <div class="result-badge">Ready</div>
       <h2 class="result-title">Your Short is ready</h2>
-      <p class="result-sub">Download it and post to YouTube Shorts, TikTok, or Instagram Reels.</p>
+      <p class="result-sub">Download it before it expires. Free keeps files for 1 hour; Pro for 7 days.</p>
       <div class="result-player">
         <video id="resultVideo" class="result-video" controls playsinline></video>
       </div>
@@ -493,7 +522,7 @@
      */
     window.__API_BASE__ = '';
   </script>
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getAuth, signOut, onIdTokenChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
@@ -555,12 +584,17 @@
     
     menuBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      const open = !dropdown.classList.contains('open');
+      dropdown.classList.toggle('open', open);
+      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
 
     document.addEventListener('click', () => {
-      dropdown.style.display = 'none';
+      dropdown.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
     });
+
+    dropdown.addEventListener('click', (e) => e.stopPropagation());
     
     document.getElementById('btn-signout').addEventListener('click', async () => {
       try {

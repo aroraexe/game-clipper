@@ -98,9 +98,12 @@ const PRESETS = {
  */
 function hexToAssColor(hex) {
   if (!hex || !/^#[0-9A-Fa-f]{6}$/.test(hex)) return null;
-  const r = hex.substring(1, 3);
-  const g = hex.substring(3, 5);
-  const b = hex.substring(5, 7);
+  // Strict validation: only allow pure hex color, no ASS override chars
+  const clean = hex.replace(/[\\{}&]/g, '');
+  if (clean !== hex) return null; // reject if any structural chars were present
+  const r = clean.substring(1, 3);
+  const g = clean.substring(3, 5);
+  const b = clean.substring(5, 7);
   return `&H00${b}${g}${r}`;
 }
 
