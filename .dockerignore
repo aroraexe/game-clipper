@@ -15,6 +15,22 @@ storage/temp/
 storage/audio/
 storage/subtitles/
 
+# Runtime stores — must never be baked into an image.
+#
+# The Dockerfile does `COPY storage/ ./storage/`, so anything not excluded here is
+# captured into an image layer. That included storage/userStore.json (every
+# customer's email, plan and Stripe customer/subscription id) and
+# storage/jobStore.json (every submitted story) — a developer's local copy would
+# ship to the registry inside the image, where it survives even if the file is
+# later deleted. Image layers are not scrubbable by a redeploy.
+#
+# Note: these are single-star patterns on purpose. Docker matches with
+# filepath.Match, so `**` is NOT a globstar here — `storage/**/*.json` silently
+# matches nothing at all, which is exactly the failure this file exists to prevent.
+storage/*.json
+storage/*.corrupt-*
+storage/*.tmp
+
 # Node modules (rebuilt in Docker via npm ci)
 node_modules/
 
@@ -39,3 +55,34 @@ generate_*.js
 upload.js
 bgsample1.png
 .kilo/
+
+# ── Dead frontend media ────────────────────────────────────────────────────────
+#
+# The Dockerfile does `COPY frontend/ ./frontend/`, so every byte here lands in an
+# image layer. frontend/ currently carries ~385 MB of files that NOTHING
+# references — verified by grepping every .html/.js/.css in frontend/ for each
+# filename. They are git-tracked (so still recoverable from history) but they were
+# being uploaded to the daemon and pushed into the registry on every build.
+#
+#   frontend/*_small.mp4              287 MB  gameplay.service.js resolves these
+#                                             under storage/gameplay/, NOT
+#                                             frontend/ — the frontend copies are
+#                                             shadow duplicates
+#   frontend/example_1..4.mp4          71 MB  the pages all load media/example_*.mp4
+#   frontend/hero-mid.png, bgsample1.png,
+#   card-left.jpg, card-right.jpg,
+#   bg-signin.jpg, 8x UUID .png        28 MB  unreferenced
+#
+# Deleting them is a separate decision (see AGENT_LOG.md); excluding them from the
+# build context is free and takes effect immediately.
+frontend/*_small.mp4
+frontend/example_*.mp4
+frontend/hero-mid.png
+frontend/bgsample1.png
+frontend/card-left.jpg
+frontend/card-right.jpg
+frontend/bg-signin.jpg
+frontend/bg-minecraft.png
+frontend/card-media/card-cod.jpg
+frontend/card-media/card-valorant.jpg
+frontend/[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*-[0-9a-f]*.png

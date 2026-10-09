@@ -32,6 +32,9 @@ router.get('/', requireAuth, (req, res) => {
       status:          record?.subscriptionStatus || 'none',
       currentPeriodEnd: record?.currentPeriodEnd || null,
       cancelAtPeriodEnd: !!record?.cancelAtPeriodEnd,
+      // Which provider this was bought through, so the UI can send the user to
+      // the right management screen. No customer or subscription ids are exposed.
+      provider:        record?.billingProvider || null,
     },
     availablePlans: Object.entries(PLANS).map(([name, p]) => ({
       name: name, label: p.label, maxStoryChars: p.maxStoryChars, maxActiveJobs: p.maxActiveJobs,

@@ -18,6 +18,18 @@ storage/output/
 storage/outputs/
 storage/temp/
 
+# Durable stores — runtime state, never source.
+#
+# storage/userStore.json holds every account's email, plan, Stripe customer id and
+# subscription id. storage/jobStore.json holds every submitted story. Only
+# jobStore.json was listed here, so a `git add .` would have committed the user
+# store — real customer PII and billing identifiers — into permanent history
+# where removing it later would not help.
+storage/jobStore.json
+storage/userStore.json
+storage/*.json
+storage/**/*.corrupt-*
+
 # Gameplay videos (ignore massive originals, allow small versions for Render)
 storage/gameplay/*.mp4
 storage/gameplay/*.webm

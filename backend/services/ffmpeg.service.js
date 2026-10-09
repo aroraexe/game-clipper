@@ -19,9 +19,9 @@ const path       = require('path');
 const fs         = require('fs');
 
 
-/* ── CPU-Only Mode ─────────────────────────────────────────────────── */
-// Hardware acceleration is disabled. All encoding uses libx264 on CPU.
-console.log('[FFmpeg] Running in CPU-only mode (libx264)');
+/* ── Railway Hobby CPU Mode ────────────────────────────────────────── */
+// Hardware acceleration disabled for Railway Hobby plan.
+console.log('[FFmpeg] Running in Railway Hobby CPU mode (libx264)');
 
 /* ── Output resolution (env-configurable) ───────────────────────────── */
 // Default: 720x1280 (HD vertical short)
@@ -201,8 +201,23 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
 
       if (watermark) {
         // 3) Add watermark
-        // Using Arial or a generic font. x=w-tw-30 aligns right, y=30 aligns top.
-        filterChain.push(`[vsub]drawtext=text='StoryPlay.app':fontcolor=white@0.5:fontsize=32:x=w-tw-30:y=40[vout]`);
+        // x=w-tw-30 aligns right, y=40 near the top.
+        //
+        // An explicit fontfile is preferred where one is known to exist. On Linux
+        // the previous version passed nothing and relied on fontconfig resolving
+        // a default face — if no font is installed, drawtext fails the whole
+        // composite and the customer's video is lost over a watermark. The
+        // container installs fonts-liberation, so Liberation Sans is named here.
+        const fontCandidates = process.platform === 'win32'
+          ? ['C:/Windows/Fonts/arial.ttf', 'C:/Windows/Fonts/segoeui.ttf']
+          : ['/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+             '/usr/share/fonts/liberation/LiberationSans-Regular.ttf',
+             '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'];
+        const fontFile = fontCandidates.find(f => { try { return fs.existsSync(f); } catch (_) { return false; } });
+        const fontStr = fontFile
+          ? `fontfile=${escapeFilterPath(fontFile)}:`
+          : 'font=Arial:';
+        filterChain.push(`[vsub]drawtext=${fontStr}text='StoryPlay.app':fontcolor=white@0.5:fontsize=32:x=w-tw-30:y=40[vout]`);
       }
 
       cmd.complexFilter(filterChain)
@@ -212,11 +227,11 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
         '-map', '[vout]',
         '-map', '1:a',
 
-        // CPU-only video codec — balanced speed/quality settings
+        // CPU video codec — tuned for Railway Hobby Plan
         '-c:v', 'libx264',
-        '-preset', 'ultrafast',  // fastest encode for cloud CPU boxes
-        '-crf', '28',            // MAX OPTIMIZATION: lower quality threshold for massive speed boost
-        '-bf', '2',              // B-frames: better compression without -zerolatency penalty
+        '-preset', 'ultrafast',  // fastest encode
+        '-crf', '28',            // lower quality threshold
+        '-bf', '2',              // B-frames: better compression
         '-profile:v', 'main',
         '-level', '4.0',
         '-pix_fmt', 'yuv420p',
@@ -226,8 +241,8 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
         '-b:a', '128k',
         '-ar',  '44100',
 
-        // Threading: 0 = use optimal number of threads based on CPU cores
-        '-threads', '0',
+        // Threading: cap at 2 threads to avoid starving other processes on Railway
+        '-threads', '2',
 
         // Duration cap
         `-t`, String(durationS),

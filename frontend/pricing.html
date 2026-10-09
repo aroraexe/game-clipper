@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pricing — StoryPlay</title>
   <meta name="description" content="StoryPlay pricing: a free tier and a Pro monthly plan. Free videos are kept for 1 hour; Pro keeps them for 7 days with no watermark.">
-  <link rel="stylesheet" href="landing.css">
+  <link rel="stylesheet" href="landing.css?v=2">
+  <script src="/billing.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -55,14 +56,12 @@
         <li>Stories up to 1,500 characters</li>
         <li><strong>Videos are deleted after 1 hour</strong> &mdash; download anything you want to keep</li>
       </ul>
-      <a href="/signin" class="btn btn-ghost btn-large">Create a video</a>
+      <a href="/app" class="btn btn-ghost btn-large" data-plan-cta="free">Create a video</a>
     </div>
 
-    <div class="glass-card price-panel">
+    <div class="glass-card price-panel" id="pro-panel">
       <h2 style="font-size:1.4rem;font-weight:700;">Pro</h2>
-      <!-- TODO(price): replace this amount with your real Stripe monthly price
-           before launch. Also update "per" below to match the billing period. -->
-      <div class="amount">&pound;9</div>
+      <div class="amount" id="pro-price">&mdash;</div>
       <div class="per">per month &mdash; cancel any time</div>
       <ul>
         <li>Everything in Free</li>
@@ -72,7 +71,13 @@
         <li>Stories up to 3,000 characters</li>
         <li>Priority queue during busy periods</li>
       </ul>
-      <a href="/signin" class="btn btn-primary btn-large">Go Pro</a>
+      <!-- Replaced at runtime by the payment buttons for whichever providers the
+           server actually has configured. Until then this stays a plain link, so
+           the page is still usable if the pricing API is unreachable. -->
+      <div id="pro-actions">
+        <a href="/signin" class="btn btn-primary btn-large" data-plan-cta="pro">Go Pro</a>
+      </div>
+      <p id="pro-note" style="margin-top:0.9rem;font-size:0.85rem;color:rgba(255,255,255,0.55);"></p>
     </div>
 
   </div>
@@ -81,7 +86,7 @@
     <h2>How billing works</h2>
     <div class="glass-card doc-card">
       <p>Pro is a monthly subscription that renews automatically. You can cancel at any time and you keep Pro until the end of the period you have already paid for, after which your account returns to Free. If a renewal payment fails, Pro and the 7-day retention end until the payment succeeds.</p>
-      <p style="margin-top:1rem;">Payments are taken by Stripe, so your card details never reach our servers. Prices exclude any local sales tax or VAT that may apply.</p>
+      <p style="margin-top:1rem;" id="billing-processors-note">Payments are taken by a payment processor, so your card details never reach our servers. Prices exclude any local sales tax or VAT that may apply.</p>
     </div>
   </div>
 
@@ -100,6 +105,7 @@
       <a href="/how-it-works">How it works</a>
       <a href="/examples">Examples</a>
       <a href="/faq">FAQ</a>
+      <a href="/pricing">Pricing</a>
       <a href="/privacy">Privacy</a>
       <a href="/terms">Terms</a>
     </nav>
@@ -108,5 +114,109 @@
 
 </div>
 
+<script>
+/* Renders the buy buttons from what the server actually has configured.
+ *
+ * The amount and the available payment methods both come from the API, so this
+ * page cannot advertise a price or a provider that is not live. If the request
+ * fails the static "Go Pro" sign-in link stays exactly where it was, which is why
+ * no price is hardcoded in the HTML above.
+ */
+(function () {
+  'use strict';
+
+  var B = window.StoryPlayBilling;
+  var actions = document.getElementById('pro-actions');
+  var note    = document.getElementById('pro-note');
+  var price   = document.getElementById('pro-price');
+  if (!B || !actions) return;
+
+  function say(message) {
+    if (note) note.textContent = message || '';
+  }
+
+  function buttonFor(provider) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-primary btn-large';
+    btn.textContent = provider.label + ' — ' + provider.provider;
+    btn.style.display = 'block';
+    btn.style.width = '100%';
+    btn.style.marginTop = '0.5rem';
+    btn.addEventListener('click', function () {
+      start(btn);
+    });
+    return btn;
+  }
+
+  function start(btn) {
+    var original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Opening checkout…';
+
+    B.startCheckout(btn.dataset.provider, 'pro', {
+      onSuccess: function () {
+        btn.textContent = 'Done — reloading';
+        globalThis.location.href = '/app?upgraded=1';
+      },
+      onDismiss: function () {
+        btn.disabled = false;
+        btn.textContent = original;
+      },
+      onError: function (err) {
+        btn.disabled = false;
+        btn.textContent = original;
+        say(err.message || 'Could not start checkout. Please try again.');
+      }
+    }).catch(function (err) {
+      btn.disabled = false;
+      btn.textContent = original;
+      say(err.message || 'Could not start checkout. Please try again.');
+    });
+  }
+
+  B.loadConfig().then(function (cfg) {
+    var live = (cfg.providers || []).filter(function (p) { return p.enabled; });
+
+    if (cfg.plan && cfg.plan.name === 'pro') {
+      actions.innerHTML = '<a href="/app" class="btn btn-primary btn-large">You are on Pro — open the app</a>';
+      say(cfg.plan.cancelAtPeriodEnd
+        ? 'Your plan is cancelled and ends' + (cfg.plan.currentPeriodEnd
+            ? ' on ' + new Date(cfg.plan.currentPeriodEnd * 1000).toLocaleDateString() + '.'
+            : ' at the end of the current period.')
+        : '');
+      return;
+    }
+
+    if (live.length === 0) {
+      // No provider is fully configured. Say so instead of showing a button that
+      // would fail at the last step.
+      say('Card payments are being set up. Email us if you need Pro in the meantime.');
+      return;
+    }
+
+    actions.innerHTML = '';
+    live.forEach(function (provider) {
+      var btn = buttonFor(provider);
+      btn.dataset.provider = provider.provider;
+      actions.appendChild(btn);
+    });
+
+    var labels = live.map(function (p) { return p.label; });
+    var names  = live.map(function (p) { return p.provider === 'stripe' ? 'Stripe' : 'Razorpay'; });
+    say('Pay with ' + names.join(' or ') + '. ' + (live.length > 1 ? 'Cards, UPI and netbanking are all accepted.' : ''));
+
+    var processorNote = document.getElementById('billing-processors-note');
+    if (processorNote) {
+      processorNote.textContent = 'Payments are taken by ' + names.join(' and ') +
+        ', so your card details never reach our servers. Prices exclude any local sales tax or VAT that may apply.';
+    }
+  }).catch(function () {
+    say('We could not load payment options right now. Please try again shortly.');
+  });
+})();
+</script>
+
 </body>
+
 </html>

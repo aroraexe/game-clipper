@@ -17,8 +17,18 @@
 const fs      = require('fs');
 const path    = require('path');
 
-const STORAGE_ROOT = process.env.STORAGE_ROOT || './storage';
-const GAMEPLAY_DIR = path.resolve(STORAGE_ROOT, 'gameplay');
+/*
+ * Must come from storage.util, not `process.env.STORAGE_ROOT || './storage'`.
+ *
+ * storage.util resolves STORAGE_ROOT -> RAILWAY_VOLUME_MOUNT_PATH -> ./storage.
+ * Reading the env var directly here skipped the Railway volume case, so on a
+ * deployment with a volume attached and no explicit STORAGE_ROOT the videos
+ * would be written to the volume while the gameplay sources were looked for in
+ * the container filesystem — every render failing with "No gameplay file
+ * available" while the files sat right there on the mount.
+ */
+const { gameplayDir } = require('../utils/storage.util');
+const GAMEPLAY_DIR = gameplayDir();
 
 /* ── In-memory catalogue ──────────────────────────────────────────────────── */
 // Each entry lists the preferred (full-size) file and an optional fallback.
