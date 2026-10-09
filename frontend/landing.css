@@ -435,7 +435,7 @@ body::after {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 1.65rem; font-weight: 700;
 }
-.games-row {
+.games-row, .games-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.9rem;
@@ -495,7 +495,7 @@ body::after {
   .main-phone { width:220px; height:440px; }
   .left-card  { width:165px; height:325px; }
   .right-card { width:155px; height:305px; }
-  .games-row { grid-template-columns: repeat(3, 1fr); }
+  .games-row, .games-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 860px) {
@@ -534,7 +534,7 @@ body::after {
   .hero-phone-container { width:280px; height:380px; }
   .main-phone { width:160px; height:320px; }
   .left-card, .right-card { display:none; }
-  .games-row { grid-template-columns: repeat(2, 1fr); }
+  .games-row, .games-grid { grid-template-columns: repeat(2, 1fr); }
   .hero-title { font-size:2.2rem; letter-spacing:-1px; }
 }
 
