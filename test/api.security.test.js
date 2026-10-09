@@ -1,32 +1,13 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-
-// jobStore/userStore resolve STORAGE_ROOT at import time and importing
-// server.js loads them, so redirect BEFORE the import below is evaluated.
-// Otherwise this suite reads and writes the real ./storage.
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'api-sec-'));
-process.env.STORAGE_ROOT = tmpDir;
 
 // Firebase is intentionally left unconfigured so requireAuth must fail closed.
-// Set to '' rather than deleted: backend/server.js runs dotenv.config(), which
-// only fills in absent keys, so a delete let the local .env install a real
-// service account and this suite silently tested the wrong branch.
-process.env.FIREBASE_SERVICE_ACCOUNT_BASE64 = '';
-
-// Keep the render queue from starting real encodes when server.js is imported.
-process.env.MAX_CONCURRENT_RENDERS = '0';
+delete process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
 
 let app;
 beforeAll(async () => {
   const mod = await import('../backend/server.js');
   app = mod.default || mod;
-});
-
-afterAll(() => {
-  fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
 describe('health', () => {

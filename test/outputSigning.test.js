@@ -7,10 +7,8 @@ import crypto from 'crypto';
 const SECRET = 'test-secret';
 const OUTPUT_URL_TTL_MS = 15 * 60 * 1000;
 
-function sign(jobId, userId, expiresAt, download = false) {
-  return crypto.createHmac('sha256', SECRET)
-    .update(`${jobId}.${userId}.${expiresAt}.${download ? '1' : '0'}`)
-    .digest('hex');
+function sign(jobId, userId, expiresAt) {
+  return crypto.createHmac('sha256', SECRET).update(`${jobId}.${userId}.${expiresAt}`).digest('hex');
 }
 
 describe('output URL signing', () => {
@@ -42,20 +40,6 @@ describe('output URL signing', () => {
 
   it('changes when the expiry changes — prevents indefinite reuse', () => {
     expect(sign(jobId, userId, expiresAt + 1000)).not.toBe(sig);
-  });
-
-  it('changes when the response mode changes — prevents upgrading a stream URL to a download', () => {
-    // `download` selects Content-Disposition: attachment. It used to sit outside
-    // the signed payload, so appending ?download=true to a valid stream URL was
-    // accepted and forced the file to download.
-    expect(sign(jobId, userId, expiresAt, true)).not.toBe(sig);
-    expect(sign(jobId, userId, expiresAt, false)).toBe(sig);
-  });
-
-  it('encodes the mode unambiguously — no field-boundary collisions', () => {
-    // `${a}.${b}.${c}.${d}` would be ambiguous if the mode were interpolated as a
-    // bare boolean, so it is encoded as a fixed '0'/'1' token.
-    expect(sign('job-1', 'user-abc', 123, false)).not.toBe(sign('job-1.user', 'abc', 123, false));
   });
 
   it('rejects a signature of the wrong length without throwing', () => {

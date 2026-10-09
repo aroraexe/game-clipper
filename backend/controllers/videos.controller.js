@@ -12,21 +12,6 @@ const userStore = require('../jobs/userStore');
 
 const OUTPUT_URL_TTL_MS = 15 * 60 * 1000;
 
-/**
- * `download` is part of the signed payload, not a free parameter.
- *
- * It changes the response from an inline <video> stream into a
- * Content-Disposition attachment — a different capability from "watch this".
- * Signing only jobId/userId/expires meant anyone holding a stream URL could
- * append `&download=true` and the signature still verified, so the download mode
- * was reachable by anyone who could merely view the video. Now a stream URL
- * cannot be upgraded into a download URL without a signature over it.
- */
-function normalizeDownloadFlag(value) {
-  if (value === undefined || value === null || value === '') return false;
-  return String(value).toLowerCase() === 'true' ? true : false;
-}
-
 // Generated once per process, dev only. Previously the non-production fallback
 // was the literal string 'dev-output-url-secret', which is public — fine for
 // local work, but it meant a dev box produced URLs signed with a guessable key.
@@ -49,24 +34,18 @@ function outputSigningSecret() {
   return secret;
 }
 
-/**
- * @param {boolean} download  whether this URL grants the attachment response
- */
-function signOutputUrl(jobId, userId, expiresAt, download = false) {
-  // The mode is part of the message, so it cannot be swapped after signing.
-  // `${Number(download) ? '1' : '0'}` keeps the string unambiguous.
+function signOutputUrl(jobId, userId, expiresAt) {
   return crypto
     .createHmac('sha256', outputSigningSecret())
-    .update(`${jobId}.${userId}.${expiresAt}.${download ? '1' : '0'}`)
+    .update(`${jobId}.${userId}.${expiresAt}`)
     .digest('hex');
 }
 
 function createOutputPath(jobId, userId, download = false) {
-  const wantDownload = download === true;
   const expiresAt = Date.now() + OUTPUT_URL_TTL_MS;
-  const sig = signOutputUrl(jobId, userId, expiresAt, wantDownload);
+  const sig = signOutputUrl(jobId, userId, expiresAt);
   const params = new URLSearchParams({ expires: String(expiresAt), sig });
-  if (wantDownload) params.set('download', 'true');
+  if (download) params.set('download', 'true');
   return `/api/videos/${jobId}/output?${params.toString()}`;
 }
 
@@ -75,8 +54,7 @@ function hasValidOutputSignature(req, job) {
   const sig = String(req.query.sig || '');
   if (!expiresAt || !sig || Date.now() > expiresAt) return false;
 
-  const wantDownload = normalizeDownloadFlag(req.query.download);
-  const expected = signOutputUrl(job.jobId, job.userId || '', expiresAt, wantDownload);
+  const expected = signOutputUrl(job.jobId, job.userId || '', expiresAt);
   if (sig.length !== expected.length) return false;
   return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
 }
@@ -97,18 +75,6 @@ async function authorizeOutputRequest(req, job) {
     return false;
   }
   return job.userId === user.uid;
-}
-
-/**
- * Consecutive story-generation failures, keyed by a NON-REVERSIBLE fingerprint of
- * the API key so a broken key is visible in the logs without ever printing the
- * secret itself. Never log the key.
- */
-const STORY_GEN_FAILURES = new Map();
-function nvidiaApiKeyFingerprint() {
-  const key = process.env.NVIDIA_API_KEY || '';
-  if (!key) return 'unset';
-  return crypto.createHash('sha256').update(key).digest('hex').slice(0, 8);
 }
 
 function parseStoryResponse(raw) {
@@ -258,18 +224,6 @@ STORY REQUIREMENTS:
       // user silently gets this one fixed story rendered at full TTS+encode cost.
       usedFallback = true;
       story = "I stared at the flickering screen, the last boss's health bar a thin red line. My fingers trembled over the controller, each heartbeat syncing with the pulsing music. One final combo, a perfect parry, and the arena erupted in light. The victory screen flashed—then the console whispered my real name, and the lights in my room went out.";
-
-      // Count it. A broken key looks exactly like a working one from the user's
-      // side — every request succeeds and returns the same story — so without a
-      // running tally the misconfiguration is invisible until someone reads logs.
-      const n = (STORY_GEN_FAILURES.get(nvidiaApiKeyFingerprint()) || 0) + 1;
-      STORY_GEN_FAILURES.set(nvidiaApiKeyFingerprint(), n);
-      if (n === 5 || n % 50 === 0) {
-        console.error(
-          `[Story Gen] ${n} consecutive NVIDIA failures (key ${nvidiaApiKeyFingerprint()}). ` +
-          'Every "Generate" is returning the placeholder story. Check NVIDIA_API_KEY and quota.'
-        );
-      }
     }
 
     // Server-side validation just to log it (client handles UX)
@@ -328,8 +282,8 @@ exports.createJob = async (req, res, next) => {
     const allJobs = jobStore.list();
     const activeJobs = allJobs.filter(j => ['queued', 'processing'].includes(j.status));
 
-    // Global queue cap (increased for Railway Hobby to hold 1000+ pending renders)
-    if (activeJobs.length >= 2000) {
+    // Global queue cap
+    if (activeJobs.length >= 100) {
       return res.status(503).json({ error: 'System is currently at maximum capacity. Please try again later.' });
     }
     
@@ -422,9 +376,7 @@ exports.getOutput = async (req, res, next) => {
     res.setHeader('Cache-Control', 'private, no-store, max-age=0');
     res.setHeader('Pragma', 'no-cache');
 
-    // The signature already proved the caller was issued THIS mode, so the value
-    // is read rather than re-validated here.
-    if (normalizeDownloadFlag(req.query.download)) {
+    if (req.query.download === 'true') {
       return res.download(job.outputPath, `storyplay_${req.params.jobId}.mp4`, (err) => {
         if (err && !res.headersSent) next(err);
       });

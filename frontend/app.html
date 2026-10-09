@@ -25,7 +25,7 @@
     <!-- ── STEP INDICATOR ── -->
     <header class="app-header">
       <a class="app-logo" href="/" aria-label="Go to StoryPlay landing page">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="url(#appLg)"/>
           <defs><linearGradient id="appLg" x1="5" y1="4.5" x2="19" y2="19.5" gradientUnits="userSpaceOnUse">
             <stop stop-color="#A78BFA"/><stop offset="1" stop-color="#3B82F6"/>
@@ -34,29 +34,21 @@
         <span>StoryPlay</span>
         <span class="beta-badge">Beta</span>
       </a>
-      <ol class="step-indicators">
-        <li><span class="step-dot active" data-step="1" aria-current="step" aria-label="Step 1: Story">1</span></li>
-        <li><span class="step-dot" data-step="2" aria-label="Step 2: Gameplay">2</span></li>
-        <li><span class="step-dot" data-step="3" aria-label="Step 3: Captions">3</span></li>
-        <li><span class="step-dot" data-step="4" aria-label="Step 4: Voice and duration">4</span></li>
-      </ol>
-      <div class="user-menu">
-        <button id="user-menu-btn" class="user-menu-btn" aria-haspopup="true" aria-expanded="false" aria-controls="user-dropdown">
-          <div class="user-avatar" id="user-avatar-initial">U</div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      <div class="step-indicators">
+        <div class="step-dot active" data-step="1">1</div>
+        <div class="step-dot" data-step="2">2</div>
+        <div class="step-dot" data-step="3">3</div>
+        <div class="step-dot" data-step="4">4</div>
+      </div>
+      <div class="user-menu" style="position: relative;">
+        <button id="user-menu-btn" style="background: none; border: none; cursor: pointer; color: white; display: flex; align-items: center; gap: 8px;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #A78BFA); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;" id="user-avatar-initial">U</div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
-        <div id="user-dropdown" class="user-dropdown" role="menu">
-          <div class="user-dropdown-head" id="user-dropdown-email">user@example.com</div>
-          <div class="user-dropdown-row" id="user-plan-row">
-            <span>Plan</span>
-            <span id="user-plan-name">Free</span>
-          </div>
-          <button id="btn-manage-plan" class="user-menu-item user-menu-item--plan">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg>
-            <span id="manage-plan-label">Upgrade to Pro</span>
-          </button>
-          <button id="btn-signout" class="user-menu-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        <div id="user-dropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: rgba(15, 15, 20, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px; min-width: 180px; backdrop-filter: blur(10px); z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          <div style="padding: 8px; font-size: 13px; color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; word-break: break-all;" id="user-dropdown-email">user@example.com</div>
+          <button id="btn-signout" style="width: 100%; text-align: left; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid transparent; color: white; cursor: pointer; border-radius: 6px; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
             Sign out
           </button>
         </div>
@@ -64,13 +56,13 @@
     </header>
 
     <!-- ── STEP 1: Story ── -->
-    <section id="step-story" class="step step--active" aria-labelledby="step-story-title">
+    <section id="step-story" class="step step--active">
       <div class="step-layout">
         <div class="step-main">
           <div class="step-heading">
             <span class="step-num">01</span>
             <div>
-              <h1 class="step-title" id="step-story-title">Your <span class="grad">Story</span></h1>
+              <h1 class="step-title">Your <span class="grad">Story</span></h1>
               <p class="step-subtitle">Paste the story that will be narrated over your gameplay.</p>
             </div>
           </div>
@@ -83,16 +75,14 @@
               </div>
               <div class="field-header-actions">
               <div class="custom-select" id="aiDurationWrapper">
-                <div class="custom-select__trigger" id="aiDurationTrigger" role="combobox"
-                     tabindex="0" aria-haspopup="listbox" aria-expanded="false"
-                     aria-controls="aiDurationOptions" aria-labelledby="aiDurationLabel">
+                <div class="custom-select__trigger" id="aiDurationTrigger">
                   <span id="aiDurationLabel">45s (Medium)</span>
-                  <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="#8B93A8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="#8B93A8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
-                <div class="custom-select__options" id="aiDurationOptions" role="listbox" aria-label="Story duration">
-                  <div class="custom-select__option" data-value="30" role="option" aria-selected="false" tabindex="-1">30s (Short)</div>
-                  <div class="custom-select__option selected" data-value="45" role="option" aria-selected="true" tabindex="-1">45s (Medium)</div>
-                  <div class="custom-select__option" data-value="60" role="option" aria-selected="false" tabindex="-1">60s (Long)</div>
+                <div class="custom-select__options" id="aiDurationOptions">
+                  <div class="custom-select__option" data-value="30">30s (Short)</div>
+                  <div class="custom-select__option selected" data-value="45">45s (Medium)</div>
+                  <div class="custom-select__option" data-value="60">60s (Long)</div>
                 </div>
                 <input type="hidden" id="aiDuration" value="45">
               </div>
@@ -110,8 +100,7 @@
               maxlength="3000"
             ></textarea>
             <div class="textarea-footer">
-              <span class="char-count"><span id="charCount">0</span> / <span id="charLimit">3000</span></span>
-              <span class="char-hint" id="charMin">Minimum 50 characters</span>
+              <span class="char-count"><span id="charCount">0</span> / 3000  Minimum 50 characters</span>
             </div>
           </div>
 
@@ -142,18 +131,18 @@
         <!-- Right side phone preview -->
         <div class="step-preview">
           <div class="preview-phone">
-            <img src="card-mid.jpg" alt="Example finished Short" width="720" height="1280" decoding="async">
+            <img src="card-mid.jpg" alt="Preview">
           </div>
         </div>
       </div>
     </section>
 
     <!-- ── STEP 2: Gameplay ── -->
-    <section id="step-gameplay" class="step" aria-labelledby="step-gameplay-title">
+    <section id="step-gameplay" class="step">
       <div class="step-heading">
         <span class="step-num">02</span>
         <div>
-          <h2 class="step-title" id="step-gameplay-title">Choose <span class="grad">Gameplay</span></h2>
+          <h2 class="step-title">Choose <span class="grad">Gameplay</span></h2>
           <p class="step-subtitle">Pick the background gameplay for your Short.</p>
         </div>
       </div>
@@ -167,12 +156,12 @@
     </section>
 
     <!-- ── STEP 3: Captions ── -->
-    <section id="step-captions" class="step" aria-labelledby="step-captions-title">
+    <section id="step-captions" class="step">
       <div class="step-heading step-heading--with-info">
         <div class="step-heading-left">
           <span class="step-num">03</span>
           <div>
-            <h2 class="step-title" id="step-captions-title">Caption <span class="grad">Style</span></h2>
+            <h2 class="step-title">Caption <span class="grad">Style</span></h2>
             <p class="step-subtitle">Choose how your subtitles will look.</p>
           </div>
         </div>
@@ -186,7 +175,7 @@
         <label class="caption-card" data-style="bold-yellow">
           <input type="radio" name="captionStyle" value="bold-yellow" checked>
           <div class="caption-card__bg">
-            <img src="bg-minecraft.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+            <img src="bg-minecraft.jpg" alt="Preview">
             <div class="caption-card__overlay"></div>
             <div class="caption-preview preview--bold-yellow">
               I FOUND A <span style="color:#FFD700">SECRET</span><br>CASTLE...
@@ -202,7 +191,7 @@
         <label class="caption-card" data-style="white-highlight">
           <input type="radio" name="captionStyle" value="white-highlight">
           <div class="caption-card__bg">
-            <img src="bg-minecraft.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+            <img src="bg-minecraft.jpg" alt="Preview">
             <div class="caption-card__overlay"></div>
             <div class="caption-preview preview--white-highlight">
               <span style="opacity:0.6">I found a </span> <mark>secret castle...</mark>
@@ -218,7 +207,7 @@
         <label class="caption-card" data-style="word-pop">
           <input type="radio" name="captionStyle" value="word-pop">
           <div class="caption-card__bg">
-            <img src="bg-minecraft.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+            <img src="bg-minecraft.jpg" alt="Preview">
             <div class="caption-card__overlay"></div>
             <div class="caption-preview preview--word-pop">
               I FOUND A <span style="color:#FF2E93; transform: scale(1.1); display:inline-block; font-style:italic">SECRET CASTLE...</span>
@@ -234,7 +223,7 @@
         <label class="caption-card" data-style="clean">
           <input type="radio" name="captionStyle" value="clean">
           <div class="caption-card__bg">
-            <img src="bg-minecraft.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+            <img src="bg-minecraft.jpg" alt="Preview">
             <div class="caption-card__overlay"></div>
             <div class="caption-preview preview--clean">
               <span>I found a secret castle...</span>
@@ -269,12 +258,12 @@
     </section>
 
     <!-- ── STEP 4: Voice ── -->
-    <section id="step-voice" class="step" aria-labelledby="step-voice-title">
+    <section id="step-voice" class="step">
       <div class="step-heading step-heading--with-info">
         <div class="step-heading-left">
           <span class="step-num">04</span>
           <div>
-            <h2 class="step-title" id="step-voice-title">Voice &amp; <span class="grad">Duration</span></h2>
+            <h2 class="step-title">Voice & <span class="grad">Duration</span></h2>
             <p class="step-subtitle">Choose the narrator voice and video length for your Short.</p>
           </div>
         </div>
@@ -297,8 +286,8 @@
               <div class="field-panel-desc">Choose the voice for your story.</div>
             </div>
           </div>
-          <button type="button" class="btn-preview-voice" id="btnPreviewVoice" aria-pressed="false">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg> Preview Voice
+          <button class="btn-preview-voice">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Preview Voice
           </button>
         </div>
 
@@ -306,7 +295,7 @@
           <label class="voice-card" data-voice="default">
             <input type="radio" name="voice" value="default" checked>
             <div class="voice-card-header">
-              <button type="button" class="voice-play-btn" aria-label="Preview this voice"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+              <div class="voice-play-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
               <div class="voice-wave"></div>
               <div class="voice-card-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
             </div>
@@ -316,7 +305,7 @@
           <label class="voice-card" data-voice="energetic">
             <input type="radio" name="voice" value="energetic">
             <div class="voice-card-header">
-              <button type="button" class="voice-play-btn" aria-label="Preview this voice"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+              <div class="voice-play-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
               <div class="voice-wave"></div>
               <div class="voice-card-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
             </div>
@@ -326,7 +315,7 @@
           <label class="voice-card" data-voice="calm">
             <input type="radio" name="voice" value="calm">
             <div class="voice-card-header">
-              <button type="button" class="voice-play-btn" aria-label="Preview this voice"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+              <div class="voice-play-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
               <div class="voice-wave"></div>
               <div class="voice-card-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
             </div>
@@ -336,7 +325,7 @@
           <label class="voice-card" data-voice="narrator">
             <input type="radio" name="voice" value="narrator">
             <div class="voice-card-header">
-              <button type="button" class="voice-play-btn" aria-label="Preview this voice"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+              <div class="voice-play-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
               <div class="voice-wave"></div>
               <div class="voice-card-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
             </div>
@@ -361,7 +350,7 @@
         <div class="duration-grid">
           <label class="duration-card">
             <input type="radio" name="duration" value="30">
-            <img class="duration-card-img" src="bg-minecraft.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+            <img class="duration-card-img" src="bg-minecraft.jpg" alt="">
             <div class="duration-card-content">
               <div class="dur-time">30s</div>
               <div class="dur-bar-wrap"><div class="dur-bar" style="width:30%"></div></div>
@@ -372,7 +361,7 @@
           </label>
           <label class="duration-card">
             <input type="radio" name="duration" value="45" checked>
-            <img class="duration-card-img" src="bg-minecraft.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+            <img class="duration-card-img" src="bg-minecraft.jpg" alt="">
             <div class="duration-card-content">
               <div class="dur-time">45s</div>
               <div class="dur-bar-wrap"><div class="dur-bar" style="width:60%"></div></div>
@@ -383,7 +372,7 @@
           </label>
           <label class="duration-card">
             <input type="radio" name="duration" value="60">
-            <img class="duration-card-img" src="bg-minecraft.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async">
+            <img class="duration-card-img" src="bg-minecraft.jpg" alt="">
             <div class="duration-card-content">
               <div class="dur-time">60s</div>
               <div class="dur-bar-wrap"><div class="dur-bar" style="width:100%"></div></div>
@@ -405,7 +394,7 @@
     </section>
 
     <!-- ── STEP 5: Progress ── -->
-    <section id="step-progress" class="step" aria-labelledby="step-progress-title">
+    <section id="step-progress" class="step">
       <div class="progress-hero">
         <div class="progress-orb">
           <div class="progress-orb-inner"><span id="progressPct">0%</span></div>
@@ -417,7 +406,7 @@
             <circle class="ring-fill" id="progressRing" cx="60" cy="60" r="54"/>
           </svg>
         </div>
-        <h2 class="progress-title" id="step-progress-title">Creating your <span class="grad">Short</span>...</h2>
+        <h2 class="progress-title">Creating your <span class="grad">Short</span>...</h2>
         <p class="progress-stage" id="progressStage">Turning your story into a cinematic video ✨</p>
       </div>
       <div class="pipeline-steps">
@@ -475,9 +464,9 @@
     </section>
 
     <!-- ── STEP 6: Result ── -->
-    <section id="step-result" class="step" aria-labelledby="step-result-title">
+    <section id="step-result" class="step">
       <div class="result-badge">🎉 Ready!</div>
-      <h2 class="result-title" id="step-result-title">Your Short is ready</h2>
+      <h2 class="result-title">Your Short is ready</h2>
       <p class="result-sub">Download it and post to YouTube Shorts, TikTok, or Instagram Reels.</p>
       <div class="result-player">
         <video id="resultVideo" class="result-video" controls playsinline></video>
@@ -504,9 +493,6 @@
      */
     window.__API_BASE__ = '';
   </script>
-  <!-- billing.js defines window.StoryPlayBilling, which app.js calls from
-       initPlanUi(). It must load before app.js or the plan UI silently no-ops. -->
-  <script src="/billing.js"></script>
   <script src="app.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
@@ -566,28 +552,16 @@
 
     const menuBtn = document.getElementById('user-menu-btn');
     const dropdown = document.getElementById('user-dropdown');
-
-    // Class-based rather than inline display juggling, so the state is also
-    // readable by CSS and by aria-expanded. Escape closes it and returns focus to
-    // the trigger, which is the minimum a keyboard user needs.
-    function setMenuOpen(open) {
-      dropdown.classList.toggle('open', open);
-      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    }
-
+    
     menuBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      setMenuOpen(!dropdown.classList.contains('open'));
+      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
     });
 
-    document.addEventListener('click', () => setMenuOpen(false));
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key !== 'Escape' || !dropdown.classList.contains('open')) return;
-      setMenuOpen(false);
-      menuBtn.focus();
+    document.addEventListener('click', () => {
+      dropdown.style.display = 'none';
     });
-
+    
     document.getElementById('btn-signout').addEventListener('click', async () => {
       try {
         if (auth) {

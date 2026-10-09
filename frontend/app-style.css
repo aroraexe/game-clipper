@@ -83,65 +83,8 @@ body {
   font-size: 0.7rem; font-weight: 600; color: #FFFFFF;
   letter-spacing: 0.05em;
 }
-/* ── Account menu ── */
-.user-menu { position: relative; }
-.user-menu-btn {
-  background: none; border: none; cursor: pointer; color: #fff;
-  display: flex; align-items: center; gap: 8px;
-  padding: 0.25rem; border-radius: 999px;
-}
-.user-menu-btn:focus-visible {
-  outline: 2px solid #fff; outline-offset: 2px;
-}
-.user-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: linear-gradient(135deg, #3B82F6, #A78BFA);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: bold; font-size: 14px; text-transform: uppercase;
-}
-.user-dropdown {
-  display: none;
-  position: absolute; top: 100%; right: 0; margin-top: 8px;
-  background: rgba(15, 15, 20, 0.95);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px; padding: 8px; min-width: 180px;
-  backdrop-filter: blur(10px);
-  z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-.user-dropdown.open { display: block; }
-.user-dropdown-head {
-  padding: 8px; font-size: 13px; color: rgba(255,255,255,0.7);
-  border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px;
-  word-break: break-all;
-}
-.user-dropdown-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  padding: 8px; font-size: 13px;
-  border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px;
-}
-.user-dropdown-row span:first-child { color: rgba(255,255,255,0.55); }
-.user-dropdown-row #user-plan-name { font-weight: 600; }
-.user-menu-item {
-  width: 100%; text-align: left; padding: 8px; margin-bottom: 4px;
-  background: rgba(255,255,255,0.05); border: 1px solid transparent;
-  color: #fff; cursor: pointer; border-radius: 6px;
-  display: none; align-items: center; gap: 8px; font-size: 14px;
-  font-family: inherit;
-  transition: background 0.2s;
-}
-.user-menu-item--visible { display: flex; }
-.user-menu-item:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
-.user-menu-item:disabled { opacity: 0.55; cursor: default; }
-.user-menu-item--plan {
-  background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.16);
-}
-.user-menu-item--plan:hover:not(:disabled) { filter: brightness(1.25); }
-
-/* ── Step indicators ── */
-/* ── Step indicators ── */
 .step-indicators {
   display: flex; gap: 0.5rem; align-items: center;
-  list-style: none; margin: 0; padding: 0;
 }
 .step-dot {
   width: 32px; height: 32px; border-radius: 50%;
@@ -164,12 +107,8 @@ body {
 }
 
 /* ── Steps ── */
-/* Visibility is driven by the `hidden` attribute (set in goTo) rather than by
-   inline display juggling, so the browser hides the non-active steps for free and
-   assistive technology is told which step is current. */
-[hidden] { display: none !important; }
-.step { width: 100%; max-width: 900px; }
-.step--active { animation: fadeUp 0.35s ease; }
+.step { display: none; width: 100%; max-width: 900px; }
+.step--active { display: block; animation: fadeUp 0.35s ease; }
 
 @keyframes fadeUp {
   from { opacity:0; transform:translateY(16px); }
@@ -335,16 +274,8 @@ body {
 
 .textarea-footer {
   padding-top: 0.5rem;
-  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
 }
-.char-count { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.char-count.warn  { color: #FFD700; }
-.char-count.error { color: #ef476f; }
-.char-hint {
-  font-size: 0.78rem; color: var(--muted);
-  transition: opacity 0.2s;
-}
-.char-hint--ok { opacity: 0; }
+.char-count { font-size: 0.78rem; color: var(--muted); }
 
 /* ── Examples row ── */
 .examples-row {
@@ -406,20 +337,14 @@ body {
 .gameplay-loading {
   grid-column: 1/-1; text-align:center; color:var(--muted);
   padding: 3rem;
-  display: flex; flex-direction: column; align-items: center; gap: 1rem;
 }
-.gameplay-loading--error { color: #ef476f; }
 .gameplay-card {
   position: relative; border-radius: 12px; overflow: hidden;
   aspect-ratio: 16/9;
   border: 1px solid rgba(255,255,255,0.12);
   cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   background: var(--card);
-  padding: 0; font-family: inherit; color: inherit; text-align: left;
 }
-.gameplay-card:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.gameplay-card--unavailable { cursor: not-allowed; opacity: 0.5; filter: grayscale(0.6); }
-.gameplay-card--unavailable:hover { transform: none; border-color: rgba(255,255,255,0.12); box-shadow: none; }
 .gameplay-card__bg { width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.5s ease; }
 .gameplay-card:hover { transform:translateY(-4px); border-color:rgba(255,255,255,0.6); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
 .gameplay-card:hover .gameplay-card__bg { transform:scale(1.08); }
@@ -584,15 +509,11 @@ body {
   margin-bottom: 1.5rem;
 }
 .voice-play-btn {
-  width: 28px; height: 28px; border-radius: 50%;
-  background: rgba(255,255,255,0.1);
-  border: none; padding: 0;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.05); color: #fff;
   display: flex; align-items: center; justify-content: center;
-  color: var(--text); flex-shrink: 0;
-  cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
 }
-.voice-play-btn:hover { background: rgba(255,255,255,0.2); }
-.voice-play-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .voice-card:has(input:checked) .voice-play-btn {
   background: #FFFFFF; color: #000000; box-shadow: 0 0 12px rgba(255,255,255,0.4);
 }
@@ -660,13 +581,11 @@ body {
   box-shadow:0 4px 14px rgba(255, 255, 255, 0.25);
   transition:all 0.2s;
 }
-.btn-generate:hover:not(:disabled) {
+.btn-generate:hover {
   background: #F0F0F0;
   box-shadow: 0 6px 20px rgba(255, 255, 255, 0.35);
   transform: translateY(-2px);
 }
-.btn-generate.is-busy { opacity: 0.7; cursor: progress; }
-.btn-generate:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
 /* ── Progress ── */
 .progress-hero { text-align:center;padding:2rem 0 1.5rem; }

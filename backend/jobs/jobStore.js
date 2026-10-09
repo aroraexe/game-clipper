@@ -7,21 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
-
-/*
- * The store must live under the SAME resolved root as everything else —
- * STORAGE_ROOT -> RAILWAY_VOLUME_MOUNT_PATH -> ./storage (see storage.util.js).
- *
- * It used to hardcode `../../storage/jobStore.json`, which ignored STORAGE_ROOT
- * and the Railway volume mount entirely. That is not merely inconsistent: it
- * meant job state was written into the container filesystem while the videos it
- * describes sat on the attached volume, so a redeploy lost the job list and
- * orphaned the MP4s (the cleanup sweep walks this list, so they were never
- * reclaimed). It also meant a test that redirected STORAGE_ROOT still wrote to
- * the developer's real store.
- */
-const { STORAGE_ROOT } = require('../utils/storage.util');
-const STORE_PATH = path.join(STORAGE_ROOT, 'jobStore.json');
+const STORE_PATH = path.join(__dirname, '../../storage/jobStore.json');
 
 let jobs = new Map();
 
@@ -186,5 +172,4 @@ module.exports = {
   create, get, update, setStage, setStatus,
   markFailed, markCompleted, list, removeJob,
   findByIdempotencyKey, flush,
-  STORE_PATH,
 };

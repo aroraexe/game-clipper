@@ -7,7 +7,7 @@
   <meta name="description" content="Paste a story, pick gameplay, and get a ready-to-upload short video with AI voice, captions, and smooth edits.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="landing.css?v=2">
+  <link rel="stylesheet" href="landing.css">
 </head>
 <body>
 
@@ -15,18 +15,13 @@
   <nav class="navbar">
     <div class="nav-container">
       <div class="nav-left">
-        <a class="nav-logo" href="/" aria-label="StoryPlay home">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <div class="nav-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="#7A52FF"/>
           </svg>
           <span>StoryPlay</span>
-        </a>
-        <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <path d="M4 7h16M4 12h16M4 17h16"/>
-          </svg>
-        </button>
-        <nav class="nav-links" id="nav-links">
+        </div>
+        <nav class="nav-links">
           <a href="/features">Features</a>
           <a href="/how-it-works">How It Works</a>
           <a href="/#games">Games</a>
@@ -37,15 +32,15 @@
       <div class="nav-actions">
         <a href="/signin" class="btn btn-ghost" id="navSignIn">Sign In</a>
         <a href="/signin" class="btn btn-primary" id="navCreateBtn">Create Video</a>
-        <div id="userMenu" class="user-menu">
-          <button id="user-menu-btn" class="user-menu-btn" aria-haspopup="true" aria-expanded="false" aria-controls="user-dropdown" aria-label="Account menu">
-            <div class="user-avatar user-avatar--brand" id="user-avatar-initial">U</div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <div id="userMenu" style="display: none; position: relative;">
+          <button id="user-menu-btn" style="background: none; border: none; cursor: pointer; color: white; display: flex; align-items: center; gap: 8px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #7A52FF; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;" id="user-avatar-initial">U</div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </button>
-          <div id="user-dropdown" class="user-dropdown" role="menu">
-            <div class="user-dropdown-head" id="user-dropdown-email">user@example.com</div>
-            <button id="btn-signout" class="user-menu-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          <div id="user-dropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 8px; background: rgba(15, 15, 20, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px; min-width: 180px; backdrop-filter: blur(10px); z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="padding: 8px; font-size: 13px; color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; word-break: break-all;" id="user-dropdown-email">user@example.com</div>
+            <button id="btn-signout" style="width: 100%; text-align: left; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid transparent; color: white; cursor: pointer; border-radius: 6px; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
               Sign out
             </button>
           </div>
@@ -98,17 +93,17 @@
 
           <!-- Left floating card -->
           <div class="floating-card left-card">
-            <video data-src="media/example_2.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920" aria-hidden="true"></video>
+            <video src="media/example_2.mp4" autoplay loop muted playsinline disablePictureInPicture></video>
           </div>
 
           <!-- Center main phone -->
           <div class="floating-card main-phone">
-            <video data-src="media/example_1.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920" aria-hidden="true"></video>
+            <video src="media/example_1.mp4" autoplay loop muted playsinline disablePictureInPicture></video>
           </div>
 
           <!-- Right floating card -->
           <div class="floating-card right-card">
-            <video data-src="media/example_4.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920" aria-hidden="true"></video>
+            <video src="media/example_4.mp4" autoplay loop muted playsinline disablePictureInPicture></video>
           </div>
 
         </div>
@@ -195,11 +190,13 @@
       <div class="section-header">
         <h2>Games included</h2>
       </div>
-      <div class="games-row">
-        <div class="game-card"><video data-src="card-media/card-minecraft.mp4" loop muted playsinline disablePictureInPicture width="480" height="360" aria-label="Minecraft gameplay preview"></video><div class="game-card-overlay"><span class="game-name">Minecraft</span></div></div>
-        <div class="game-card"><video data-src="card-media/card-roblox.mp4" loop muted playsinline disablePictureInPicture width="480" height="360" aria-label="Roblox gameplay preview"></video><div class="game-card-overlay"><span class="game-name">Roblox</span></div></div>
-        <div class="game-card"><video data-src="card-media/card-gtav.mp4" loop muted playsinline disablePictureInPicture width="480" height="360" aria-label="GTA V gameplay preview"></video><div class="game-card-overlay"><span class="game-name">GTA V</span></div></div>
-        <div class="game-card"><video data-src="card-media/card-fortnite.mp4" loop muted playsinline disablePictureInPicture width="480" height="360" aria-label="Fortnite gameplay preview"></video><div class="game-card-overlay"><span class="game-name">Fortnite</span></div></div>
+      <div class="games-grid">
+        <div class="game-card"><video src="card-media/card-minecraft.mp4" loop muted playsinline disablePictureInPicture preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;"></video><div class="game-card-overlay" style="z-index: 1;"><span class="game-name">Minecraft</span></div></div>
+        <div class="game-card"><video src="card-media/card-roblox.mp4" loop muted playsinline disablePictureInPicture preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;"></video><div class="game-card-overlay" style="z-index: 1;"><span class="game-name">Roblox</span></div></div>
+        <div class="game-card"><video src="card-media/card-gtav.mp4" loop muted playsinline disablePictureInPicture preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;"></video><div class="game-card-overlay" style="z-index: 1;"><span class="game-name">GTA V</span></div></div>
+        <div class="game-card"><video src="card-media/card-fortnite.mp4" loop muted playsinline disablePictureInPicture preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;"></video><div class="game-card-overlay" style="z-index: 1;"><span class="game-name">Fortnite</span></div></div>
+        <div class="game-card"><img src="card-media/card-valorant.jpg" alt="Valorant" loading="lazy"><div class="game-card-overlay"><span class="game-name">Valorant</span></div></div>
+        <div class="game-card"><img src="card-media/card-cod.jpg" alt="Call of Duty" loading="lazy"><div class="game-card-overlay"><span class="game-name">Call of Duty</span></div></div>
       </div>
     </section>
 
@@ -210,34 +207,34 @@
         <p style="color:var(--muted)">One caption style each.</p>
       </div>
       <div class="examples-grid">
-        <figure class="example-card">
-          <video data-src="media/example_1.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920"></video>
-          <figcaption>
-            <span class="example-tag">Style: Word-Pop</span>
+        <div class="example-card" style="padding:0; position:relative; overflow:hidden;">
+          <video src="media/example_1.mp4" loop muted playsinline disablePictureInPicture preload="none" style="width:100%; display:block;"></video>
+          <div style="position:absolute; bottom:15px; left:15px; right:15px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; font-weight:600; font-size:0.85rem; text-align:left; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.1);">
+            <div style="color:var(--pink);font-size:0.75rem;margin-bottom:2px;text-transform:uppercase;letter-spacing:1px;">Style: Word-Pop</div>
             Minecraft + Reddit Story
-          </figcaption>
-        </figure>
-        <figure class="example-card">
-          <video data-src="media/example_2.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920"></video>
-          <figcaption>
-            <span class="example-tag">Style: Bold Yellow</span>
+          </div>
+        </div>
+        <div class="example-card" style="padding:0; position:relative; overflow:hidden;">
+          <video src="media/example_2.mp4" loop muted playsinline disablePictureInPicture preload="none" style="width:100%; display:block;"></video>
+          <div style="position:absolute; bottom:15px; left:15px; right:15px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; font-weight:600; font-size:0.85rem; text-align:left; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.1);">
+            <div style="color:var(--blue);font-size:0.75rem;margin-bottom:2px;text-transform:uppercase;letter-spacing:1px;">Style: Bold Yellow</div>
             GTA V + True Scary Story
-          </figcaption>
-        </figure>
-        <figure class="example-card">
-          <video data-src="media/example_3.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920"></video>
-          <figcaption>
-            <span class="example-tag">Style: White Highlight</span>
+          </div>
+        </div>
+        <div class="example-card" style="padding:0; position:relative; overflow:hidden;">
+          <video src="media/example_3.mp4" loop muted playsinline disablePictureInPicture preload="none" style="width:100%; display:block;"></video>
+          <div style="position:absolute; bottom:15px; left:15px; right:15px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; font-weight:600; font-size:0.85rem; text-align:left; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.1);">
+            <div style="color:var(--purple);font-size:0.75rem;margin-bottom:2px;text-transform:uppercase;letter-spacing:1px;">Style: White Highlight</div>
             Roblox + Fun Facts
-          </figcaption>
-        </figure>
-        <figure class="example-card">
-          <video data-src="media/example_4.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920"></video>
-          <figcaption>
-            <span class="example-tag">Style: Clean</span>
+          </div>
+        </div>
+        <div class="example-card" style="padding:0; position:relative; overflow:hidden;">
+          <video src="media/example_4.mp4" loop muted playsinline disablePictureInPicture preload="none" style="width:100%; display:block;"></video>
+          <div style="position:absolute; bottom:15px; left:15px; right:15px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:8px; font-weight:600; font-size:0.85rem; text-align:left; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.1);">
+            <div style="color:#FFF;font-size:0.75rem;margin-bottom:2px;text-transform:uppercase;letter-spacing:1px;">Style: Clean</div>
             Fortnite + Funny Story
-          </figcaption>
-        </figure>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -261,7 +258,7 @@
         </div>
         <div class="glass-card faq-card">
           <h4>Do I keep the rights?</h4>
-          <p>Yes. We make no claim on what you make. Free renders carry a small StoryPlay mark in the corner; Pro removes it.</p>
+          <p>Yes. There is no watermark and no claim on what you make.</p>
         </div>
         <div class="glass-card faq-card">
           <h4>How do I log in?</h4>
@@ -269,7 +266,7 @@
         </div>
         <div class="glass-card faq-card">
           <h4>Will my videos disappear?</h4>
-          <p>Free renders are deleted an hour after they finish; Pro keeps yours for seven days. Either way, download before the window closes.</p>
+          <p>Finished videos are deleted an hour after they are created. Download yours before you close the tab.</p>
         </div>
       </div>
     </section>
@@ -291,123 +288,82 @@
 
   <script src="typewriter.js"></script>
   <script>
-    (function () {
-      'use strict';
+    // Check Auth State
+    const userEmail = localStorage.getItem('userEmail');
+    if (userEmail) {
+      document.getElementById('navSignIn').style.display = 'none';
+      document.getElementById('userMenu').style.display = 'block';
+      
+      document.getElementById('user-dropdown-email').innerText = userEmail;
+      document.getElementById('user-avatar-initial').innerText = userEmail.charAt(0).toUpperCase();
 
-      var API_BASE = (window.__API_BASE__ || '').replace(/\/$/, '');
-      var userEmail = localStorage.getItem('userEmail');
+      document.getElementById('navCreateBtn').href = '/app';
+      document.getElementById('navCreateBtn').textContent = 'Go to App';
+      document.getElementById('heroCreateBtn').href = '/app';
+    }
 
-      if (userEmail) {
-        document.getElementById('navSignIn').hidden = true;
-        document.getElementById('userMenu').hidden = false;
-        document.getElementById('user-dropdown-email').textContent = userEmail;
-        document.getElementById('user-avatar-initial').textContent = userEmail.charAt(0).toUpperCase();
-        document.getElementById('navCreateBtn').href = '/app';
-        document.getElementById('navCreateBtn').textContent = 'Go to App';
-        document.getElementById('heroCreateBtn').href = '/app';
-      }
-
-      // ── Mobile nav ──
-      var navToggle = document.getElementById('nav-toggle');
-      var navLinks = document.getElementById('nav-links');
-
-      function setNavOpen(open) {
-        navLinks.classList.toggle('open', open);
-        navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-        navToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-      }
-
-      navToggle.addEventListener('click', function (e) {
+    const menuBtn = document.getElementById('user-menu-btn');
+    const dropdown = document.getElementById('user-dropdown');
+    
+    if (menuBtn) {
+      menuBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        setNavOpen(!navLinks.classList.contains('open'));
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
       });
-      navLinks.addEventListener('click', function (e) {
-        if (e.target.tagName === 'A') setNavOpen(false);
-      });
+    }
 
-      // ── Account menu ──
-      var menuBtn = document.getElementById('user-menu-btn');
-      var dropdown = document.getElementById('user-dropdown');
-
-      function setMenuOpen(open) {
-        dropdown.classList.toggle('open', open);
-        menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      }
-
-      menuBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        setMenuOpen(!dropdown.classList.contains('open'));
-      });
-
-      document.addEventListener('click', function () {
-        setMenuOpen(false);
-        setNavOpen(false);
-      });
-
-      document.addEventListener('keydown', function (e) {
-        if (e.key !== 'Escape') return;
-        if (dropdown.classList.contains('open')) { setMenuOpen(false); menuBtn.focus(); }
-        setNavOpen(false);
-      });
-
-      // ── Sign out ──
-      document.getElementById('btn-signout').addEventListener('click', async function () {
-        // The session cookie is httpOnly, so `document.cookie = ...` cannot clear
-        // it — that line ran here before and did nothing, leaving a live session
-        // behind a "signed out" landing page. The server has to clear it.
-        try {
-          await fetch(API_BASE + '/api/auth/logout', { method: 'POST', credentials: 'include' });
-        } catch (err) {
-          console.warn('[Auth] logout request failed:', err.message);
-        }
+    document.addEventListener('click', () => {
+      if (dropdown) dropdown.style.display = 'none';
+    });
+    
+    const signOutBtn = document.getElementById('btn-signout');
+    if (signOutBtn) {
+      signOutBtn.addEventListener('click', () => {
         localStorage.removeItem('userEmail');
         localStorage.removeItem('firebaseToken');
+        document.cookie = "sessionToken=; path=/; max-age=0";
         window.location.href = '/signin';
       });
-    })();
+    }
   </script>
   <script>
-    /* Load and play videos only while they are near the viewport.
-       All three hero clips plus the four examples were downloading and decoding
-       at once on load; deferring src until intersect keeps the landing page cheap
-       without needing a build step to produce poster images. */
-    (function () {
-      'use strict';
-
-      var videos = Array.prototype.slice.call(document.querySelectorAll('video[data-src]'));
-
-      if (!videos.length) return;
-
-      function activate(video) {
-        var src = video.getAttribute('data-src');
-        if (!src) return;
-        video.removeAttribute('data-src');
-        video.setAttribute('src', src);
-        video.load();
-      }
-
-      if (!('IntersectionObserver' in window)) {
-        videos.forEach(activate);
-        return;
-      }
-
-      var observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          var video = entry.target;
-          if (entry.isIntersecting) {
-            activate(video);
-            var p = video.play();
-            if (p) p.catch(function () {});
-          } else {
-            video.pause();
-            // Drop the decoder buffer — 1080p decoders hold tens of MB.
-            if (video.currentTime > 0) video.currentTime = 0;
-          }
+    // Extreme Memory Optimization: 
+    // Unload videos when out of view, and lazy load them only when scrolling near them.
+    document.addEventListener("DOMContentLoaded", function() {
+      const videos = document.querySelectorAll("video");
+      if ("IntersectionObserver" in window) {
+        const videoObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            const video = entry.target;
+            if (entry.isIntersecting) {
+              // Only load the video if it hasn't been loaded yet
+              if (video.getAttribute('preload') === 'none') {
+                video.setAttribute('preload', 'auto');
+              }
+              const playPromise = video.play();
+              if (playPromise !== undefined) {
+                playPromise.catch(() => {});
+              }
+            } else {
+              video.pause();
+              // Reset current time to force the browser to dump decoder cache
+              // (which is huge for 1080p videos)
+              if (video.currentTime > 0) {
+                video.currentTime = 0;
+              }
+            }
+          });
+        }, { 
+          // Start loading the video when it's 20% away from entering the screen
+          rootMargin: "20% 0px 20% 0px",
+          threshold: 0.1 
         });
-      }, { rootMargin: '20% 0px 20% 0px', threshold: 0.1 });
-
-      videos.forEach(function (video) { observer.observe(video); });
-    })();
+        
+        videos.forEach(video => {
+          videoObserver.observe(video);
+        });
+      }
+    });
   </script>
 </body>
 </html>

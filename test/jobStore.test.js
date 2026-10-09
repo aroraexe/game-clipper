@@ -1,28 +1,7 @@
-import { describe, it, expect, afterAll, beforeEach } from 'vitest';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-
-// jobStore resolves STORAGE_ROOT at import time, so it must be redirected BEFORE
-// the import below is evaluated.
-//
-// Without this the suite wrote to the real ./storage/jobStore.json. The
-// 'persist-1' fixture from the persistence test was left behind on disk, and on
-// the next boot renderQueue.initQueue() picked it up and tried to render a job
-// with no gameplayId — surfacing as "Unknown gameplay id: undefined" on server
-// start. The job was deleted by hand twice before the cause was found.
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'jobstore-'));
-process.env.STORAGE_ROOT = tmpDir;
-
-const jobStore = await import('../backend/jobs/jobStore');
-const { create, get, update, setStage, markFailed, list, removeJob, findByIdempotencyKey, flush } = jobStore;
+import { describe, it, expect, beforeEach } from 'vitest';
+import { create, get, update, setStage, markFailed, list, removeJob, findByIdempotencyKey, flush } from '../backend/jobs/jobStore';
 
 const uid = () => `u-${Math.random().toString(36).slice(2, 10)}`;
-
-afterAll(() => {
-  flush();
-  fs.rmSync(tmpDir, { recursive: true, force: true });
-});
 
 beforeEach(() => {
   list().forEach(j => removeJob(j.jobId));
@@ -114,14 +93,5 @@ describe('persistence', () => {
     create('persist-1', { userId: 'u1', story: 'x' });
     flush();
     expect(() => flush()).not.toThrow();
-  });
-
-  it('is writing to the temp dir, never the real storage/jobStore.json', () => {
-    // Guards the isolation set up at the top of this file. If the redirection
-    // is dropped, this suite silently seeds the live store with jobs that have
-    // no gameplayId, and the next server boot fails on them.
-    expect(jobStore.STORE_PATH.startsWith(tmpDir)).toBe(true);
-    expect(fs.existsSync(jobStore.STORE_PATH)).toBe(true);
-    expect(JSON.parse(fs.readFileSync(jobStore.STORE_PATH, 'utf8'))).toHaveProperty('persist-1');
   });
 });

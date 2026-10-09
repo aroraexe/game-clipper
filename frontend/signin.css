@@ -1,7 +1,4 @@
-/* The Google Fonts <link> in signin.html already loads both families. The @import
-   here was a second, duplicate request for the same CSS (and it blocks the first
-   paint because @import is serialised behind the stylesheet itself). Removed —
-   keep the single <link> as the source. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700;800&display=swap');
 
 :root {
   --bg-right: #000000;
@@ -25,12 +22,6 @@ body {
   color: var(--text-main);
   overflow: hidden;
   height: 100vh;
-}
-
-/* 100vh on mobile browsers is the viewport with the URL bar expanded, so the
-   bottom of the sign-in panel was unreachable behind it. */
-@media (max-width: 968px) {
-  body { height: auto; min-height: 100dvh; overflow-y: auto; }
 }
 
 .split-layout {
@@ -358,16 +349,9 @@ body {
 .input-icon {
   position: absolute; left: 14px; top: 40px; color: #6b7280; pointer-events: none;
 }
-/* Show/hide password toggle. The eye icon in signin.html had cursor:pointer but
-   no handler at all — it looked interactive and did nothing. */
 .input-action {
-  position: absolute; right: 10px; top: 34px;
-  background: none; border: none; padding: 6px;
-  color: #6b7280; cursor: pointer; border-radius: 6px;
-  display: flex; align-items: center;
+  position: absolute; right: 14px; top: 40px; color: #6b7280; cursor: pointer;
 }
-.input-action:hover { color: #C7C7CC; }
-.input-action:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
 
 .btn-submit {
   width: 100%; padding: 14px; border: none; border-radius: 8px;

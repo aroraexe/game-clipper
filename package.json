@@ -24,8 +24,6 @@
     "helmet": "^7.1.0",
     "node-edge-tts": "^1.2.10",
     "openai": "^7.23.0",
-    "razorpay": "^2.9.8",
-    "stripe": "^23.0.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
