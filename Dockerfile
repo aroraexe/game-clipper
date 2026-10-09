@@ -62,12 +62,4 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"
 
-USER node
-
-# Railway: images that run as a non-root UID hit permission errors on an
-# attached volume unless this is set. Railway chowns the volume for the
-# specified UID, which lets the container KEEP running as `node` (1000)
-# and still write to the mount.
-ENV RAILWAY_RUN_UID=1000
-
 CMD ["node", "backend/server.js"]
