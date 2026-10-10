@@ -545,3 +545,16 @@ ode process out of writing to /app/storage/temp.
 - **Changes:** Verified vitest test suite (172 passed across all 11 files); verified backend syntax with node --check; removed empty outputSigning.js scratch file; committed and pushed to origin/main.
 - **Verified:** npm test = 172 passed / 11 files. git push origin main clean.
 - **Notes:** Railway deployment will automatically pick up latest commit.
+
+### 2026-10-10 18:35 - antigravity
+- **Task:** Fix legit bugs: auth null token poisoning, Razorpay webhook signature, Whisper subtitle timing desync, and bundled gameplay fallback
+- **Files:** backend/middleware/auth.middleware.js, backend/billing/razorpay.billing.js, backend/services/whisper.service.js, backend/services/render.service.js, backend/services/gameplay.service.js, frontend/signin.html, frontend/app.js, frontend/billing.js, AGENT_LOG.md
+- **Changes:**
+  - auth.middleware.js: Ignore string 'null' and 'undefined' in Authorization Bearer headers so requests gracefully fall back to valid session cookies.
+  - signin.html & app.js: Store Firebase ID token on signin and introduce authHeaders helper to only send valid Bearer tokens.
+  - billing.js: Ensure api helper respects global.__API_BASE__ and attaches auth token.
+  - razorpay.billing.js: Update constructEvent to check standard HMAC-SHA256 signature on rawBody with fallback to legacy webhookId prefix.
+  - whisper.service.js & render.service.js: Pass trueDurationS to transcribe and use ffprobe-static fallback before defaulting to 10s.
+  - gameplay.service.js: Added fallback resolution to check bundled storage/gameplay directory if external volume is mounted.
+- **Verified:** Ran npm test - all 172 tests passed across 11 test suites.
+- **Notes:** Zero regression; all billing, auth, and rendering test suites green.

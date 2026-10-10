@@ -23,17 +23,25 @@
 
   function api(path, options) {
     options = options || {};
+    var base = (global.__API_BASE__ || '').replace(/\/$/, '');
+    var url = path.startsWith('http') ? path : (base + path);
     var init = {
       method: options.method || 'GET',
       // The session lives in an httpOnly cookie, so it must be sent explicitly.
       credentials: 'include',
       headers: { 'Accept': 'application/json' }
     };
+    if (global.localStorage) {
+      var token = global.localStorage.getItem('firebaseToken');
+      if (token && token !== 'null' && token !== 'undefined') {
+        init.headers['Authorization'] = 'Bearer ' + token;
+      }
+    }
     if (options.body) {
       init.headers['Content-Type'] = 'application/json';
       init.body = JSON.stringify(options.body);
     }
-    return fetch(path, init).then(function (res) {
+    return fetch(url, init).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (data) {
         if (!res.ok) {
           var err = new Error(data.error || 'Request failed (' + res.status + ')');

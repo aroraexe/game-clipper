@@ -59,13 +59,29 @@ const COOLDOWN_RANGE = 30;            // avoid start timestamps within ±30s of 
  */
 function resolveFile(entry) {
   const primary = path.join(GAMEPLAY_DIR, entry.file);
-  if (fs.existsSync(primary)) return { resolvedFile: entry.file, usingFallback: false };
+  if (fs.existsSync(primary)) return { resolvedFile: entry.file, fullPath: primary, usingFallback: false };
 
   if (entry.fallback) {
     const fb = path.join(GAMEPLAY_DIR, entry.fallback);
     if (fs.existsSync(fb)) {
       console.warn(`[Gameplay] Full file '${entry.file}' missing — using fallback '${entry.fallback}'`);
       return { resolvedFile: entry.fallback, usingFallback: true };
+    }
+  }
+
+  // If STORAGE_ROOT was moved (e.g. Railway volume at /data), check bundled storage/gameplay
+  const bundledDir = path.resolve(__dirname, '../../storage/gameplay');
+  if (bundledDir !== GAMEPLAY_DIR && fs.existsSync(bundledDir)) {
+    const bundledPrimary = path.join(bundledDir, entry.file);
+    if (fs.existsSync(bundledPrimary)) {
+      return { resolvedFile: entry.file, fullPath: bundledPrimary, usingFallback: false };
+    }
+    if (entry.fallback) {
+      const bundledFb = path.join(bundledDir, entry.fallback);
+      if (fs.existsSync(bundledFb)) {
+        console.warn(`[Gameplay] Serving bundled fallback '${entry.fallback}'`);
+        return { resolvedFile: entry.fallback, fullPath: bundledFb, usingFallback: true };
+      }
     }
   }
 
@@ -108,7 +124,7 @@ async function selectSegment(gameId, durationS) {
     throw new Error(`No gameplay file available for '${gameId}'. Upload ${entry.file} or ${entry.fallback} to storage/gameplay/.`);
   }
 
-  const filePath = path.join(GAMEPLAY_DIR, resolved.resolvedFile);
+  const filePath = resolved.fullPath || path.join(GAMEPLAY_DIR, resolved.resolvedFile);
 
   // Get (or probe) the file duration
   const totalDuration = await getFileDuration(gameId, filePath);

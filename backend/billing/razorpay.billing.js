@@ -168,19 +168,36 @@ function verifyCheckoutSignature({ paymentId, subscriptionId, signature }) {
   return true;
 }
 
-/** Webhook authenticity: HMAC over `webhook-id|rawBody`. */
+/** Webhook authenticity: HMAC SHA256 over rawBody (standard Razorpay), with legacy webhookId fallback. */
 function constructEvent(rawBody, signature, webhookId) {
   const secret = config.razorpayWebhookSecret();
   if (!secret) throw new Error('RAZORPAY_WEBHOOK_SECRET is not set; cannot verify webhooks.');
 
-  const expected = crypto
-    .createHmac('sha256', secret)
-    .update(`${webhookId}|${rawBody}`)
-    .digest('hex');
+  const sig = String(signature || '');
+  const b = Buffer.from(sig);
 
-  const a = Buffer.from(expected);
-  const b = Buffer.from(String(signature || ''));
-  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+  // Standard Razorpay specification: HMAC-SHA256 of raw request body
+  const expectedStandard = crypto
+    .createHmac('sha256', secret)
+    .update(rawBody)
+    .digest('hex');
+  const aStandard = Buffer.from(expectedStandard);
+
+  let valid = aStandard.length === b.length && crypto.timingSafeEqual(aStandard, b);
+
+  // Fallback for custom or legacy webhookId prefix if present
+  if (!valid && webhookId) {
+    const expectedPrefixed = crypto
+      .createHmac('sha256', secret)
+      .update(`${webhookId}|${rawBody}`)
+      .digest('hex');
+    const aPrefixed = Buffer.from(expectedPrefixed);
+    if (aPrefixed.length === b.length && crypto.timingSafeEqual(aPrefixed, b)) {
+      valid = true;
+    }
+  }
+
+  if (!valid) {
     throw new Error('Razorpay webhook signature verification failed.');
   }
 

@@ -327,6 +327,7 @@
       
       if (response.ok) {
         localStorage.setItem('userEmail', user.email || 'user');
+        localStorage.setItem('firebaseToken', token);
         window.location.href = '/app';
       } else {
         let errMsg = 'Could not start your secure session. Please try again.';

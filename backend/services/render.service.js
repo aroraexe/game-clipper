@@ -115,7 +115,7 @@ async function renderPipeline(job) {
     const subsPromise = (async () => {
       let words;
       await timeBlock('Whisper Sync', async () => {
-        words = await whisperService.transcribe(audioPath, tempDir, cleanStory);
+        words = await whisperService.transcribe(audioPath, tempDir, cleanStory, trueDurationS);
         fs.writeFileSync(path.join(tempDir, 'timestamps.json'), JSON.stringify(words, null, 2), 'utf8');
       });
       checkTimeout(timedOut);

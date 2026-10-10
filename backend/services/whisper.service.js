@@ -26,7 +26,7 @@ const { execFileSync } = require('child_process');
  *
  * WordTimestamp: { word: string, start: number, end: number }
  */
-async function transcribe(audioPath, _outputDir, cleanStory) {
+async function transcribe(audioPath, _outputDir, cleanStory, explicitDuration = null) {
   if (!fs.existsSync(audioPath)) {
     throw new Error(`Audio file not found: ${path.basename(audioPath)}`);
   }
@@ -34,14 +34,24 @@ async function transcribe(audioPath, _outputDir, cleanStory) {
   console.log('[Timing] Using character-weighted math timing (free, instant)');
 
   /* ── 1. Get real audio duration via ffprobe ─────────────────────── */
-  let durationS = 10.0;
-  try {
-    const ffprobeBin = process.env.FFPROBE_PATH || 'ffprobe';
-    const args = ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', audioPath];
-    const out  = execFileSync(ffprobeBin, args, { encoding: 'utf8' }).trim();
-    durationS  = parseFloat(out) || 10.0;
-  } catch (e) {
-    console.warn('[Timing] Could not read audio duration, defaulting to 10s');
+  let durationS = typeof explicitDuration === 'number' && explicitDuration > 0 ? explicitDuration : null;
+  if (!durationS) {
+    try {
+      let ffprobeBin = process.env.FFPROBE_PATH;
+      if (!ffprobeBin) {
+        try {
+          const ffprobeStatic = require('ffprobe-static');
+          if (ffprobeStatic && ffprobeStatic.path) ffprobeBin = ffprobeStatic.path;
+        } catch (_) {}
+      }
+      ffprobeBin = ffprobeBin || 'ffprobe';
+      const args = ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', audioPath];
+      const out  = execFileSync(ffprobeBin, args, { encoding: 'utf8' }).trim();
+      durationS  = parseFloat(out) || 10.0;
+    } catch (e) {
+      console.warn('[Timing] Could not read audio duration, defaulting to 10s');
+      durationS  = 10.0;
+    }
   }
 
   /* ── 2. Tokenise story into words ───────────────────────────────── */

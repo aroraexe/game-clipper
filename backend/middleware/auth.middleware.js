@@ -122,7 +122,10 @@ function authPreflight() {
 function getRequestToken(req) {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
-    return authHeader.split('Bearer ')[1];
+    const token = authHeader.split('Bearer ')[1]?.trim();
+    if (token && token !== 'null' && token !== 'undefined') {
+      return token;
+    }
   }
   return req.cookies?.sessionToken || null;
 }

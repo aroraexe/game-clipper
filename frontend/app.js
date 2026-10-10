@@ -31,6 +31,15 @@ const state = {
 const API_BASE = (window.__API_BASE__ || '').replace(/\/$/, '');
 const apiUrl = (path) => `${API_BASE}${path}`;
 
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem('firebaseToken');
+  const headers = { ...extra };
+  if (token && token !== 'null' && token !== 'undefined') {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 // Only the ids the server's CATALOGUE actually serves. An id missing here falls
 // back to the shared background rather than 404-ing on every card.
 const GAMEPLAY_EMOJIS = {
@@ -598,7 +607,7 @@ async function loadGameplay() {
   try {
     const res  = await fetch(apiUrl('/api/gameplay'), {
       credentials: 'include',
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('firebaseToken')}` }
+      headers: authHeaders(),
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.error || 'Failed to load gameplay options.');
@@ -771,11 +780,10 @@ async function submitJob() {
       // Idempotency-Key lets jobStore collapse a duplicate submission instead of
       // queueing a second full render for the same story. Sent on every attempt;
       // the server reuses it for 24h.
-      headers: {
+      headers: authHeaders({
         'Content-Type': 'application/json',
         'Idempotency-Key': submitJob.key || (submitJob.key = cryptoId()),
-        'Authorization': `Bearer ${localStorage.getItem('firebaseToken')}`
-      },
+      }),
       credentials: 'include',
       body: JSON.stringify({
         story:        state.story,
@@ -887,7 +895,7 @@ function startPolling(jobId) {
     try {
       const res = await fetch(apiUrl(`/api/videos/${jobId}`), {
         credentials: 'include',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('firebaseToken')}` }
+        headers: authHeaders(),
       });
 
       // A 401 here means the session cookie and the cached ID token both expired.
