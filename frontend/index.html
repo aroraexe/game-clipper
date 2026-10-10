@@ -4,10 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StoryPlay — Turn any story into a gaming Short.</title>
-  <meta name="description" content="Paste a story, pick gameplay, and get a ready-to-upload short video with AI voice, captions, and smooth edits.">
+  <meta name="description" content="Paste a story, pick gameplay, and download a 9:16 short with voiceover and burned-in captions.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="landing.css?v=5">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="landing.css?v=10">
+  <link rel="preload" href="media/example_1.mp4" as="video" type="video/mp4">
+
 </head>
 <body>
 
@@ -17,7 +20,7 @@
       <div class="nav-left">
         <a class="nav-logo" href="/" aria-label="StoryPlay home">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="#FFFFFF"/>
+            <path d="M5 4.5V19.5L19 12L5 4.5Z"/>
           </svg>
           <span>StoryPlay</span>
         </a>
@@ -38,7 +41,7 @@
       <div class="nav-actions">
         <a href="/signin" class="btn btn-ghost" id="navSignIn">Sign In</a>
         <a href="/signin" class="btn btn-primary" id="navCreateBtn">Create Video</a>
-        <div id="userMenu" class="user-menu">
+        <div id="userMenu" class="user-menu" hidden>
           <button id="user-menu-btn" class="user-menu-btn" aria-haspopup="true" aria-expanded="false" aria-controls="user-dropdown" aria-label="Account menu">
             <div class="user-avatar user-avatar--brand" id="user-avatar-initial">U</div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -60,82 +63,85 @@
 
     <!-- HERO -->
     <section class="hero">
-      <div class="hero-left">
-        <h1 class="hero-title">
-          Turn any story into a<br>
-          <span class="typewriter" data-words='["gaming Short","TikTok Short","YouTube Short","vertical Short"]'></span><span class="typewriter-caret" aria-hidden="true"></span>
-        </h1>
+      <div class="hero-copy">
+        <p class="hero-brand">StoryPlay</p>
+        <h1 class="hero-title">Turn any story into a gaming Short.</h1>
         <p class="hero-desc">
-          Paste a story, pick a game, and download a 9:16 video with a voiceover and burned-in captions
+          Paste a story, pick gameplay, and download a ready 9:16 with voiceover and burned-in captions.
         </p>
         <div class="hero-cta-group">
-          <a href="/signin" class="btn btn-primary btn-large" id="heroCreateBtn">Create your first video</a>
+          <a href="/signin" class="btn btn-accent btn-large" id="heroCreateBtn">Start free</a>
+          <a href="/examples" class="btn btn-outline btn-large">See examples</a>
         </div>
+        <p class="hero-trust">
+          <span>720×1280</span>
+          <span>4 voice styles</span>
+          <span>6 games</span>
+          <span>Free plan included</span>
+        </p>
       </div>
 
-      <!-- Phone cluster -->
-      <div class="hero-right">
-        <div class="hero-phone-container">
-
-          <!-- "Your Story" label — top-left of cluster -->
-          <div class="arrow-label label-left">
-            <span>Your Story</span>
-            <svg class="drawn-arrow" viewBox="0 0 56 36" fill="none">
-              <path d="M4 6 C 10 6, 20 24, 44 30" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-              <path d="M36 30 L44 30 L40 23" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+      <div class="hero-visual">
+        <div class="studio" id="heroStudio">
+          <div class="studio-pane">
+            <div class="studio-chrome">
+              <span>New video</span>
+              <span class="studio-hint">Try it — nothing is submitted yet</span>
+            </div>
+            <div>
+              <label class="studio-label" for="studioStory">Story</label>
+              <textarea id="studioStory" class="studio-story" rows="4" maxlength="800" placeholder="Paste a story…">So I was walking home at 2am when I heard footsteps behind me that matched every step I took…</textarea>
+            </div>
+            <div>
+              <div class="studio-label" id="studioGameplayLabel">Gameplay</div>
+              <div class="studio-chips" role="radiogroup" aria-labelledby="studioGameplayLabel">
+                <button type="button" class="studio-chip is-active" role="radio" aria-checked="true" data-game="Minecraft" data-preview="media/example_1.mp4">Minecraft</button>
+                <button type="button" class="studio-chip" role="radio" aria-checked="false" data-game="GTA V" data-preview="media/example_2.mp4">GTA V</button>
+                <button type="button" class="studio-chip" role="radio" aria-checked="false" data-game="Fortnite" data-preview="media/example_4.mp4">Fortnite</button>
+                <button type="button" class="studio-chip" role="radio" aria-checked="false" data-game="Roblox" data-preview="media/example_3.mp4">Roblox</button>
+              </div>
+            </div>
+            <div class="studio-meta">
+              <button type="button" class="studio-meta-btn" id="studioVoice" data-options="Narrator,Deadpan,Energetic,Soft">
+                Voice <strong>Narrator</strong>
+              </button>
+              <button type="button" class="studio-meta-btn" id="studioCaptions" data-options="Word-Pop,Bold Yellow,White Highlight,Clean">
+                Captions <strong>Word-Pop</strong>
+              </button>
+              <button type="button" class="studio-meta-btn" id="studioLength" data-options="30s,45s,60s">
+                Length <strong>45s</strong>
+              </button>
+            </div>
+            <button type="button" class="btn btn-accent studio-generate" id="studioGenerate">Generate video</button>
           </div>
-
-          <!-- "Viral Short" label — top-right of cluster -->
-          <div class="arrow-label label-right">
-            <span>Your Short</span>
-            <svg class="drawn-arrow" viewBox="0 0 56 36" fill="none">
-              <path d="M52 6 C 46 6, 36 24, 12 30" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-              <path d="M20 30 L12 30 L16 23" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+          <div class="studio-preview">
+            <span class="studio-preview-label">Preview</span>
+            <div class="studio-phone">
+              <video id="studioPreview" data-src="media/example_1.mp4" data-priority="high" loop muted playsinline preload="metadata" disablePictureInPicture></video>
+            </div>
           </div>
-
-          <!-- Removed confusing expand hint arrows -->
-
-          <!-- Left floating card -->
-          <div class="floating-card left-card">
-            <video data-src="media/example_2.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920" aria-hidden="true"></video>
-          </div>
-
-          <!-- Center main phone -->
-          <div class="floating-card main-phone">
-            <video data-src="media/example_1.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920" aria-hidden="true"></video>
-          </div>
-
-          <!-- Right floating card -->
-          <div class="floating-card right-card">
-            <video data-src="media/example_4.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920" aria-hidden="true"></video>
-          </div>
-
         </div>
       </div>
     </section>
 
-    <!-- FEATURES -->
+    <!-- CAPABILITIES -->
     <section id="features" class="features-section">
       <div class="section-header">
-        <h2>What it does</h2>
+        <h2>Built for shipping Shorts</h2>
+        <p>The same pipeline you use in the app — no template filler.</p>
       </div>
-      <div class="features-grid">
-        <div class="glass-card feature-card">
-          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <div class="cap-list">
+        <div class="cap-item">
           <h3>Voiceover</h3>
-          <p>Text-to-speech narration in four styles, from deadpan to narrator.</p>
+          <p>Four narration styles timed to your script so the clip ends on the last word.</p>
         </div>
-        <div class="glass-card feature-card">
-          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17v2m5-2v2m5-2v2"/></svg></div>
-          <h3>Word-level captions</h3>
-          <p>Four caption styles burned into the video, timed to the voiceover.</p>
+        <div class="cap-item">
+          <h3>Burned-in captions</h3>
+          <p>Word-level styles baked into the MP4 — ready for TikTok, Reels, and Shorts.</p>
         </div>
-        <div class="glass-card feature-card">
-          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
+        <div class="cap-item">
           <h3>Real gameplay</h3>
-          <p>Random segments from full-length gameplay, never the same clip twice in an hour.</p>
+          <p>Random cuts from full-length footage so back-to-back renders don’t look identical.</p>
         </div>
       </div>
     </section>
@@ -188,7 +194,7 @@
     <section id="examples" class="examples-section">
       <div class="section-header">
         <h2>Examples</h2>
-        <p style="color:var(--muted)">One caption style each.</p>
+        <p>One caption style each — real renders from the product.</p>
       </div>
       <div class="examples-grid">
         <figure class="example-card">
@@ -224,34 +230,34 @@
 
     <!-- FAQ -->
     <section id="faq" class="faq-section">
-      <div class="section-header" style="text-align: center; margin-bottom: 2rem;">
+      <div class="section-header">
         <h2>FAQ</h2>
       </div>
-      <div class="faq-grid">
-        <div class="glass-card faq-card">
-          <h4>How long can a video be?</h4>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>How long can a video be?</summary>
           <p>30, 45 or 60 seconds. The final length follows your voiceover, so the last word is never cut off.</p>
-        </div>
-        <div class="glass-card faq-card">
-          <h4>What do I get in the download?</h4>
+        </details>
+        <details class="faq-item">
+          <summary>What do I get in the download?</summary>
           <p>A 720&times;1280 H.264 MP4 with the narration mixed in and the captions burned into the picture.</p>
-        </div>
-        <div class="glass-card faq-card">
-          <h4>Which languages work?</h4>
+        </details>
+        <details class="faq-item">
+          <summary>Which languages work?</summary>
           <p>English only for now. The voiceover and caption timing are both tuned for it.</p>
-        </div>
-        <div class="glass-card faq-card">
-          <h4>Do I keep the rights?</h4>
+        </details>
+        <details class="faq-item">
+          <summary>Do I keep the rights?</summary>
           <p>Yes. We make no claim on what you make. Free renders carry a small StoryPlay mark in the corner; Pro removes it.</p>
-        </div>
-        <div class="glass-card faq-card">
-          <h4>How do I log in?</h4>
+        </details>
+        <details class="faq-item">
+          <summary>How do I log in?</summary>
           <p>With Google, GitHub or an email address. Nothing else is required.</p>
-        </div>
-        <div class="glass-card faq-card">
-          <h4>Will my videos disappear?</h4>
+        </details>
+        <details class="faq-item">
+          <summary>Will my videos disappear?</summary>
           <p>Free renders are deleted an hour after they finish; Pro keeps yours for seven days. Either way, download before the window closes.</p>
-        </div>
+        </details>
       </div>
     </section>
 
@@ -270,23 +276,118 @@
     <span class="copy">StoryPlay</span>
   </footer>
 
-  <script src="typewriter.js"></script>
   <script>
     (function () {
       'use strict';
 
       var API_BASE = (window.__API_BASE__ || '').replace(/\/$/, '');
       var userEmail = localStorage.getItem('userEmail');
+      var navSignIn = document.getElementById('navSignIn');
+      var userMenu = document.getElementById('userMenu');
+      var navCreateBtn = document.getElementById('navCreateBtn');
+      var heroCreateBtn = document.getElementById('heroCreateBtn');
 
       if (userEmail) {
-        document.getElementById('navSignIn').hidden = true;
-        document.getElementById('userMenu').hidden = false;
+        navSignIn.hidden = true;
+        userMenu.hidden = false;
         document.getElementById('user-dropdown-email').textContent = userEmail;
         document.getElementById('user-avatar-initial').textContent = userEmail.charAt(0).toUpperCase();
-        document.getElementById('navCreateBtn').href = '/app';
-        document.getElementById('navCreateBtn').textContent = 'Go to App';
-        document.getElementById('heroCreateBtn').href = '/app';
+        navCreateBtn.href = '/app';
+        navCreateBtn.textContent = 'Go to App';
+        if (heroCreateBtn) heroCreateBtn.href = '/app';
+      } else {
+        navSignIn.hidden = false;
+        userMenu.hidden = true;
       }
+
+      // ── Interactive hero studio ──
+      (function initHeroStudio() {
+        var studio = document.getElementById('heroStudio');
+        if (!studio) return;
+
+        var preview = document.getElementById('studioPreview');
+        var story = document.getElementById('studioStory');
+        var chips = Array.prototype.slice.call(studio.querySelectorAll('.studio-chip'));
+        var generateBtn = document.getElementById('studioGenerate');
+        var state = {
+          game: 'Minecraft',
+          voice: 'Narrator',
+          captions: 'Word-Pop',
+          length: '45s',
+          preview: 'media/example_1.mp4'
+        };
+
+        function dbg() {}
+
+        function setPreview(src) {
+          if (!preview || !src || state.preview === src && preview.getAttribute('src')) return;
+          state.preview = src;
+          preview.setAttribute('src', src);
+          preview.removeAttribute('data-src');
+          preview.load();
+          var play = preview.play();
+          if (play) play.catch(function () {});
+          dbg('preview_switched', { src: src, game: state.game });
+        }
+
+        chips.forEach(function (chip) {
+          chip.addEventListener('click', function () {
+            chips.forEach(function (c) {
+              c.classList.remove('is-active');
+              c.setAttribute('aria-checked', 'false');
+            });
+            chip.classList.add('is-active');
+            chip.setAttribute('aria-checked', 'true');
+            state.game = chip.getAttribute('data-game') || chip.textContent.trim();
+            setPreview(chip.getAttribute('data-preview'));
+            dbg('game_selected', { game: state.game });
+          });
+        });
+
+        function wireCycle(btn, key) {
+          if (!btn) return;
+          btn.addEventListener('click', function () {
+            var options = (btn.getAttribute('data-options') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+            if (!options.length) return;
+            var idx = options.indexOf(state[key]);
+            var next = options[(idx + 1) % options.length];
+            state[key] = next;
+            var strong = btn.querySelector('strong');
+            if (strong) strong.textContent = next;
+            btn.classList.add('is-flash');
+            setTimeout(function () { btn.classList.remove('is-flash'); }, 180);
+            dbg('option_cycled', { key: key, value: next });
+          });
+        }
+
+        wireCycle(document.getElementById('studioVoice'), 'voice');
+        wireCycle(document.getElementById('studioCaptions'), 'captions');
+        wireCycle(document.getElementById('studioLength'), 'length');
+
+        if (story) {
+          story.addEventListener('input', function () {
+            dbg('story_edited', { len: story.value.length });
+          });
+        }
+
+        if (generateBtn) {
+          generateBtn.addEventListener('click', function () {
+            try {
+              sessionStorage.setItem('studioDraft', JSON.stringify({
+                story: story ? story.value.trim() : '',
+                game: state.game,
+                voice: state.voice,
+                captions: state.captions,
+                length: state.length
+              }));
+            } catch (err) {}
+            dbg('generate_clicked', { game: state.game, voice: state.voice, captions: state.captions, length: state.length, storyLen: story ? story.value.length : 0 });
+            window.location.href = userEmail ? '/app' : '/signin';
+          });
+        }
+
+        dbg('studio_ready', { interactive: true, chipCount: chips.length });
+      })();
 
       // ── Mobile nav ──
       var navToggle = document.getElementById('nav-toggle');
@@ -356,7 +457,6 @@
       'use strict';
 
       var videos = Array.prototype.slice.call(document.querySelectorAll('video[data-src]'));
-
       if (!videos.length) return;
 
       function activate(video) {
@@ -365,6 +465,13 @@
         video.removeAttribute('data-src');
         video.setAttribute('src', src);
         video.load();
+        var p = video.play();
+        if (p) p.catch(function () {});
+      }
+
+      function whenIdle(fn) {
+        if (typeof requestIdleCallback === 'function') requestIdleCallback(fn, { timeout: 1800 });
+        else setTimeout(fn, 1200);
       }
 
       if (!('IntersectionObserver' in window)) {
@@ -376,16 +483,18 @@
         entries.forEach(function (entry) {
           var video = entry.target;
           if (entry.isIntersecting) {
-            activate(video);
-            var p = video.play();
-            if (p) p.catch(function () {});
-          } else {
+            observer.unobserve(video);
+            // Side hero phones wait for idle so the main phone wins the network.
+            if (video.getAttribute('data-priority') === 'low') {
+              whenIdle(function () { activate(video); });
+            } else {
+              activate(video);
+            }
+          } else if (video.src) {
             video.pause();
-            // Drop the decoder buffer — 1080p decoders hold tens of MB.
-            if (video.currentTime > 0) video.currentTime = 0;
           }
         });
-      }, { rootMargin: '20% 0px 20% 0px', threshold: 0.1 });
+      }, { rootMargin: '80px 0px', threshold: 0.05 });
 
       videos.forEach(function (video) { observer.observe(video); });
     })();

@@ -10,8 +10,8 @@
     }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="app-style.css?v=3">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app-style.css?v=5">
   <script src="/billing.js" defer></script>
 </head>
 <body>
@@ -27,7 +27,7 @@
     <header class="app-header">
       <a class="app-logo" href="/" aria-label="Go to StoryPlay landing page">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="#FFFFFF"/>
+          <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="currentColor"/>
         </svg>
         <span>StoryPlay</span>
         <span class="beta-badge">Beta</span>
@@ -167,7 +167,7 @@
     </section>
 
     <!-- ── STEP 2: Gameplay ── -->
-    <section id="step-gameplay" class="step">
+    <section id="step-gameplay" class="step" hidden>
       <div class="step-heading">
         <span class="step-num">02</span>
         <div>
@@ -185,7 +185,7 @@
     </section>
 
     <!-- ── STEP 3: Captions ── -->
-    <section id="step-captions" class="step">
+    <section id="step-captions" class="step" hidden>
       <div class="step-heading step-heading--with-info">
         <div class="step-heading-left">
           <span class="step-num">03</span>
@@ -287,7 +287,7 @@
     </section>
 
     <!-- ── STEP 4: Voice ── -->
-    <section id="step-voice" class="step">
+    <section id="step-voice" class="step" hidden>
       <div class="step-heading step-heading--with-info">
         <div class="step-heading-left">
           <span class="step-num">04</span>
@@ -423,20 +423,20 @@
     </section>
 
     <!-- ── STEP 5: Progress ── -->
-    <section id="step-progress" class="step">
+    <section id="step-progress" class="step" hidden>
       <div class="progress-hero">
         <div class="progress-orb">
           <div class="progress-orb-inner"><span id="progressPct">0%</span></div>
           <svg class="progress-ring" viewBox="0 0 120 120">
             <defs><linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#888888"/>
+              <stop offset="0%" stop-color="#E85D04"/><stop offset="100%" stop-color="#FF8A3D"/>
             </linearGradient></defs>
             <circle class="ring-bg" cx="60" cy="60" r="54"/>
             <circle class="ring-fill" id="progressRing" cx="60" cy="60" r="54"/>
           </svg>
         </div>
-        <h2 class="progress-title">Creating your <span class="grad">Short</span>...</h2>
-        <p class="progress-stage" id="progressStage">Turning your story into a cinematic video ✨</p>
+        <h2 class="progress-title">Creating your <span class="grad">Short</span></h2>
+        <p class="progress-stage" id="progressStage">Queued — starting your render…</p>
       </div>
       <div class="pipeline-steps">
         <div class="pipeline-step" id="ps-preparing_story">
@@ -481,11 +481,11 @@
         </div>
         <div class="pipeline-step" id="ps-finalizing">
           <div class="ps-icon-box">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           </div>
           <div class="ps-text">
             <div class="ps-title">Finalizing</div>
-            <div class="ps-desc">Polishing your Short...</div>
+            <div class="ps-desc">Polishing your Short…</div>
           </div>
           <div class="ps-status-icon"></div>
         </div>
@@ -493,7 +493,7 @@
     </section>
 
     <!-- ── STEP 6: Result ── -->
-    <section id="step-result" class="step">
+    <section id="step-result" class="step" hidden>
       <div class="result-badge">Ready</div>
       <h2 class="result-title">Your Short is ready</h2>
       <p class="result-sub">Download it before it expires. Free keeps files for 1 hour; Pro for 7 days.</p>
@@ -522,7 +522,7 @@
      */
     window.__API_BASE__ = '';
   </script>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=5"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getAuth, signOut, onIdTokenChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";

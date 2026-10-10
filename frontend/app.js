@@ -72,6 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
   checkApiReachable();
   initPlanUi();
   initLibraryUi();
+  // Wizard steps are all in the DOM; hide inactive ones so the app is one step
+  // at a time (not a long scroll of 01–04 on first paint).
+  goTo('story');
 });
 
 /**
@@ -480,6 +483,19 @@ function initStoryStep() {
   }
 
   textarea.addEventListener('input', updateCharCount);
+
+  // Restore draft from landing hero studio if present
+  try {
+    const rawDraft = sessionStorage.getItem('studioDraft');
+    if (rawDraft) {
+      sessionStorage.removeItem('studioDraft');
+      const draft = JSON.parse(rawDraft);
+      if (draft && draft.story) {
+        textarea.value = draft.story;
+      }
+    }
+  } catch (_) {}
+
   updateCharCount();
 
   btn.addEventListener('click', () => {
@@ -852,6 +868,7 @@ const STAGE_LABELS = {
   compositing:       'Compositing video…',
   finalizing:        'Finalizing…',
   retrying:          'Retrying render…',
+  queued:            'Queued — starting your render…',
 };
 
 const STAGE_ORDER = [
@@ -861,6 +878,26 @@ const STAGE_ORDER = [
   'compositing',
   'finalizing',
 ];
+
+// Backend emits finer stages than the 5 UI rows — fold them so the pipeline stays in sync.
+const STAGE_ALIAS = {
+  preparing_story: 'preparing_story',
+  generating_voice: 'generating_voice',
+  transcribing: 'generating_voice',
+  creating_subtitles: 'generating_assets',
+  generating_assets: 'generating_assets',
+  selecting_gameplay: 'generating_assets',
+  trimming_gameplay: 'generating_assets',
+  compositing: 'compositing',
+  finalizing: 'finalizing',
+  retrying: 'compositing',
+};
+
+function normalizeStage(stage, status) {
+  if (status === 'completed') return 'finalizing';
+  if (status === 'queued' || !stage) return 'preparing_story';
+  return STAGE_ALIAS[stage] || (STAGE_ORDER.includes(stage) ? stage : 'preparing_story');
+}
 
 // Must match the server's JOB_TIMEOUT_MS (default 600000) with headroom. Without
 // a ceiling the progress screen polls forever if the worker dies silently, which
@@ -879,12 +916,14 @@ function stopPolling() {
 
 function startPolling(jobId) {
   stopPolling();
-  updateProgress(0, null);
+  lastStage = null;
+  // Immediate UI sync: queued jobs have stage=null — don't leave the pipeline blank at 0%.
+  updateProgress(3, 'preparing_story', 'queued');
 
   let errors = 0;
   const startedAt = Date.now();
 
-  state.pollTimer = setInterval(async () => {
+  async function tick() {
     if (Date.now() - startedAt > POLL_TIMEOUT_MS) {
       stopPolling();
       toast('This render is taking longer than expected. It may still finish — check back in a few minutes.', 'error');
@@ -915,10 +954,11 @@ function startPolling(jobId) {
       }
 
       errors = 0;
-      updateProgress(data.progress || 0, data.stage);
+      updateProgress(data.progress || 0, data.stage, data.status);
 
       if (data.status === 'completed') {
         stopPolling();
+        updateProgress(100, 'finalizing', 'completed');
         state.outputUrl = data.outputUrl ? apiUrl(data.outputUrl) : null;
         state.downloadUrl = data.downloadUrl ? apiUrl(data.downloadUrl) : null;
         showResult(jobId);
@@ -934,15 +974,25 @@ function startPolling(jobId) {
         toast('Lost contact with the server. Reload the page to check on your video.', 'error');
       }
     }
-  }, POLL_INTERVAL_MS);
+  }
+
+  tick();
+  state.pollTimer = setInterval(tick, POLL_INTERVAL_MS);
 }
 
 let lastStage = null;
 
-function updateProgress(pct, stage) {
+function updateProgress(pct, stage, status) {
+  const uiStage = normalizeStage(stage, status);
   // Ring. 2*PI*54 = 339.29 for the r="54" circle in app.html.
   const circumference = 339.29;
-  const clamped = Math.max(0, Math.min(100, Number(pct) || 0));
+  let clamped = Math.max(0, Math.min(100, Number(pct) || 0));
+  // Queued jobs report 0 — show a small floor so the ring/pipeline look alive.
+  if (status === 'queued' || (!stage && status !== 'completed')) {
+    clamped = Math.max(clamped, 3);
+  }
+  if (status === 'completed') clamped = 100;
+
   const ring = $('progressRing');
   if (ring) ring.style.strokeDashoffset = String(circumference - (clamped / 100) * circumference);
 
@@ -950,25 +1000,34 @@ function updateProgress(pct, stage) {
   if (pctEl) pctEl.textContent = `${Math.round(clamped)}%`;
 
   const stageText = $('progressStage');
-  if (stageText) stageText.textContent = STAGE_LABELS[stage] || 'Turning your story into a cinematic video…';
+  if (stageText) {
+    if (status === 'completed') {
+      stageText.textContent = 'Done — opening your Short…';
+    } else {
+      const labelKey = status === 'queued' && !stage ? 'queued' : uiStage;
+      stageText.textContent = STAGE_LABELS[labelKey] || STAGE_LABELS[uiStage] || 'Working on your Short…';
+    }
+  }
 
-  const activeIndex = STAGE_ORDER.indexOf(stage);
+  const activeIndex = STAGE_ORDER.indexOf(uiStage);
+  const allDone = status === 'completed';
 
   STAGE_ORDER.forEach((s, i) => {
     const el = $(`ps-${s}`);
     if (!el) return;
-    const done = activeIndex > i;
-    el.classList.toggle('active', s === stage);
+    const done = allDone || activeIndex > i;
+    const active = !allDone && s === uiStage;
+    el.classList.toggle('active', active);
     el.classList.toggle('done', done);
   });
 
   // Only chase the active row when the stage actually changes. This ran on every
   // 1.5 s tick, so smooth-scrolling fought the user for the scroll position
   // continuously for the whole render.
-  if (stage && stage !== lastStage) {
-    lastStage = stage;
-    const el = $(`ps-${stage}`) || $('ps-preparing_story');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (uiStage && uiStage !== lastStage) {
+    lastStage = uiStage;
+    const el = $(`ps-${uiStage}`) || $('ps-preparing_story');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }
 
