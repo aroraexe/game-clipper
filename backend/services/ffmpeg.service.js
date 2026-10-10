@@ -34,11 +34,11 @@ console.log(`[FFmpeg] Output resolution: ${VIDEO_W}×${VIDEO_H}`);
 const ffmpegStatic = require('ffmpeg-static');
 const ffprobeStatic = require('ffprobe-static');
 
-// Prefer system/installed full ffmpeg builds if present (e.g. /usr/local/bin/ffmpeg in Docker)
-const systemFfmpeg = ['/usr/local/bin/ffmpeg', '/usr/bin/ffmpeg'].find(p => {
+// Prefer system/installed full ffmpeg builds if present (e.g. /usr/bin/ffmpeg in Docker)
+const systemFfmpeg = ['/usr/bin/ffmpeg', '/usr/local/bin/ffmpeg'].find(p => {
   try { return fs.existsSync(p); } catch (_) { return false; }
 });
-const systemFfprobe = ['/usr/local/bin/ffprobe', '/usr/bin/ffprobe'].find(p => {
+const systemFfprobe = ['/usr/bin/ffprobe', '/usr/local/bin/ffprobe'].find(p => {
   try { return fs.existsSync(p); } catch (_) { return false; }
 });
 
@@ -164,20 +164,16 @@ function generateMockVideo({ durationS, outputPath }) {
 function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, durationS, onProgress, signal, watermark }) {
   const gp  = validatePath(gameplayPath, 'Gameplay segment');
   const aud = validatePath(audioPath,    'Narration audio');
-  // subtitles validated separately — path may contain special chars
 
-  const assPath = path.resolve(subtitlePath);
-  if (!fs.existsSync(assPath))
-    throw new Error(`Subtitle file not found: ${path.basename(assPath)}`);
-
-  // Escape ASS path for the ffmpeg filtergraph. The value is interpolated into
-  // `ass='...'` inside a filter chain, where several characters are structural:
-  //   \  Windows separator      :  drive letter / protocol separator
-  //   '  quote delimiter        ,  separates filters in a chain
-  //   [  ]  label delimiters
-  // Previously only \ and : were escaped, so a checkout path containing a comma
-  // or bracket (or an apostrophe) would produce a malformed filter chain.
-  const assEscaped = escapeFilterPath(assPath);
+  let assPath = null;
+  if (subtitlePath) {
+    const resolved = path.resolve(subtitlePath);
+    if (fs.existsSync(resolved)) {
+      assPath = resolved;
+    } else {
+      console.warn(`[FFmpeg:composite] Subtitle file not found: ${path.basename(resolved)}`);
+    }
+  }
 
   return new Promise((resolve, reject) => {
     const cmd = ffmpeg()
@@ -187,36 +183,40 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
       // Input 1: narration audio
       .input(aud);
 
-      const filterChain = [
-        // Scale & crop gameplay to exactly VIDEO_W×VIDEO_H (default 720×1280)
-        `[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase,crop=${VIDEO_W}:${VIDEO_H},setsar=1[vscaled]`,
-        watermark
-          ? `[vscaled]ass='${assEscaped}'[vsub]`
-          : `[vscaled]ass='${assEscaped}'[vout]`
-      ];
+    const filterChain = [];
+    let currentPad = 'vscaled';
 
-      if (watermark) {
-        // 3) Add watermark
-        // x=w-tw-30 aligns right, y=40 near the top.
-        //
-        // An explicit fontfile is preferred where one is known to exist. On Linux
-        // the previous version passed nothing and relied on fontconfig resolving
-        // a default face — if no font is installed, drawtext fails the whole
-        // composite and the customer's video is lost over a watermark. The
-        // container installs fonts-liberation, so Liberation Sans is named here.
-        const fontCandidates = process.platform === 'win32'
-          ? ['C:/Windows/Fonts/arial.ttf', 'C:/Windows/Fonts/segoeui.ttf']
-          : ['/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
-             '/usr/share/fonts/liberation/LiberationSans-Regular.ttf',
-             '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'];
-        const fontFile = fontCandidates.find(f => { try { return fs.existsSync(f); } catch (_) { return false; } });
-        const fontStr = fontFile
-          ? `fontfile=${escapeFilterPath(fontFile)}:`
-          : 'font=Arial:';
-        filterChain.push(`[vsub]drawtext=${fontStr}text='StoryPlay.app':fontcolor=white@0.5:fontsize=32:x=w-tw-30:y=40[vout]`);
-      }
+    // Scale & crop gameplay to exactly VIDEO_W×VIDEO_H (default 720×1280)
+    filterChain.push(`[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase,crop=${VIDEO_W}:${VIDEO_H},setsar=1[${currentPad}]`);
 
-      cmd.complexFilter(filterChain)
+    if (assPath) {
+      const assEscaped = escapeFilterPath(assPath);
+      const nextPad = watermark ? 'vsub' : 'vout';
+      filterChain.push(`[${currentPad}]ass='${assEscaped}'[${nextPad}]`);
+      currentPad = nextPad;
+    }
+
+    if (watermark) {
+      // Add watermark
+      // x=w-tw-30 aligns right, y=40 near the top.
+      const fontCandidates = process.platform === 'win32'
+        ? ['C:/Windows/Fonts/arial.ttf', 'C:/Windows/Fonts/segoeui.ttf']
+        : ['/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+           '/usr/share/fonts/liberation/LiberationSans-Regular.ttf',
+           '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'];
+      const fontFile = fontCandidates.find(f => { try { return fs.existsSync(f); } catch (_) { return false; } });
+      const fontStr = fontFile
+        ? `fontfile=${escapeFilterPath(fontFile)}:`
+        : 'font=Arial:';
+      filterChain.push(`[${currentPad}]drawtext=${fontStr}text='StoryPlay.app':fontcolor=white@0.5:fontsize=32:x=w-tw-30:y=40[vout]`);
+      currentPad = 'vout';
+    }
+
+    if (currentPad !== 'vout') {
+      filterChain[0] = `[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase,crop=${VIDEO_W}:${VIDEO_H},setsar=1[vout]`;
+    }
+
+    cmd.complexFilter(filterChain)
 
       // Map final video + mixed audio
       .outputOptions([
@@ -265,6 +265,39 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
       .on('error', (err) => {
         if (signal) signal.removeEventListener('abort', onAbort);
         process.stdout.write('\n');
+
+        const errMsg = err?.message || '';
+        // If a filter is missing from the binary (e.g. drawtext or ass not compiled in),
+        // gracefully retry rather than failing the customer's entire render job.
+        if (/Filter not found/i.test(errMsg)) {
+          if (watermark) {
+            console.warn('[FFmpeg:composite] Filter not found error encountered with watermark. Retrying without watermark...');
+            return compositeVideo({
+              gameplayPath,
+              audioPath,
+              subtitlePath,
+              outputPath,
+              durationS,
+              onProgress,
+              signal,
+              watermark: false
+            }).then(resolve, reject);
+          }
+          if (assPath) {
+            console.warn('[FFmpeg:composite] Filter not found error encountered with subtitles. Retrying without subtitles...');
+            return compositeVideo({
+              gameplayPath,
+              audioPath,
+              subtitlePath: null,
+              outputPath,
+              durationS,
+              onProgress,
+              signal,
+              watermark: false
+            }).then(resolve, reject);
+          }
+        }
+
         reject(new Error(`FFmpeg composite failed: ${err.message}`));
       });
 

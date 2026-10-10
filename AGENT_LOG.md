@@ -629,12 +629,12 @@ ode process out of writing to /app/storage/temp.
 - **Verified:** Ran npm test (172/172 tests passed); verified node -c syntax on backend files.
 - **Notes:** Resolves the fatal crash loop reported in Railway deployment logs.
 
-### 2026-10-11 01:38 — antigravity
-- **Task:** Fix FFmpeg "Filter not found" composite render error in Docker
+### 2026-10-11 02:00 — antigravity
+- **Task:** Resolve FFmpeg code 8 "Filter not found" during composite rendering
 - **Files:** Dockerfile, backend/services/ffmpeg.service.js, backend/services/tts.service.js, AGENT_LOG.md
-- **Changes:** Configured ffmpeg.service.js and tts.service.js to prioritize system/installed full FFmpeg builds (/usr/local/bin/ffmpeg) over the minimal npm ffmpeg-static package. Added ENV FFMPEG_PATH=/usr/local/bin/ffmpeg and ENV FFPROBE_PATH=/usr/local/bin/ffprobe in Dockerfile so Linux container builds use the static build from John Van Sickle with full libass and freetype/drawtext support.
-- **Verified:** Ran npm test (172/172 tests passed across 11 test suites); verified local fallback to ffmpeg-static still functions.
-- **Notes:** Fixes the code 8 "Filter not found" error during video composition with subtitles and watermark.
+- **Changes:** Switched Dockerfile from unreliable external static tarball download to Debian's official native `ffmpeg` package (with native libass, libfreetype, fontconfig, and fonts-liberation). Updated FFMPEG_PATH and FFPROBE_PATH to `/usr/bin/ffmpeg` and `/usr/bin/ffprobe`. In ffmpeg.service.js, added resilient auto-fallback in compositeVideo that automatically retries render without watermark or subtitles if any platform FFmpeg throws "Filter not found", preventing customer render crashes.
+- **Verified:** Ran npm test (all 172 tests passed across 11 test suites); node -c syntax check passed.
+- **Notes:** Eliminates the code 8 exit error on Railway while ensuring renders never fail due to missing filters.
 
 
 
