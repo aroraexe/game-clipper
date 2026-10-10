@@ -91,10 +91,29 @@ It is a security setting. Express derives the client IP from `X-Forwarded-For`
 right-to-left and trusts exactly this many entries. Get it wrong in the unsafe
 direction — the real chain is longer than the number you set — and the entries
 being skipped were chosen by the caller, so anyone can pick their own rate-limit
-identity with one header. Every rate limiter on the API (20 POST/min, 120
+identity with one header. Every rate limiter on the API (30 POST/min, 300
 GET/min) then stops applying, and the per-account job caps are the only thing
 left between an attacker and the render queue. Unset defaults to `0`, which is
 correct locally and means X-Forwarded-For is ignored entirely.
+
+---
+
+## 3b. Railway Hobby capacity (~100 concurrent users)
+
+Hobby is fine for **~100 people browsing / polling at once**. It is **not** fine
+for 100 encodes at once.
+
+| Knob | Hobby default | Why |
+|------|---------------|-----|
+| `MAX_CONCURRENT_RENDERS` | `1` | One libx264 job; more OOMs the container |
+| Output | `720×1280` | Kept — do not drop resolution for speed |
+| `X264_PRESET` / `X264_CRF` | `veryfast` / `23` | Real Short quality; override only if you must |
+| Queue | deep FIFO + Pro `high` lane | Everyone waits fairly; Pro jumps ahead |
+| Daily caps | Free 10 / Pro 100 | Stops free accounts looping cost |
+
+Expect queue wait when many people hit Create together. `/api/health` reports
+`queue.active` and `queue.queued`. If wait times stay high, scale the service —
+do not raise concurrency above 1 on Hobby without measuring RAM.
 
 ### `CORS_ORIGINS`
 

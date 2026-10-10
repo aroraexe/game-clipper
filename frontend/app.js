@@ -858,7 +858,9 @@ const STAGE_ORDER = [
 // a ceiling the progress screen polls forever if the worker dies silently, which
 // is exactly what it did — the interval was never cleared on a network error and
 // every error was swallowed by an empty catch.
-const POLL_INTERVAL_MS = 1500;
+// 2s keeps ~100 concurrent progress screens under ~50 req/s to the API while
+// still feeling live. Daily/plan caps (not this interval) are the cost brake.
+const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS  = 11 * 60 * 1000;
 const POLL_MAX_ERRORS  = 5;
 

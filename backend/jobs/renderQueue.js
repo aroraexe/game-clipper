@@ -118,7 +118,18 @@ function initQueue() {
 // Run init immediately on load
 initQueue();
 
-module.exports = { enqueue, initQueue };
+/** Snapshot for /api/health — safe to expose (no job ids / user data). */
+function getStats() {
+  return {
+    maxConcurrent: MAX_CONCURRENT,
+    active,
+    queued: _totalDepth(),
+    highPriorityQueued: highQueue.length,
+    avgEncodeMs: Math.round(avgEncodeMs),
+  };
+}
+
+module.exports = { enqueue, initQueue, getStats };
 
 /* ── Internal ────────────────────────────────────────────────────────────── */
 

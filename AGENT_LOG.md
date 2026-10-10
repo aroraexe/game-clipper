@@ -503,3 +503,45 @@ ode process out of writing to /app/storage/temp.
 - **Verified:** All 172 tests pass; node --check clean on all 23 backend files; server starts without errors
 - **Notes:** CRITICAL: NVIDIA API key in git history (commits 2a25bd9, 0fa225f) still needs rotation in NVIDIA console. Medium: Signed URL nonce and httpOnly-only session are follow-up items.
 - **Notes:** Clean deployment state ready on GitHub.
+
+### 2026-10-10 02:27 — composer
+- **Task:** Fix landing example cards stretching to 1920px tall
+- **Files:** frontend/landing.css, frontend/index.html, AGENT_LOG.md
+- **Changes:** Example cards now own `aspect-ratio: 9/16`; videos are absolutely filled with `object-fit: cover` so the HTML `height=\"1920\"` attribute cannot inflate layout. Games grid corrected from 6 columns to 4 (matches the four game cards). Cache-bust landing.css to `?v=3`.
+- **Verified:** Inspected DevTools-reported video box (270×1920) and CSS; height:auto/absolute fill is the correct override for the presentational height attribute.
+- **Notes:** none
+
+### 2026-10-10 02:30 — composer
+- **Task:** Make How It Works match Games/Examples card look from user screenshot
+- **Files:** frontend/index.html, frontend/how-it-works.html, frontend/landing.css, AGENT_LOG.md
+- **Changes:** Landing How It Works is now a 4-card grid (same border/radius language as game cards). Nav How It Works scrolls to `/#how-it-works` like Games. Restored Valorant + Call of Duty cards (6-up row). `/how-it-works` page rebuilt with the same how-grid + games row + examples grid. Cache-bust `landing.css?v=4`.
+- **Verified:** Assets `card-valorant.jpg` / `card-cod.jpg` present under frontend/card-media.
+- **Notes:** Dedicated /how-it-works page still exists for deep links; landing nav uses the hash.
+
+### 2026-10-10 02:35 — composer
+- **Task:** Redesign marketing UI from AI-slop template to product SaaS
+- **Files:** frontend/index.html, frontend/landing.css, frontend/signin.css, frontend/app-style.css, frontend/*.html (font/CSS version bumps), AGENT_LOG.md
+- **Changes:** Light product surface (not black Inter grid). Brand-first full-bleed hero video, Bricolage Grotesque + IBM Plex Sans, orange accent `#FF3B00`. Removed typewriter, floating phone cluster, arrow labels, glass feature cards. Added proof strip, how-grid, examples, FAQ details, CTA band. Sign-in/app accents aligned. Cache `landing.css?v=5`.
+- **Verified:** Browser screenshot of localhost hero shows StoryPlay wordmark + product video + Start free CTA.
+- **Notes:** App shell stays dark (tool UI); marketing is light. Valorant/COD cards remain marketing-only (not in gameplay.service).
+
+### 2026-10-10 02:40 — composer
+- **Task:** Match Games/Examples screenshot look; restyle How It Works as card grid
+- **Files:** frontend/index.html, frontend/how-it-works.html, frontend/landing.css, AGENT_LOG.md
+- **Changes:** Restored 6-up games row (Valorant + COD jpgs). How It Works is a 4-card `how-grid` (same border/radius/hover as game cards). Nav How It Works / Examples scroll to landing hashes. `/how-it-works` page rebuilt with how-grid + games + examples. `landing.css?v=4`.
+- **Verified:** card-valorant.jpg / card-cod.jpg present in frontend/card-media.
+- **Notes:** Valorant/COD are marketing-only previews (not in gameplay.service render picker).
+
+### 2026-10-10 16:25 — composer
+- **Task:** Fix broken marketing pages; optimize for ~100 concurrent users on Railway Hobby without dropping 720p quality
+- **Files:** frontend/landing.css, frontend/index.html, frontend/how-it-works.html, frontend/examples.html, frontend/*.html (css v=5), frontend/app.js, backend/services/ffmpeg.service.js, backend/jobs/renderQueue.js, backend/controllers/videos.controller.js, backend/routes/health.routes.js, backend/server.js, test/server.hardening.test.js, .env.example, DEPLOY.md, AGENT_LOG.md
+- **Changes:** Hardened example-card CSS (`height:auto !important` + 9:16). Rebuilt examples page (broken `</h3>`, lazy videos). Unified `landing.css?v=5`. Encode: keep 720×1280, `veryfast` + CRF 23 (was ultrafast/28). Pro jobs high-priority queue. GET limiter 300/min, poll 2s. `/api/health` exposes queue + output size. DEPLOY Hobby capacity section. Hardening tests fixed (POST allowance + missing mp4 fixture).
+- **Verified:** vitest hardening+security+billing = 75 passed; health returns queue stats; /how-it-works and /examples 200.
+- **Notes:** Hobby still encodes **one at a time** — 100 concurrent *browsers* yes, 100 concurrent *renders* no. Raise MAX_CONCURRENT_RENDERS only after measuring RAM.
+
+### 2026-10-10 16:51 - antigravity
+- **Task:** Verify and push Cursor marketing fixes and Railway Hobby concurrency optimizations to GitHub
+- **Files:** frontend/*, backend/services/ffmpeg.service.js, backend/jobs/renderQueue.js, backend/controllers/videos.controller.js, backend/routes/health.routes.js, backend/server.js, test/server.hardening.test.js, .env.example, DEPLOY.md, AGENT_LOG.md
+- **Changes:** Verified vitest test suite (172 passed across all 11 files); verified backend syntax with node --check; removed empty outputSigning.js scratch file; committed and pushed to origin/main.
+- **Verified:** npm test = 172 passed / 11 files. git push origin main clean.
+- **Notes:** Railway deployment will automatically pick up latest commit.

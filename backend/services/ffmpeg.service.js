@@ -7,7 +7,7 @@
  * Responsibilities:
  *  - probeDuration   – ffprobe a file for duration
  *  - extractSegment  – efficient direct-seek trim of a source video
- *  - compositeVideo  – stack narration audio + gameplay video + ASS subtitles → 1080×1920 MP4
+ *  - compositeVideo  – stack narration audio + gameplay video + ASS subtitles → 720×1280 MP4
  *  - generateMockVideo – create a test pattern video when gameplay file is missing
  *
  * Security: all paths are resolved and validated before execution.
@@ -148,17 +148,8 @@ function generateMockVideo({ durationS, outputPath }) {
 /* ── compositeVideo ─────────────────────────────────────────────────────────
  *
  * Final composition pipeline:
- *   gameplay (video only, muted) + narration audio → 9:16 1080×1920 MP4
- *   with ASS subtitles burned in.
- *
- * Layout:
- *   • Top 50%: gameplay (cropped to 9:16, scaled to 1080×960)
- *   • Bottom 50%: solid dark background for subtitles
- *   (This gives the "gaming short" look where gameplay is top half
- *    and story subtitles dominate the bottom)
- *
- *   OR for full-bleed: gameplay fills entire 9:16 frame, subtitles on top.
- *   We default to full-bleed — ASS positions subtitles safely.
+ *   gameplay (video only, muted) + narration audio → 9:16 720×1280 MP4
+ *   with ASS subtitles burned in (full-bleed gameplay).
  *
  * compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, durationS })
  * → Promise<string>  outputPath
@@ -190,10 +181,8 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
       .input(aud);
 
       const filterChain = [
-        // 1) Scale & crop gameplay to exactly 1080×1920 (9:16)
+        // Scale & crop gameplay to exactly VIDEO_W×VIDEO_H (default 720×1280)
         `[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase,crop=${VIDEO_W}:${VIDEO_H},setsar=1[vscaled]`,
-        
-        // 2) Burn ASS subtitles into video
         watermark
           ? `[vscaled]ass='${assEscaped}'[vsub]`
           : `[vscaled]ass='${assEscaped}'[vout]`
@@ -227,22 +216,24 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
         '-map', '[vout]',
         '-map', '1:a',
 
-        // CPU video codec — tuned for Railway Hobby Plan
+        // CPU encode — 720p quality held (CRF 23) while staying Hobby-friendly.
+        // ultrafast+CRF28 was soft; veryfast is ~2–3× slower than ultrafast but
+        // looks like a real Short. One concurrent encode (MAX_CONCURRENT_RENDERS=1)
+        // keeps the container responsive under ~100 concurrent browsers.
         '-c:v', 'libx264',
-        '-preset', 'ultrafast',  // fastest encode
-        '-crf', '28',            // lower quality threshold
-        '-bf', '2',              // B-frames: better compression
+        '-preset', process.env.X264_PRESET || 'veryfast',
+        '-crf', String(process.env.X264_CRF || '23'),
+        '-bf', '2',
         '-profile:v', 'main',
         '-level', '4.0',
         '-pix_fmt', 'yuv420p',
 
-        // Audio codec
         '-c:a', 'aac',
         '-b:a', '128k',
         '-ar',  '44100',
 
-        // Threading: cap at 2 threads to avoid starving other processes on Railway
-        '-threads', '2',
+        // Cap encode threads so the Node process can still serve polls/API.
+        '-threads', String(Math.max(1, Math.min(2, parseInt(process.env.X264_THREADS, 10) || 2))),
 
         // Duration cap
         `-t`, String(durationS),

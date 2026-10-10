@@ -95,11 +95,11 @@ describe('protected app shell cannot be reached by any spelling of the path', ()
 describe('rate limiting cannot be sidestepped with X-Forwarded-For', () => {
   it('counts a rotating X-Forwarded-For against one bucket', async () => {
     const codes = [];
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 40; i++) {
       const res = await request(app).post('/api/auth/logout').set('X-Forwarded-For', `7.7.7.${i}`);
       codes.push(res.status);
     }
-    // 20/min is the POST allowance, so a single bucket MUST start refusing.
+    // 30/min is the POST allowance, so a single bucket MUST start refusing.
     // Before the fix every request got a fresh bucket and none were refused.
     expect(codes.filter((c) => c === 429).length).toBeGreaterThan(0);
   });
@@ -120,7 +120,15 @@ describe('signed output URLs bind the response mode', () => {
   let downloadUrl;
 
   beforeAll(async () => {
-    const fixture = path.resolve(__dirname, '..', 'storage/outputs/test-job.mp4');
+    // Tiny valid-enough MP4 header bytes — sendFile only needs the path to exist.
+    const outDir = path.join(tmpDir, 'outputs');
+    fs.mkdirSync(outDir, { recursive: true });
+    const fixture = path.join(outDir, 'hardening-mode-binding.mp4');
+    fs.writeFileSync(fixture, Buffer.from([
+      0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70,
+      0x69, 0x73, 0x6f, 0x6d, 0x00, 0x00, 0x00, 0x01,
+      0x69, 0x73, 0x6f, 0x6d, 0x61, 0x76, 0x63, 0x31,
+    ]));
     jobStore.create(JOB_ID, { story: 'x', userId: 'dev-user', idempotencyKey: null });
     jobStore.markCompleted(JOB_ID, fixture);
     const res = await request(app).get(`/api/videos/${JOB_ID}`);

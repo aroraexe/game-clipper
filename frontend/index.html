@@ -7,7 +7,7 @@
   <meta name="description" content="Paste a story, pick gameplay, and get a ready-to-upload short video with AI voice, captions, and smooth edits.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="landing.css?v=2">
+  <link rel="stylesheet" href="landing.css?v=5">
 </head>
 <body>
 
@@ -141,52 +141,30 @@
     </section>
 
     <!-- HOW IT WORKS -->
-    <section id="how-it-works">
-      <div class="how-it-works glass-card">
-        <div class="step">
-          <div class="step-icon-wrapper">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
-          </div>
-          <div class="step-content">
-            <h3>1. Paste Your Story</h3>
-            <p>Use a Reddit post, a true story, or write your own.</p>
-          </div>
+    <section id="how-it-works" class="how-section">
+      <div class="section-header">
+        <h2>How it works</h2>
+      </div>
+      <div class="how-grid">
+        <div class="how-card">
+          <span class="how-card-num">01</span>
+          <h3>Paste your story</h3>
+          <p>Reddit post, true story, or write your own.</p>
         </div>
-        <div class="step-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <div class="how-card">
+          <span class="how-card-num">02</span>
+          <h3>Pick gameplay</h3>
+          <p>Minecraft, Roblox, GTA V, Fortnite, Valorant, COD.</p>
         </div>
-        <div class="step">
-          <div class="step-icon-wrapper">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M8 12h.01M12 12h.01M16 12h.01M12 6v-2M12 18v2"/></svg>
-          </div>
-          <div class="step-content">
-            <h3>2. Pick Gameplay</h3>
-            <p>Pick from Minecraft, GTA V, Roblox and Fortnite.</p>
-          </div>
+        <div class="how-card">
+          <span class="how-card-num">03</span>
+          <h3>Voice &amp; captions</h3>
+          <p>Narration plus burned-in captions, timed to the audio.</p>
         </div>
-        <div class="step-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-        <div class="step">
-          <div class="step-icon-wrapper">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 013 3v6a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 10a7 7 0 01-14 0M12 19v3M8 22h8"/></svg>
-          </div>
-          <div class="step-content">
-            <h3>3. AI Voice & Captions</h3>
-            <p>We generate natural voiceover and add subtitles automatically.</p>
-          </div>
-        </div>
-        <div class="step-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-        <div class="step">
-          <div class="step-icon-wrapper">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M9 10l2 2 4-4"/></svg>
-          </div>
-          <div class="step-content">
-            <h3>4. Get Your Short</h3>
-            <p>Download a ready-to-upload 9:16 video in minutes.</p>
-          </div>
+        <div class="how-card">
+          <span class="how-card-num">04</span>
+          <h3>Get your Short</h3>
+          <p>Download a ready 9:16 MP4 in minutes.</p>
         </div>
       </div>
     </section>
@@ -201,6 +179,8 @@
         <div class="game-card"><video data-src="card-media/card-roblox.mp4" loop muted playsinline disablePictureInPicture width="480" height="360" aria-label="Roblox gameplay preview"></video><div class="game-card-overlay"><span class="game-name">Roblox</span></div></div>
         <div class="game-card"><video data-src="card-media/card-gtav.mp4" loop muted playsinline disablePictureInPicture width="480" height="360" aria-label="GTA V gameplay preview"></video><div class="game-card-overlay"><span class="game-name">GTA V</span></div></div>
         <div class="game-card"><video data-src="card-media/card-fortnite.mp4" loop muted playsinline disablePictureInPicture width="480" height="360" aria-label="Fortnite gameplay preview"></video><div class="game-card-overlay"><span class="game-name">Fortnite</span></div></div>
+        <div class="game-card"><img src="card-media/card-valorant.jpg" width="480" height="360" alt="Valorant gameplay preview"><div class="game-card-overlay"><span class="game-name">Valorant</span></div></div>
+        <div class="game-card"><img src="card-media/card-cod.jpg" width="480" height="360" alt="Call of Duty gameplay preview"><div class="game-card-overlay"><span class="game-name">Call of Duty</span></div></div>
       </div>
     </section>
 
@@ -212,28 +192,28 @@
       </div>
       <div class="examples-grid">
         <figure class="example-card">
-          <video data-src="media/example_1.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920"></video>
+          <video data-src="media/example_1.mp4" loop muted playsinline disablePictureInPicture></video>
           <figcaption>
             <span class="example-tag">Style: Word-Pop</span>
             Minecraft + Reddit Story
           </figcaption>
         </figure>
         <figure class="example-card">
-          <video data-src="media/example_2.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920"></video>
+          <video data-src="media/example_2.mp4" loop muted playsinline disablePictureInPicture></video>
           <figcaption>
             <span class="example-tag">Style: Bold Yellow</span>
             GTA V + True Scary Story
           </figcaption>
         </figure>
         <figure class="example-card">
-          <video data-src="media/example_3.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920"></video>
+          <video data-src="media/example_3.mp4" loop muted playsinline disablePictureInPicture></video>
           <figcaption>
             <span class="example-tag">Style: White Highlight</span>
             Roblox + Fun Facts
           </figcaption>
         </figure>
         <figure class="example-card">
-          <video data-src="media/example_4.mp4" loop muted playsinline disablePictureInPicture width="1080" height="1920"></video>
+          <video data-src="media/example_4.mp4" loop muted playsinline disablePictureInPicture></video>
           <figcaption>
             <span class="example-tag">Style: Clean</span>
             Fortnite + Funny Story

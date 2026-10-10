@@ -179,16 +179,17 @@ function rateLimitKey(req) {
 // POST limiter — controls expensive operations (job creation, story gen)
 const postLimiter = rateLimit({
   windowMs: 60_000,
-  max: 20,
+  max: 30,
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: rateLimitKey,
   message: { error: 'Too many requests, please slow down.' },
 });
-// GET limiter — allows polling every 1.5 s comfortably for 2+ concurrent users
+// GET limiter — progress polls every ~2s. Sized for ~100 concurrent browsers
+// behind different IPs; shared NAT still has plan daily caps as the hard brake.
 const getLimiter = rateLimit({
   windowMs: 60_000,
-  max: 120,
+  max: 300,
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: rateLimitKey,

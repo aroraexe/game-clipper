@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>How It Works — StoryPlay</title>
   <meta name="description" content="From pasting a story to downloading a finished 9:16 video: the four steps and what happens behind each one.">
-  <link rel="stylesheet" href="landing.css?v=2">
+  <link rel="stylesheet" href="landing.css?v=5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -22,9 +22,9 @@
       </a>
       <nav class="nav-links">
         <a href="/features">Features</a>
-        <a href="/how-it-works">How It Works</a>
+        <a href="/how-it-works" aria-current="page">How It Works</a>
         <a href="/#games">Games</a>
-        <a href="/examples">Examples</a>
+        <a href="/#examples">Examples</a>
         <a href="/pricing">Pricing</a>
         <a href="/faq">FAQ</a>
       </nav>
@@ -40,46 +40,65 @@
 
   <div class="subpage-head">
     <h1>How it works</h1>
-    <p>Four steps. The interesting part happens after you press create, on a server, while you wait.</p>
+    <p>Four steps. Same card layout as the landing page.</p>
   </div>
 
   <div class="subpage-section">
-    <div class="steps-list">
-      <div class="step-row">
-        <div class="step-num"></div>
-        <div>
-          <h3>Paste your story</h3>
-          <p>Bring a Reddit post, a true story, or something you wrote yourself. Between 50 and 3000 characters. If you would rather not paste anything, the generator can write a draft for you from a one-line prompt, and you can edit it before rendering.</p>
-        </div>
+    <div class="how-grid">
+      <div class="how-card">
+        <span class="how-card-num">01</span>
+        <h3>Paste your story</h3>
+        <p>Reddit post, true story, or write your own. Or generate a draft and edit it.</p>
       </div>
-      <div class="step-row">
-        <div class="step-num"></div>
-        <div>
-          <h3>Pick a game and a style</h3>
-          <p>Choose the gameplay, a voice, a caption style and colour, and roughly how long you want it. Thirty, forty-five and sixty seconds are the options.</p>
-        </div>
+      <div class="how-card">
+        <span class="how-card-num">02</span>
+        <h3>Pick gameplay</h3>
+        <p>Choose a game, voice, caption style, and 30 / 45 / 60 seconds.</p>
       </div>
-      <div class="step-row">
-        <div class="step-num"></div>
-        <div>
-          <h3>The render runs on the server</h3>
-          <p>Your job goes into a queue and is picked up by a background worker. It is not processed by the page you are looking at. The worker strips formatting from the script, generates the voiceover, measures how long that audio actually is, then works out caption timings and picks a gameplay segment in parallel. It reports progress at each stage, so you can watch it move.</p>
-        </div>
+      <div class="how-card">
+        <span class="how-card-num">03</span>
+        <h3>Server render</h3>
+        <p>Voiceover, captions, and gameplay are composed while you watch progress.</p>
       </div>
-      <div class="step-row">
-        <div class="step-num"></div>
-        <div>
-          <h3>Download it</h3>
-          <p>Gameplay and narration are combined with the captions burned into the picture and written out as an H.264 MP4 at 720&times;1280. Finished videos are deleted from the server an hour after they are created, so download before you close the tab.</p>
-        </div>
+      <div class="how-card">
+        <span class="how-card-num">04</span>
+        <h3>Download</h3>
+        <p>720×1280 H.264 MP4. Free keeps files 1 hour; Pro keeps them 7 days.</p>
       </div>
     </div>
   </div>
 
   <div class="subpage-section">
-    <h2>If a render fails</h2>
-    <div class="glass-card doc-card">
-      <p>Failed jobs are retried twice with a short delay before they are marked as failed. If a retry also fails you get the error text on the job rather than a silent hang. Common causes are the text-to-speech service being unreachable or FFmpeg running out of disk space.</p>
+    <h2>Games included</h2>
+    <div class="games-row" style="margin-top:1rem;">
+      <div class="game-card"><video data-src="card-media/card-minecraft.mp4" loop muted playsinline disablePictureInPicture width="480" height="360" aria-label="Minecraft"></video><div class="game-card-overlay"><span class="game-name">Minecraft</span></div></div>
+      <div class="game-card"><video data-src="card-media/card-roblox.mp4" loop muted playsinline disablePictureInPicture width="480" height="360" aria-label="Roblox"></video><div class="game-card-overlay"><span class="game-name">Roblox</span></div></div>
+      <div class="game-card"><video data-src="card-media/card-gtav.mp4" loop muted playsinline disablePictureInPicture width="480" height="360" aria-label="GTA V"></video><div class="game-card-overlay"><span class="game-name">GTA V</span></div></div>
+      <div class="game-card"><video data-src="card-media/card-fortnite.mp4" loop muted playsinline disablePictureInPicture width="480" height="360" aria-label="Fortnite"></video><div class="game-card-overlay"><span class="game-name">Fortnite</span></div></div>
+      <div class="game-card"><img src="card-media/card-valorant.jpg" width="480" height="360" alt="Valorant"><div class="game-card-overlay"><span class="game-name">Valorant</span></div></div>
+      <div class="game-card"><img src="card-media/card-cod.jpg" width="480" height="360" alt="Call of Duty"><div class="game-card-overlay"><span class="game-name">Call of Duty</span></div></div>
+    </div>
+  </div>
+
+  <div class="subpage-section">
+    <h2>Examples</h2>
+    <div class="examples-grid" style="margin-top:1rem;">
+      <figure class="example-card">
+        <video data-src="media/example_1.mp4" loop muted playsinline disablePictureInPicture></video>
+        <figcaption><span class="example-tag">Style: Word-Pop</span>Minecraft + Reddit Story</figcaption>
+      </figure>
+      <figure class="example-card">
+        <video data-src="media/example_2.mp4" loop muted playsinline disablePictureInPicture></video>
+        <figcaption><span class="example-tag">Style: Bold Yellow</span>GTA V + True Scary Story</figcaption>
+      </figure>
+      <figure class="example-card">
+        <video data-src="media/example_3.mp4" loop muted playsinline disablePictureInPicture></video>
+        <figcaption><span class="example-tag">Style: White Highlight</span>Roblox + Fun Facts</figcaption>
+      </figure>
+      <figure class="example-card">
+        <video data-src="media/example_4.mp4" loop muted playsinline disablePictureInPicture></video>
+        <figcaption><span class="example-tag">Style: Clean</span>Fortnite + Funny Story</figcaption>
+      </figure>
     </div>
   </div>
 
@@ -87,7 +106,7 @@
     <nav>
       <a href="/">Home</a>
       <a href="/features">Features</a>
-      <a href="/examples">Examples</a>
+      <a href="/#examples">Examples</a>
       <a href="/pricing">Pricing</a>
       <a href="/faq">FAQ</a>
       <a href="/privacy">Privacy</a>
@@ -98,5 +117,30 @@
 
 </div>
 
+<script>
+(function () {
+  var videos = Array.prototype.slice.call(document.querySelectorAll('video[data-src]'));
+  function load(video) {
+    var src = video.getAttribute('data-src');
+    if (!src) return;
+    video.src = src;
+    video.removeAttribute('data-src');
+    video.muted = true;
+    video.play().catch(function () {});
+  }
+  if (!('IntersectionObserver' in window)) {
+    videos.forEach(load);
+    return;
+  }
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      load(entry.target);
+      observer.unobserve(entry.target);
+    });
+  }, { rootMargin: '200px 0px' });
+  videos.forEach(function (v) { observer.observe(v); });
+})();
+</script>
 </body>
 </html>

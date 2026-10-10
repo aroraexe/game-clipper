@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Examples — StoryPlay</title>
   <meta name="description" content="Finished StoryPlay videos, one per caption style.">
-  <link rel="stylesheet" href="landing.css?v=2">
+  <link rel="stylesheet" href="landing.css?v=5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -15,7 +15,7 @@
   <div class="nav-container">
     <div class="nav-left">
       <a href="/" class="nav-logo" style="text-decoration:none;color:inherit;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M5 4.5V19.5L19 12L5 4.5Z" fill="#FFFFFF"/>
         </svg>
         <span>StoryPlay</span>
@@ -24,7 +24,7 @@
         <a href="/features">Features</a>
         <a href="/how-it-works">How It Works</a>
         <a href="/#games">Games</a>
-        <a href="/examples">Examples</a>
+        <a href="/examples" aria-current="page">Examples</a>
         <a href="/pricing">Pricing</a>
         <a href="/faq">FAQ</a>
       </nav>
@@ -45,29 +45,30 @@
 
   <div class="subpage-section">
     <div class="examples-grid">
-      <div class="example-card">
-        <video src="media/example_1.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
-        <div class="example-meta"><span class="example-tag">Word pop</span><strong>Minecraft, Reddit story</strong></div>
-      </div>
-      <div class="example-card">
-        <video src="media/example_2.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
-        <div class="example-meta"><span class="example-tag">Bold yellow</span><strong>GTA V, true scary story</strong></div>
-      </div>
-      <div class="example-card">
-        <video src="media/example_3.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
-        <div class="example-meta"><span class="example-tag">White highlight</span><strong>Roblox, fun facts</strong></div>
-      </div>
-      <div class="example-card">
-        <video src="media/example_4.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
-        <div class="example-meta"><span class="example-tag">Clean</span><strong>Fortnite, funny story</strong></div>
-      </div>
+      <figure class="example-card">
+        <video data-src="media/example_1.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
+        <figcaption><span class="example-tag">Style: Word-Pop</span>Minecraft + Reddit Story</figcaption>
+      </figure>
+      <figure class="example-card">
+        <video data-src="media/example_2.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
+        <figcaption><span class="example-tag">Style: Bold Yellow</span>GTA V + True Scary Story</figcaption>
+      </figure>
+      <figure class="example-card">
+        <video data-src="media/example_3.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
+        <figcaption><span class="example-tag">Style: White Highlight</span>Roblox + Fun Facts</figcaption>
+      </figure>
+      <figure class="example-card">
+        <video data-src="media/example_4.mp4" loop muted playsinline preload="none" disablePictureInPicture></video>
+        <figcaption><span class="example-tag">Style: Clean</span>Fortnite + Funny Story</figcaption>
+      </figure>
     </div>
   </div>
 
   <div class="subpage-section">
-    <h2>Try your own</h3>
+    <h2>Try your own</h2>
     <div class="glass-card doc-card">
       <p>Every video above was made by pasting a story, picking a game and pressing one button. It takes a couple of minutes because the render happens on the server.</p>
+      <p style="margin-top:1rem;"><a href="/signin" class="btn btn-primary">Create a video</a></p>
     </div>
   </div>
 
@@ -87,27 +88,29 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const videos = document.querySelectorAll('.example-card video');
-  if (!('IntersectionObserver' in window)) return;
-
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      const v = entry.target;
-      if (entry.isIntersecting) {
-        v.setAttribute('preload', 'auto');
-        const p = v.play();
-        if (p !== undefined) p.catch(() => {});
-      } else {
-        v.pause();
-        if (v.currentTime > 0) v.currentTime = 0;
-      }
+(function () {
+  var videos = Array.prototype.slice.call(document.querySelectorAll('video[data-src]'));
+  function load(video) {
+    var src = video.getAttribute('data-src');
+    if (!src) return;
+    video.src = src;
+    video.removeAttribute('data-src');
+    video.muted = true;
+    video.play().catch(function () {});
+  }
+  if (!('IntersectionObserver' in window)) {
+    videos.forEach(load);
+    return;
+  }
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      load(entry.target);
+      observer.unobserve(entry.target);
     });
-  }, { rootMargin: '25% 0px', threshold: 0.15 });
-
-  videos.forEach((v) => io.observe(v));
-});
+  }, { rootMargin: '200px 0px' });
+  videos.forEach(function (v) { observer.observe(v); });
+})();
 </script>
-
 </body>
 </html>

@@ -413,7 +413,9 @@ exports.createJob = async (req, res, next) => {
     });
 
     /* Enqueue for async processing */
-    enqueue(jobId);
+    // Pro goes to the high-priority lane so paying users are not stuck behind
+    // a free-tier burst. Still one encode at a time on Hobby — just fairer order.
+    enqueue(jobId, userStore.planNameFor(req.user.uid) === 'pro' ? 'high' : 'normal');
 
     res.status(202).json({
       jobId,
