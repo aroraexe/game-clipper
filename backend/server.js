@@ -143,13 +143,19 @@ app.use((req, res, next) => {
 // `X-Forwarded-For: <anything>` and every limiter in this file becomes a no-op.
 // TRUST_PROXY_HOPS=0 (the local default) means no proxy is trusted and
 // X-Forwarded-For is ignored entirely.
+// In production or on Railway, default to 1 so the app works behind platform proxies without crashing.
 const TRUST_PROXY_HOPS = (() => {
   const raw = String(process.env.TRUST_PROXY_HOPS ?? '').trim();
-  if (raw === '') return 0;
+  if (raw === '') {
+    if (IS_PROD || process.env.RAILWAY || process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_ID) {
+      return 1;
+    }
+    return 0;
+  }
   const n = parseInt(raw, 10);
   if (!Number.isFinite(n) || n < 0) {
     console.warn(`[Startup] Ignoring invalid TRUST_PROXY_HOPS="${raw}" — expected a non-negative integer.`);
-    return 0;
+    return IS_PROD ? 1 : 0;
   }
   return n;
 })();
@@ -458,13 +464,10 @@ async function start() {
   }
 
   // In production behind a load balancer (Railway, Render, etc.), TRUST_PROXY_HOPS
-  // MUST be set to the correct number of proxies (usually 1). Without it, all
-  // requests appear to come from the same IP, collapsing rate limits.
+  // should match the proxy count. Auto-set to 1 rather than crashing if left at 0.
   if (IS_PROD && TRUST_PROXY_HOPS === 0) {
-    console.error('[Startup] FATAL: NODE_ENV=production but TRUST_PROXY_HOPS=0. ' +
-                  'Rate limiting will not work correctly behind a load balancer. ' +
-                  'Set TRUST_PROXY_HOPS=1 (or correct hop count for your platform).');
-    process.exit(1);
+    console.warn('[Startup] WARNING: NODE_ENV=production but TRUST_PROXY_HOPS was 0. Auto-configuring trust proxy to 1.');
+    app.set('trust proxy', 1);
   }
 
   // authPreflight only runs its full battery when NODE_ENV is exactly

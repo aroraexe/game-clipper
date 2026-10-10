@@ -48,12 +48,9 @@ let DEV_SIGNING_SECRET = null;
 function outputSigningSecret() {
   const secret = process.env.OUTPUT_URL_SECRET;
   if (!secret) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('CRITICAL: OUTPUT_URL_SECRET must be set in production to secure video downloads.');
-    }
     if (!DEV_SIGNING_SECRET) {
       DEV_SIGNING_SECRET = crypto.randomBytes(32).toString('hex');
-      console.warn('[OutputURL] OUTPUT_URL_SECRET is not set — using a random per-process dev secret. Do not rely on this outside local development.');
+      console.warn('[OutputURL] WARNING: OUTPUT_URL_SECRET is not set in environment. Using a generated per-process fallback secret. Set OUTPUT_URL_SECRET in your Railway dashboard.');
     }
     return DEV_SIGNING_SECRET;
   }

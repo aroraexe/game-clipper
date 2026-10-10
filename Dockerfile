@@ -56,6 +56,8 @@ COPY storage/ ./storage/
 RUN mkdir -p storage/gameplay storage/outputs storage/temp storage/audio storage/subtitles && \
     chown -R node:node /app
 
+ENV TRUST_PROXY_HOPS=1
+
 EXPOSE 3000
 
 # Healthcheck so Railway knows when the app is ready
