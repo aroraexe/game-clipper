@@ -629,4 +629,12 @@ ode process out of writing to /app/storage/temp.
 - **Verified:** Ran npm test (172/172 tests passed); verified node -c syntax on backend files.
 - **Notes:** Resolves the fatal crash loop reported in Railway deployment logs.
 
+### 2026-10-11 01:38 — antigravity
+- **Task:** Fix FFmpeg "Filter not found" composite render error in Docker
+- **Files:** Dockerfile, backend/services/ffmpeg.service.js, backend/services/tts.service.js, AGENT_LOG.md
+- **Changes:** Configured ffmpeg.service.js and tts.service.js to prioritize system/installed full FFmpeg builds (/usr/local/bin/ffmpeg) over the minimal npm ffmpeg-static package. Added ENV FFMPEG_PATH=/usr/local/bin/ffmpeg and ENV FFPROBE_PATH=/usr/local/bin/ffprobe in Dockerfile so Linux container builds use the static build from John Van Sickle with full libass and freetype/drawtext support.
+- **Verified:** Ran npm test (172/172 tests passed across 11 test suites); verified local fallback to ffmpeg-static still functions.
+- **Notes:** Fixes the code 8 "Filter not found" error during video composition with subtitles and watermark.
+
+
 

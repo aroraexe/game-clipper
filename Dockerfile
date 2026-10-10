@@ -56,6 +56,8 @@ COPY storage/ ./storage/
 RUN mkdir -p storage/gameplay storage/outputs storage/temp storage/audio storage/subtitles && \
     chown -R node:node /app
 
+ENV FFMPEG_PATH=/usr/local/bin/ffmpeg
+ENV FFPROBE_PATH=/usr/local/bin/ffprobe
 ENV TRUST_PROXY_HOPS=1
 
 EXPOSE 3000

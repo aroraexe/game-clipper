@@ -34,16 +34,23 @@ console.log(`[FFmpeg] Output resolution: ${VIDEO_W}×${VIDEO_H}`);
 const ffmpegStatic = require('ffmpeg-static');
 const ffprobeStatic = require('ffprobe-static');
 
-if (process.env.FFMPEG_PATH) {
-  ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
-} else if (ffmpegStatic) {
-  ffmpeg.setFfmpegPath(ffmpegStatic);
+// Prefer system/installed full ffmpeg builds if present (e.g. /usr/local/bin/ffmpeg in Docker)
+const systemFfmpeg = ['/usr/local/bin/ffmpeg', '/usr/bin/ffmpeg'].find(p => {
+  try { return fs.existsSync(p); } catch (_) { return false; }
+});
+const systemFfprobe = ['/usr/local/bin/ffprobe', '/usr/bin/ffprobe'].find(p => {
+  try { return fs.existsSync(p); } catch (_) { return false; }
+});
+
+const ffmpegBinary = process.env.FFMPEG_PATH || systemFfmpeg || ffmpegStatic;
+if (ffmpegBinary) {
+  ffmpeg.setFfmpegPath(ffmpegBinary);
+  console.log(`[FFmpeg] Using FFmpeg binary: ${ffmpegBinary}`);
 }
 
-if (process.env.FFPROBE_PATH) {
-  ffmpeg.setFfprobePath(process.env.FFPROBE_PATH);
-} else if (ffprobeStatic && ffprobeStatic.path) {
-  ffmpeg.setFfprobePath(ffprobeStatic.path);
+const ffprobeBinary = process.env.FFPROBE_PATH || systemFfprobe || (ffprobeStatic && ffprobeStatic.path);
+if (ffprobeBinary) {
+  ffmpeg.setFfprobePath(ffprobeBinary);
 }
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */

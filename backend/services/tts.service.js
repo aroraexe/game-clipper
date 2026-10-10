@@ -310,6 +310,10 @@ async function synthesizeEdge(text, mp3Path, voice) {
 
 function ffmpegBin() {
   if (process.env.FFMPEG_PATH) return process.env.FFMPEG_PATH;
+  const sys = ['/usr/local/bin/ffmpeg', '/usr/bin/ffmpeg'].find(p => {
+    try { return fs.existsSync(p); } catch (_) { return false; }
+  });
+  if (sys) return sys;
   try { return require('ffmpeg-static'); } catch (_) { return 'ffmpeg'; }
 }
 
