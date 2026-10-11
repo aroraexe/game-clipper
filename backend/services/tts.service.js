@@ -234,6 +234,7 @@ async function resolveProvider() {
 
   if (requested === 'auto') {
     if (process.env.OPENAI_API_KEY) return 'openai';
+    if (edgeIsPermitted()) return resolveProviderFor('edge');
     if (await detectLocalEngine()) return 'local';
     console.warn('[TTS] No OPENAI_API_KEY and no local speech engine found; falling back to Microsoft Edge TTS.');
     return resolveProviderFor('edge');
@@ -353,8 +354,22 @@ async function synthesize(text, outputPath, voice = DEFAULT_VOICE) {
   }
 
   const mp3Path = path.join(path.dirname(outputPath), 'tts_raw.mp3');
-  if (provider === 'edge') await synthesizeEdge(text, mp3Path, voice);
-  else await synthesizeOpenAI(text, mp3Path, voice);
+  if (provider === 'edge') {
+    try {
+      await synthesizeEdge(text, mp3Path, voice);
+    } catch (edgeErr) {
+      console.warn(`[TTS] Edge TTS error: ${edgeErr.message}. Attempting fallback to local engine...`);
+      const local = await detectLocalEngine();
+      if (local) {
+        console.warn(`[TTS] Falling back to local offline engine (${local.kind}).`);
+        if (local.kind === 'sapi') return speakSsml(text, outputPath, voice);
+        return speakEspeak(local.bin, text, outputPath, voice);
+      }
+      throw edgeErr;
+    }
+  } else {
+    await synthesizeOpenAI(text, mp3Path, voice);
+  }
 
   return toWav(mp3Path, outputPath);
 }
@@ -400,7 +415,9 @@ function describeConfigSync() {
     if (requested === 'auto') {
       // Engine existence for `local` cannot be probed synchronously; the real
       // synthesize() call reports it, and a missing engine only fails renders.
-      provider = process.env.OPENAI_API_KEY ? 'openai' : 'local';
+      if (process.env.OPENAI_API_KEY) provider = 'openai';
+      else if (edgeIsPermitted()) provider = 'edge';
+      else provider = 'local';
     } else if (requested === 'local') {
       provider = 'local';
     } else if (requested === 'openai') {

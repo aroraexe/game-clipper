@@ -30,8 +30,23 @@
       </nav>
     </div>
     <div class="nav-actions">
-      <a href="/signin" class="btn btn-ghost">Sign In</a>
-      <a href="/signin" class="btn btn-primary">Create Video</a>
+      <a href="/signin" class="btn btn-ghost" id="navSignIn">Sign In</a>
+      <a href="/signin" class="btn btn-primary" id="navCreateBtn">Create Video</a>
+      <div id="userMenu" class="user-menu" hidden>
+        <button id="user-menu-btn" class="user-menu-btn" aria-haspopup="true" aria-expanded="false" aria-controls="user-dropdown" aria-label="Account menu">
+          <div class="user-avatar user-avatar--brand" id="user-avatar-initial">U</div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="user-dropdown" class="user-dropdown" role="menu">
+          <div class="user-dropdown-head" id="user-dropdown-email">user@example.com</div>
+          <a href="/app" class="user-menu-item" style="text-decoration:none;">Go to App</a>
+          <a href="/account" class="user-menu-item" style="text-decoration:none;">Account &amp; billing</a>
+          <button id="btn-signout" class="user-menu-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            Sign out
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </nav>
@@ -142,5 +157,6 @@
   videos.forEach(function (v) { observer.observe(v); });
 })();
 </script>
+<script src="/nav-auth.js" defer></script>
 </body>
 </html>

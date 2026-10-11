@@ -31,12 +31,12 @@ function toAssTime(seconds) {
 const PRESETS = {
   'bold-yellow': {
     fontName:     'Impact',
-    fontSize:     100,
+    fontSize:     64,
     primaryColor: '&H0000FFFF',   // Yellow in ASS (AABBGGRR)
     outlineColor: '&H00000000',   // Black
     backColor:    '&H80000000',
     bold:         -1,
-    outline:      5,
+    outline:      4,
     shadow:       2,
     alignment:    5,              // middle-center
     marginV:      0,
@@ -45,7 +45,7 @@ const PRESETS = {
   },
   'white-highlight': {
     fontName:     'Arial Rounded MT Bold',
-    fontSize:     90,
+    fontSize:     60,
     primaryColor: '&H00FFFFFF',   // White
     outlineColor: '&H00000000',
     backColor:    '&H80000000',
@@ -60,13 +60,13 @@ const PRESETS = {
   },
   'word-pop': {
     fontName:     'Impact',
-    fontSize:     120,
+    fontSize:     72,
     primaryColor: '&H00FFFFFF',
     outlineColor: '&H88FFFFFF',   // White glow outline
     backColor:    '&H80000000',
     bold:         -1,
-    outline:      6,
-    shadow:       3,
+    outline:      5,
+    shadow:       2,
     alignment:    5,
     marginV:      0,
     highlight:    false,
@@ -75,7 +75,7 @@ const PRESETS = {
   },
   'clean': {
     fontName:     'Arial',
-    fontSize:     70,
+    fontSize:     50,
     primaryColor: '&H00FFFFFF',
     outlineColor: '&H00000000',
     backColor:    '&H40000000',
@@ -144,8 +144,8 @@ YCbCr Matrix: None
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,${p.fontName},${p.fontSize},${p.primaryColor},&H000000FF,${p.outlineColor},${p.backColor},${p.bold},0,0,0,100,100,0,0,1,${p.outline},${p.shadow},${p.alignment},60,60,${p.marginV},1
-Style: Highlight,${p.fontName},${p.fontSize},${p.highlightColor || p.primaryColor},&H000000FF,${p.outlineColor},${p.backColor},-1,0,0,0,110,110,0,0,1,${p.outline + 1},${p.shadow},${p.alignment},60,60,${p.marginV},1`;
+Style: Default,${p.fontName},${p.fontSize},${p.primaryColor},&H000000FF,${p.outlineColor},${p.backColor},${p.bold},0,0,0,100,100,0,0,1,${p.outline},${p.shadow},${p.alignment},45,45,${p.marginV},1
+Style: Highlight,${p.fontName},${p.fontSize},${p.highlightColor || p.primaryColor},&H000000FF,${p.outlineColor},${p.backColor},-1,0,0,0,110,110,0,0,1,${p.outline + 1},${p.shadow},${p.alignment},45,45,${p.marginV},1`;
 }
 
 /* ── Event lines ─────────────────────────────────────────────────────────── */
@@ -229,8 +229,15 @@ function buildPopChunk(chunk, preset) {
     const start = w.start;
     // Keep word on screen until next word starts (or its own end if it's the last word)
     const end = wi < chunk.length - 1 ? chunk[wi + 1].start : w.end;
-    // ASS override for scale animation (simple version: just show larger briefly)
-    const text  = `{\\t(0,80,\\fscx120\\fscy120)\\t(80,160,\\fscx100\\fscy100)}${sanitizeAssText(w.word)}`;
+    const cleanWord = sanitizeAssText(w.word);
+    // Dynamically scale down font size for long words so they never clip on 720w canvas
+    let fsTag = '';
+    if (cleanWord.length > 8) {
+      const scaledFs = Math.max(42, Math.floor(preset.fontSize * (8.5 / cleanWord.length)));
+      fsTag = `\\fs${scaledFs}`;
+    }
+    // ASS override for scale animation (pop effect)
+    const text  = `{\\t(0,80,\\fscx120\\fscy120)\\t(80,160,\\fscx100\\fscy100)${fsTag}}${cleanWord}`;
     return `Dialogue: 0,${toAssTime(start)},${toAssTime(end)},Default,,0,0,0,,${text}`;
   });
 }

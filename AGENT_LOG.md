@@ -636,5 +636,38 @@ ode process out of writing to /app/storage/temp.
 - **Verified:** Ran npm test (all 172 tests passed across 11 test suites); node -c syntax check passed.
 - **Notes:** Eliminates the code 8 exit error on Railway while ensuring renders never fail due to missing filters.
 
+### 2026-10-11 12:22 — antigravity
+- **Task:** Fix loopholes where marketing/subpage buttons redirect signed-in users to sign-in page and accidentally sign them out
+- **Files:** frontend/signin.html, frontend/firebase-config.js, backend/server.js, frontend/nav-auth.js (new), frontend/index.html, frontend/features.html, frontend/how-it-works.html, frontend/examples.html, frontend/pricing.html, frontend/faq.html, frontend/terms.html, frontend/privacy.html, frontend/app.html, frontend/account.html, AGENT_LOG.md
+- **Changes:**
+  - `signin.html`: Removed unconditional `localStorage.removeItem('userEmail')` on load which was clearing user state whenever anyone landed on the signin page. Added active session verification (`/api/me` + Firebase `onAuthStateChanged`) that redirects logged-in users straight to `/app` instead of kicking them out or displaying the signin form.
+  - `server.js`: Added `/signin` route handler redirecting authenticated requests with valid session tokens directly to `/app`.
+  - `nav-auth.js`: Created shared client auth script loaded across all subpages (`features`, `how-it-works`, `examples`, `pricing`, `faq`, `terms`, `privacy`, `account`) to dynamically display the user avatar/menu, replace "Create Video" / "Start free" buttons with links to `/app`, hide "Sign In", and provide sign out.
+  - `pricing.html`: Wrapped billing client boot so deferred `billing.js` loads reliably without leaving the "Go Pro" button pointing to `/signin`.
+  - `app.html` & `account.html`: Updated early auth gate to self-heal `userEmail` via `/api/me` session check before falling back to `/signin`, preventing accidental redirect loops if localStorage was ever cleared.
+  - `index.html`: Added "Go to App" and "Account & billing" links into the landing page user dropdown menu.
+- **Verified:** npm test = 172 passed across all 11 test suites; node --check clean on server.js and nav-auth.js; git status confirms all modified and untracked files are accounted for.
+- **Notes:** Resolves unexpected logouts caused by clicking subpage CTAs or navigating to signin while authenticated.
+
+### 2026-10-11 12:35 — antigravity
+- **Task:** Fix robotic TTS voice output, subtitle text clipping, and upscale sharpness
+- **Files:** backend/services/tts.service.js, backend/services/subtitle.service.js, backend/services/ffmpeg.service.js, AGENT_LOG.md
+- **Changes:**
+  - `backend/services/tts.service.js`: In `resolveProvider()` auto mode, prioritized Microsoft Edge neural TTS (`node-edge-tts`) over legacy Windows SAPI (`Microsoft David`). In development/local renders without `OPENAI_API_KEY`, the app now automatically outputs ultra-realistic neural human voices (`en-US-ChristopherNeural`, `en-US-GuyNeural`, `en-US-JennyNeural`, `en-US-GregoryNeural`) instead of the 1990s monotone Windows desktop voice. Added graceful fallback to local speech engine if Edge websocket fails.
+  - `backend/services/subtitle.service.js`: Calibrated font sizes (`word-pop`: 72pt down from 120pt; `bold-yellow`: 64pt down from 100pt; `white-highlight`: 60pt down from 90pt; `clean`: 50pt down from 70pt). In `buildPopChunk`, added dynamic font scaling for long words (> 8 chars) and adjusted style margins so words like "cheese-rolling" never clip outside the 720×1280 mobile canvas.
+  - `backend/services/ffmpeg.service.js`: Added `:flags=lanczos` to FFmpeg scale filters in `compositeVideo` for sharper rendering when upscaling 406p gameplay clips.
+- **Verified:** Ran `npm test` (all 172 tests passed across 11 test suites); verified `node --check` syntax on all modified backend services; verified Edge TTS audio generation and ASS word-pop dynamic scaling with inline test runs.
+- **Notes:** Eliminates the robotic David voice and subtitle horizontal truncation reported in storyplay output videos.
+
+### 2026-10-11 12:40 — antigravity
+- **Task:** Increase hero studio phone video preview size on landing page
+- **Files:** frontend/landing.css, frontend/index.html, AGENT_LOG.md
+- **Changes:**
+  - `frontend/landing.css`: Enlarged `.studio-phone` dimensions from `min(210px, 58%)` to `min(255px, 84%)` with tighter preview padding (`1.25rem 1.15rem`) and refined box-shadow. Rebalanced `.studio` columns to `minmax(0, 1.05fr) minmax(0, 0.95fr)` and increased min-height to 420px so the phone screen fills the stage proportionally and matches the height of the left form pane. Increased responsive phone size under 1100px from 180px to `min(230px, 68vw)`.
+  - `frontend/index.html`: Bumped stylesheet version to `landing.css?v=11` to prevent browser caching.
+- **Verified:** Ran `npm test` (all 172 tests passed); confirmed responsive styles and proportional 9:16 aspect ratio.
+- **Notes:** Fixes undersized preview phone in the landing hero mini-studio.
+
+
 
 

@@ -244,6 +244,17 @@ async function sendProtectedShell(req, res, next, fileName, routeLabel) {
 app.get('/app', (req, res, next) => sendProtectedShell(req, res, next, 'app.html', '/app'));
 app.get('/account', (req, res, next) => sendProtectedShell(req, res, next, 'account.html', '/account'));
 
+app.get(['/signin', '/signin.html'], async (req, res, next) => {
+  try {
+    const token = getRequestToken(req);
+    if (token && typeof token === 'string' && token.trim().length > 0) {
+      await verifyFirebaseToken(token);
+      return res.redirect('/app');
+    }
+  } catch (_) {}
+  next();
+});
+
 /* ── Block direct access to the protected shell ────────────────────────────────
  * The check MUST NOT be a literal string compare on req.path.
  *

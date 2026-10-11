@@ -7,7 +7,19 @@
   <meta name="description" content="Your StoryPlay plan, usage, and billing.">
   <script>
     if (!localStorage.getItem('userEmail')) {
-      window.location.href = '/signin';
+      fetch('/api/me', { credentials: 'include' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          if (data && data.email) {
+            localStorage.setItem('userEmail', data.email);
+            window.location.reload();
+          } else {
+            window.location.href = '/signin';
+          }
+        })
+        .catch(function () {
+          window.location.href = '/signin';
+        });
     }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,7 +45,21 @@
       </nav>
     </div>
     <div class="nav-actions">
-      <a href="/app" class="btn btn-primary">New video</a>
+      <a href="/app" class="btn btn-primary" id="navCreateBtn">New video</a>
+      <div id="userMenu" class="user-menu">
+        <button id="user-menu-btn" class="user-menu-btn" aria-haspopup="true" aria-expanded="false" aria-controls="user-dropdown" aria-label="Account menu">
+          <div class="user-avatar user-avatar--brand" id="user-avatar-initial">U</div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="user-dropdown" class="user-dropdown" role="menu">
+          <div class="user-dropdown-head" id="user-dropdown-email">user@example.com</div>
+          <a href="/app" class="user-menu-item" style="text-decoration:none;">Go to App</a>
+          <button id="btn-signout" class="user-menu-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            Sign out
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </nav>
@@ -328,5 +354,6 @@
   }
 })();
 </script>
+<script src="/nav-auth.js" defer></script>
 </body>
 </html>

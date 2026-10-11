@@ -186,8 +186,8 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
     const filterChain = [];
     let currentPad = 'vscaled';
 
-    // Scale & crop gameplay to exactly VIDEO_W×VIDEO_H (default 720×1280)
-    filterChain.push(`[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase,crop=${VIDEO_W}:${VIDEO_H},setsar=1[${currentPad}]`);
+    // Scale & crop gameplay to exactly VIDEO_W×VIDEO_H (default 720×1280) with lanczos upscaling for sharpness
+    filterChain.push(`[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase:flags=lanczos,crop=${VIDEO_W}:${VIDEO_H},setsar=1[${currentPad}]`);
 
     if (assPath) {
       const assEscaped = escapeFilterPath(assPath);
@@ -213,7 +213,7 @@ function compositeVideo({ gameplayPath, audioPath, subtitlePath, outputPath, dur
     }
 
     if (currentPad !== 'vout') {
-      filterChain[0] = `[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase,crop=${VIDEO_W}:${VIDEO_H},setsar=1[vout]`;
+      filterChain[0] = `[0:v]scale=${VIDEO_W}:${VIDEO_H}:force_original_aspect_ratio=increase:flags=lanczos,crop=${VIDEO_W}:${VIDEO_H},setsar=1[vout]`;
     }
 
     cmd.complexFilter(filterChain)

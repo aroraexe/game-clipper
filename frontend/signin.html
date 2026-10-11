@@ -190,11 +190,43 @@
   </script>
 
   <script type="module">
-    import { auth, provider, githubProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from './firebase-config.js';
+    import { auth, provider, githubProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from './firebase-config.js';
 
-    // Self-heal: If the user lands here, their session is definitively dead or intentionally signed out.
-    // Clear the ghost state so the landing page doesn't incorrectly show them as signed in.
-    localStorage.removeItem('userEmail');
+    // If the user lands here while already authenticated, redirect them to /app instead of signing them out.
+    const existingEmail = localStorage.getItem('userEmail');
+    const apiBase = (window.__API_BASE__ || '').replace(/\/$/, '');
+    if (existingEmail) {
+      fetch(`${apiBase}/api/me`, { credentials: 'include' })
+        .then(function (res) {
+          if (res.ok) {
+            window.location.replace('/app');
+          } else if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('firebaseToken');
+          }
+        })
+        .catch(function () {});
+    }
+
+    if (auth) {
+      onAuthStateChanged(auth, async function (user) {
+        if (user) {
+          try {
+            const token = await user.getIdToken();
+            const res = await fetch(`${apiBase}/api/auth/session`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ idToken: token })
+            });
+            if (res.ok) {
+              localStorage.setItem('userEmail', user.email || 'user');
+              localStorage.setItem('firebaseToken', token);
+              window.location.replace('/app');
+            }
+          } catch (_) {}
+        }
+      });
+    }
 
     let isSignUp = true;
     const formTitle = document.getElementById('form-title');

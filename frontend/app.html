@@ -6,7 +6,19 @@
   <title>StoryPlay — Create Your Gaming Short</title>
   <script>
     if (!localStorage.getItem('userEmail')) {
-      window.location.href = '/signin';
+      fetch('/api/me', { credentials: 'include' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          if (data && data.email) {
+            localStorage.setItem('userEmail', data.email);
+            window.location.reload();
+          } else {
+            window.location.href = '/signin';
+          }
+        })
+        .catch(function () {
+          window.location.href = '/signin';
+        });
     }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
