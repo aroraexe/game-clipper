@@ -204,8 +204,9 @@
       ? statusBits.join(' · ')
       : (isPro ? 'monthly subscription' : 'no card on file');
 
+    var maxMonthly = plan.maxJobsPerMonth || plan.maxJobsPerDay;
     $('account-plan-perks').innerHTML =
-      '<li>' + plan.maxJobsPerDay + ' renders / 24h</li>' +
+      '<li>' + maxMonthly + ' renders / month (rolling 30d)</li>' +
       '<li>' + plan.maxActiveJobs + ' at a time</li>' +
       '<li>Stories up to ' + plan.maxStoryChars + ' characters</li>' +
       '<li>' + (plan.watermark ? 'Watermark on free exports' : 'No watermark') + '</li>' +
@@ -276,9 +277,12 @@
 
   function renderUsage(me) {
     var u = me.usage || {};
-    $('account-usage-count').textContent = (u.jobsToday || 0) + ' / ' + (u.maxJobsPerDay || '—');
+    var used = u.jobsThisMonth !== undefined ? u.jobsThisMonth : (u.jobsToday || 0);
+    var max = u.maxJobsPerMonth || u.maxJobsPerDay || '—';
+    var remaining = u.remainingThisMonth !== undefined ? u.remainingThisMonth : (u.remainingToday || 0);
+    $('account-usage-count').textContent = used + ' / ' + max + ' this month';
     $('account-usage-remaining').textContent =
-      (u.remainingToday || 0) + ' renders left in this window';
+      remaining + ' renders left in rolling 30-day window';
   }
 
   function renderLibrary(jobs) {

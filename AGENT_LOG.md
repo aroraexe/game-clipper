@@ -756,3 +756,19 @@ ode process out of writing to /app/storage/temp.
   - SEO & Social Metadata: Added canonical tags across all pages (`https://storyplay.app/`, `/faq`, etc.), Open Graph (`og:type`, `og:site_name`, `og:title`, `og:description`, `og:url`, `og:image`), Twitter cards (`summary_large_image`), and Schema.org JSON-LD structured data (`WebApplication` and `Organization` on `index.html`, and `FAQPage` with all 10 Q&As on `faq.html`).
 - **Verified:** Ran `npm test` (all 172 tests passed across 11 test suites); verified mobile auth, drawer toggle, and navigation using browser subagent on 390×844 mobile viewport.
 - **Notes:** Completely eliminates the mobile sign-in bounce loop and ensures mobile users can seamlessly access the app.
+
+### 2026-10-11 17:08 — antigravity
+- **Task:** Limit video generation usage to 7 videos per account per month (rolling 30-day window)
+- **Files:** backend/config/plans.js, backend/jobs/userStore.js, backend/controllers/videos.controller.js, backend/routes/me.routes.js, frontend/app.js, frontend/account.html, frontend/pricing.html, test/plans.test.js, AGENT_LOG.md
+- **Changes:**
+  - `backend/config/plans.js`: Updated Free plan to `maxJobsPerMonth: 7` and Pro plan to `maxJobsPerMonth: 100` with `maxJobsPerDay` aliased for backwards compatibility.
+  - `backend/jobs/userStore.js`: Added durable `jobTimestamps` array tracking to user records, exported `ROLLING_WINDOW_MS` (30 days), added `recordJobCreation(uid)` with auto-pruning of timestamps older than 30 days, and `getRecentJobCount(uid, windowMs)`. This ensures usage tracking persists reliably across server sweeps that prune 1-hour free videos from `jobStore`.
+  - `backend/controllers/videos.controller.js`: Enforced rolling 30-day monthly render quota in `createJob` via `userStore.getRecentJobCount(req.user.uid, userStore.ROLLING_WINDOW_MS)` against `plan.maxJobsPerMonth || plan.maxJobsPerDay` returning 429 when exhausted. Recorded creation timestamp on job creation.
+  - `backend/routes/me.routes.js`: Updated `/api/me` to compute and return `jobsThisMonth`, `remainingThisMonth`, and `maxJobsPerMonth` while retaining `jobsToday`, `remainingToday`, and `maxJobsPerDay` aliases for backwards compatibility.
+  - `frontend/app.js`: Updated header usage chip to display `${used} / ${max} this month`, and widened quota error regex check to `/render limit/i` to avoid retrying exhausted accounts.
+  - `frontend/account.html`: Updated plan perk list to display renders / month (rolling 30d) and usage stats to show count and remaining renders left in rolling 30-day window.
+  - `frontend/pricing.html`: Updated Free tier perk to "7 renders per rolling 30 days", Pro tier perk to "100 renders per rolling 30 days", and updated "The actual limits" documentation.
+  - `test/plans.test.js`: Added comprehensive unit and integration tests verifying 7-render monthly limits, timestamp recording, 30-day window exclusion, disk persistence, and 429 rejection on 8th video creation.
+- **Verified:** Ran `npm test` with all 177 tests passing across 11 test suites.
+- **Notes:** Free accounts are now strictly capped at 7 videos per rolling 30 days, with accurate usage persistence even after completed video files are cleaned up from temporary disk storage.
+

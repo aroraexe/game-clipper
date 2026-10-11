@@ -131,10 +131,10 @@ function updateUsageChip(me) {
   const chip = $('usage-chip');
   const text = $('usage-chip-text');
   if (!chip || !text || !me || !me.usage) return;
-  const used = me.usage.jobsToday ?? 0;
-  const max = me.usage.maxJobsPerDay ?? me.plan?.maxJobsPerDay;
+  const used = me.usage.jobsThisMonth ?? me.usage.jobsToday ?? 0;
+  const max = me.usage.maxJobsPerMonth ?? me.usage.maxJobsPerDay ?? me.plan?.maxJobsPerMonth ?? me.plan?.maxJobsPerDay;
   if (!Number.isFinite(max)) return;
-  text.textContent = `${used} / ${max} today`;
+  text.textContent = `${used} / ${max} this month`;
   chip.hidden = false;
   chip.classList.toggle('usage-chip--tight', used >= max);
 }
@@ -820,9 +820,9 @@ async function submitJob() {
         return;
       }
       // Concurrent-queue 429s and 5xx are worth retrying with the same key.
-      // Daily-quota 429s are not — another attempt cannot succeed until tomorrow.
-      const dailyCap = /daily render limit/i.test(data.error || '');
-      if (!dailyCap && (res.status === 429 || res.status >= 500)) {
+      // Quota 429s are not — another attempt cannot succeed until the limit resets.
+      const quotaCap = /render limit/i.test(data.error || '');
+      if (!quotaCap && (res.status === 429 || res.status >= 500)) {
         submitJob.retries = (submitJob.retries || 0) + 1;
         if (submitJob.retries <= 3) {
           toast('The server is busy. Retrying…', 'error');

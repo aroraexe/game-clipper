@@ -123,6 +123,11 @@ function upsert(uid, patch = {}) {
     // `subscription.deleted` can arrive after the `...created` it should follow,
     // which would silently re-grant or wrongly revoke Pro. See applyBillingEvent.
     billingEventAt:     patch.billingEventAt ?? existing?.billingEventAt ?? null,
+    // Rolling quota tracking. Timestamps of created jobs (ms epoch).
+    // Stored here so usage counts persist even when 1-hour free videos are pruned from jobStore.
+    jobTimestamps:      Array.isArray(patch.jobTimestamps)
+                          ? patch.jobTimestamps
+                          : (Array.isArray(existing?.jobTimestamps) ? existing.jobTimestamps : []),
     createdAt:          existing?.createdAt || now,
     updatedAt:          now,
   };
@@ -190,8 +195,39 @@ function list() {
   return Array.from(users.values());
 }
 
+const ROLLING_WINDOW_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+/**
+ * Record a job creation event for a user.
+ * Prunes timestamps older than 30 days to keep user records compact.
+ */
+function recordJobCreation(uid, timestamp = Date.now()) {
+  if (!uid) return;
+  const now = Date.now();
+  const cutoff = now - ROLLING_WINDOW_MS;
+  const existing = users.get(uid);
+  const currentTimestamps = Array.isArray(existing?.jobTimestamps) ? existing.jobTimestamps : [];
+  const updatedTimestamps = currentTimestamps
+    .filter(ts => typeof ts === 'number' && ts > cutoff)
+    .concat(timestamp);
+
+  upsert(uid, { jobTimestamps: updatedTimestamps });
+}
+
+/**
+ * Count how many jobs the user has created in the rolling 30-day window.
+ */
+function getRecentJobCount(uid, windowMs = ROLLING_WINDOW_MS) {
+  if (!uid) return 0;
+  const cutoff = Date.now() - windowMs;
+  const u = users.get(uid);
+  if (!u || !Array.isArray(u.jobTimestamps)) return 0;
+  return u.jobTimestamps.filter(ts => typeof ts === 'number' && ts > cutoff).length;
+}
+
 module.exports = {
   get, upsert, setPlan, list, planNameFor, isEntitled, flush, normalisePlan,
   findUidByBillingCustomer, applyBillingEvent,
+  recordJobCreation, getRecentJobCount, ROLLING_WINDOW_MS,
   STORE_PATH,
 };

@@ -2,13 +2,16 @@ import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 // The stores read STORAGE_ROOT at import time, so redirect it before importing.
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'plans-'));
 process.env.STORAGE_ROOT = tmpDir;
 
-const { PLANS, DEFAULT_PLAN, planFor } = await import('../backend/config/plans.js');
-const userStore = await import('../backend/jobs/userStore.js');
+const { PLANS, DEFAULT_PLAN, planFor } = require('../backend/config/plans.js');
+const userStore = require('../backend/jobs/userStore.js');
 
 afterAll(() => {
   userStore.flush();
@@ -114,3 +117,92 @@ describe('userStore entitlements', () => {
     expect(onDisk['persist-me'].subscriptionStatus).toBe('active');
   });
 });
+
+describe('rolling 30-day job quota', () => {
+  beforeEach(() => {
+    userStore.flush();
+  });
+
+  it('defines 7 monthly renders for Free and 100 for Pro', () => {
+    expect(PLANS.free.maxJobsPerMonth).toBe(7);
+    expect(PLANS.pro.maxJobsPerMonth).toBe(100);
+    expect(PLANS.free.maxJobsPerDay).toBe(7);
+    expect(PLANS.pro.maxJobsPerDay).toBe(100);
+  });
+
+  it('tracks job creation timestamps and counts recent jobs', () => {
+    const uid = 'quota-user-1';
+    userStore.upsert(uid, { email: 'q@test.com' });
+    expect(userStore.getRecentJobCount(uid)).toBe(0);
+
+    userStore.recordJobCreation(uid);
+    userStore.recordJobCreation(uid);
+    expect(userStore.getRecentJobCount(uid)).toBe(2);
+  });
+
+  it('excludes timestamps older than 30 days from recent count', () => {
+    const uid = 'quota-user-2';
+    const now = Date.now();
+    const thirtyOneDaysAgo = now - (31 * 24 * 60 * 60 * 1000);
+    const tenDaysAgo = now - (10 * 24 * 60 * 60 * 1000);
+
+    userStore.upsert(uid, {
+      email: 'q2@test.com',
+      jobTimestamps: [thirtyOneDaysAgo, tenDaysAgo],
+    });
+
+    // Only the 10-days-ago job is in the 30-day rolling window
+    expect(userStore.getRecentJobCount(uid)).toBe(1);
+
+    // Recording a new job adds to the count and auto-prunes the 31-day-old timestamp
+    userStore.recordJobCreation(uid, now);
+    expect(userStore.getRecentJobCount(uid)).toBe(2);
+
+    const userRecord = userStore.get(uid);
+    expect(userRecord.jobTimestamps).not.toContain(thirtyOneDaysAgo);
+    expect(userRecord.jobTimestamps).toContain(tenDaysAgo);
+    expect(userRecord.jobTimestamps).toContain(now);
+  });
+
+  it('persists job timestamps across disk flushes', () => {
+    const uid = 'quota-user-persist';
+    userStore.upsert(uid, { email: 'qp@test.com' });
+    userStore.recordJobCreation(uid);
+    userStore.flush();
+
+    const onDisk = JSON.parse(fs.readFileSync(userStore.STORE_PATH, 'utf8'));
+    expect(Array.isArray(onDisk[uid].jobTimestamps)).toBe(true);
+    expect(onDisk[uid].jobTimestamps.length).toBe(1);
+  });
+
+  it('enforces monthly quota of 7 jobs on createJob for free tier', async () => {
+    const videosCtrl = require('../backend/controllers/videos.controller.js');
+    const uid = 'quota-user-controller';
+    userStore.upsert(uid, { email: 'ctrl@test.com' });
+
+    for (let i = 0; i < 7; i++) {
+      userStore.recordJobCreation(uid);
+    }
+
+    let status = null;
+    let jsonBody = null;
+    const req = {
+      user: { uid },
+      body: {
+        story: 'This is a test story that easily satisfies the minimum fifty character length requirement for validation.',
+        gameplayId: 'minecraft',
+      },
+      headers: {},
+    };
+    const res = {
+      status(s) { status = s; return this; },
+      json(b) { jsonBody = b; return this; },
+    };
+
+    await videosCtrl.createJob(req, res, () => {});
+    expect(status).toBe(429);
+    expect(jsonBody.error).toMatch(/Monthly render limit \(7\) reached on the Free plan/);
+  });
+});
+
+

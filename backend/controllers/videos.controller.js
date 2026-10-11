@@ -378,14 +378,13 @@ exports.createJob = async (req, res, next) => {
       return res.status(429).json({ error: `You already have ${plan.maxActiveJobs} active jobs on the ${plan.label} plan. Please wait for them to finish before creating more.` });
     }
 
-    // Per-user daily quota cap (prevents infinite render loops)
-    const DAY_MS = 24 * 60 * 60 * 1000;
-    const dayAgo = Date.now() - DAY_MS;
-    const userJobsToday = allJobs.filter(j => 
-      j.userId === req.user.uid && new Date(j.createdAt).getTime() > dayAgo
-    );
-    if (userJobsToday.length >= plan.maxJobsPerDay) {
-      return res.status(429).json({ error: `Daily render limit (${plan.maxJobsPerDay}) reached on the ${plan.label} plan. Try again tomorrow.` });
+    // Per-user monthly quota cap (rolling 30 days).
+    // We track creation timestamps in userStore so usage counts persist
+    // even when 1-hour free videos are pruned from jobStore.
+    const userJobsThisMonth = userStore.getRecentJobCount(req.user.uid, userStore.ROLLING_WINDOW_MS);
+    const limit = plan.maxJobsPerMonth || plan.maxJobsPerDay;
+    if (userJobsThisMonth >= limit) {
+      return res.status(429).json({ error: `Monthly render limit (${limit}) reached on the ${plan.label} plan. Upgrade to Pro for more.` });
     }
 
     // Per-plan story length cap (free tier is shorter, pro gets the full 3000).
@@ -408,6 +407,7 @@ exports.createJob = async (req, res, next) => {
       userId:       req.user.uid,
       idempotencyKey: hashedIdempotencyKey,
     });
+    userStore.recordJobCreation(req.user.uid);
 
     /* Enqueue for async processing */
     // Pro goes to the high-priority lane so paying users are not stuck behind

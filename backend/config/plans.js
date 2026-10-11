@@ -20,7 +20,8 @@ const DAY    = 24 * HOUR;
  * @property {number} retentionMs      how long a finished video is kept
  * @property {number} maxActiveJobs    concurrent queued/rendering jobs allowed
  * @property {number} maxStoryChars    server-side cap on submitted story length
- * @property {number} maxJobsPerDay    rolling 24h create-job cap per account
+ * @property {number} maxJobsPerMonth  rolling 30-day create-job cap per account
+ * @property {number} maxJobsPerDay    alias for backwards compatibility
  * @property {boolean} watermark       burn a watermark into free-tier output
  * @property {string} label            human-readable, for the UI and logs
  */
@@ -32,7 +33,8 @@ const PLANS = {
     retentionMs:     1 * HOUR,
     maxActiveJobs:   2,
     maxStoryChars:   1500,
-    maxJobsPerDay:   10,
+    maxJobsPerMonth: 7,
+    maxJobsPerDay:   7,
     watermark:       true,
   },
   pro: {
@@ -40,6 +42,7 @@ const PLANS = {
     retentionMs:     7 * DAY,
     maxActiveJobs:   6,
     maxStoryChars:   3000,
+    maxJobsPerMonth: 100,
     maxJobsPerDay:   100,
     watermark:       false,
   },
