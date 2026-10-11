@@ -727,3 +727,18 @@ ode process out of writing to /app/storage/temp.
   - Bumped cache buster to `app-style.css?v=11`.
 - **Verified:** Tested on 390×844 mobile viewport using browser subagent with full visual screenshot inspection; ran `npm test` (all 172 tests passed).
 - **Notes:** Step 1 now feels like a polished, native iOS/Android creation screen rather than a scaled-down desktop site.
+
+### 2026-10-11 14:26 — antigravity
+- **Task:** Fix visual asymmetry / shifted layout on Step 1 (Story Page) across desktop and mobile
+- **Files:** frontend/app.html, frontend/app-style.css, AGENT_LOG.md
+- **Changes:**
+  - `frontend/app-style.css`:
+    - Refactored `.step-heading` on desktop from horizontal flex with an oversized 3rem "01" (which pushed the title into a 68px misalignment relative to the card below) to a vertical stack topped with a crisp `STEP 01` accent badge. Heading, subtitle, and card now align flush-left on the identical vertical axis.
+    - Updated `.step-heading--with-info` and `.step-heading-left` across Steps 2, 3, and 4 for consistent symmetrical alignment.
+    - Grouped `.field-header-actions` in `.field-card-header`: on desktop, `[ ★ Generate Reddit Story ]` and `[ 45s (Medium) ▾ ]` sit side-by-side on the right of the header row, eliminating the lone left-stuck button and empty void. On mobile (`<= 680px`), `[ ★ Generate Reddit Story ]` expands to a centered full-width button below the balanced label/duration row.
+    - Added responsive `@media (max-width: 860px)` breakpoint so `.step-layout` drops to single-column without squishing or offsetting the card on tablets or medium snapped windows.
+  - `frontend/app.html`:
+    - Moved `#btnAiGenerate` into `.field-header-actions` alongside `#aiDurationWrapper`.
+    - Bumped stylesheet cache buster to `app-style.css?v=12` and script cache buster to `app.js?v=12`.
+- **Verified:** Tested with browser subagents on desktop (1024×768), 500×693 (user screenshot viewport), and mobile (390×844) with visual screenshot confirmation; ran `npm test` (all 172 tests passed).
+- **Notes:** Resolves the visual "shifted" look reported by the user. Advise user to hard-refresh (Ctrl + Shift + R) to clear cached CSS.

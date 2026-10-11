@@ -267,14 +267,23 @@ body {
 
 /* ── Step heading ── */
 .step-heading {
-  display: flex; align-items: flex-start; gap: 1.25rem;
-  margin-bottom: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
 }
 .step-heading--with-info {
-  justify-content: space-between; align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
 }
 .step-heading-left {
-  display: flex; align-items: flex-start; gap: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
 }
 .step-info-box {
   display: flex; align-items: flex-start; gap: 0.75rem;
@@ -284,15 +293,29 @@ body {
 .step-info-box svg { flex-shrink: 0; margin-top: 2px; }
 .step-info-text { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
 .step-num {
-  font-family: var(--font-display);
-  font-size: 3rem; font-weight: 800; line-height: 1;
-  color: rgba(18,20,26,0.45);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(232, 93, 4, 0.10);
+  border: 1px solid rgba(232, 93, 4, 0.22);
+  padding: 3px 9px;
+  border-radius: 6px;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
+}
+.step-num::before {
+  content: 'STEP ';
 }
 .step-title {
   font-family: var(--font-display);
-  font-size: 2.2rem; font-weight: 800; line-height: 1.1;
-  margin-bottom: 0.35rem;
+  font-size: 2.1rem; font-weight: 800; line-height: 1.15;
+  margin: 0;
+  color: var(--text);
   outline: none;
 }
 .step-title:focus,
@@ -303,6 +326,8 @@ body {
 }
 .step-subtitle {
   font-size: 0.95rem; color: var(--muted);
+  line-height: 1.4;
+  margin: 0;
 }
 .grad {
   color: var(--accent);
@@ -318,6 +343,15 @@ body {
   grid-template-columns: 1fr 220px;
   gap: 2rem;
   align-items: start;
+}
+@media (max-width: 860px) {
+  .step-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .step-preview {
+    display: none !important;
+  }
 }
 .step-main { display: flex; flex-direction: column; gap: 1rem; }
 
@@ -356,7 +390,7 @@ body {
 }
 .field-label-row svg { color: var(--accent); }
 .field-header-actions {
-  display: flex; align-items: center; gap: 0.6rem;
+  display: flex; align-items: center; gap: 0.65rem;
 }
 .custom-select {
   position: relative;
@@ -402,17 +436,22 @@ body {
 .custom-select__option.selected { color: var(--text); font-weight: 600; }
 
 .btn-ai {
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  padding: 0.5rem 0.95rem;
-  background: var(--text);
-  border: none; border-radius: 8px;
-  color: #fff; font-weight: 600; font-size: 0.84rem;
-  cursor: pointer; transition: background 0.2s;
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  background: linear-gradient(135deg, #16181F 0%, #222631 100%);
+  border: 1px solid rgba(232, 93, 4, 0.30);
+  border-radius: 8px;
+  color: #fff; font-weight: 600; font-size: 0.82rem;
+  cursor: pointer; transition: all 0.2s ease;
   font-family: var(--font-body);
   white-space: nowrap;
-  margin-bottom: 0.85rem;
+  margin-bottom: 0;
+  box-shadow: 0 2px 8px rgba(18, 20, 26, 0.08);
 }
-.btn-ai:hover { background: #2A2E38; transform: none; }
+.btn-ai:hover {
+  background: linear-gradient(135deg, #222631 0%, #2e3342 100%);
+  border-color: rgba(232, 93, 4, 0.55);
+}
 .btn-ai svg { color: #FFD700; }
 
 .story-textarea {
@@ -1050,8 +1089,10 @@ body {
   }
   .field-card-header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    gap: 0.65rem;
     margin-bottom: 0.65rem;
   }
   .field-label-row {
@@ -1060,8 +1101,13 @@ body {
     display: flex;
     align-items: center;
     gap: 0.45rem;
+    order: 1;
+  }
+  .field-header-actions {
+    display: contents;
   }
   .custom-select {
+    order: 2;
     width: auto;
     flex-shrink: 0;
   }
@@ -1076,6 +1122,7 @@ body {
     border: 1px solid rgba(18, 20, 26, 0.08);
   }
   .btn-ai {
+    order: 3;
     width: 100%;
     padding: 0.65rem 1rem;
     font-size: 0.84rem;
