@@ -901,12 +901,373 @@ body {
 .toast--error { border-color: rgba(18,20,26,0.35); background: #FFFFFF; }
 .toast--success { border-color: rgba(18,20,26,0.35); }
 
-/* ── Responsive ── */
-@media (max-width: 700px) {
-  .step-layout { grid-template-columns:1fr; }
-  .step-preview { display:none; }
-  .gameplay-grid { grid-template-columns:repeat(2,1fr); }
-  .caption-grid { grid-template-columns:repeat(2,1fr); }
-  .voice-grid { grid-template-columns:repeat(2,1fr); }
-  .step-title { font-size:1.75rem; }
+/* ── Responsive Mobile (Phone-Friendly) ── */
+@media (max-width: 680px) {
+  /* App Shell */
+  #app {
+    padding: 0.75rem 0.85rem 6.5rem;
+  }
+
+  /* Header */
+  .app-header {
+    padding: 0.6rem 0.85rem;
+    margin-bottom: 1.25rem;
+    border-radius: 12px;
+  }
+  .app-logo span {
+    font-size: 1.1rem;
+  }
+  .beta-badge {
+    display: none;
+  }
+  .step-indicators {
+    gap: 0.35rem;
+  }
+  .step-dot {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+  .header-tools {
+    gap: 0.45rem;
+  }
+  .header-tool-btn {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  /* Step Headings */
+  .step-heading {
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+  .step-num {
+    font-size: 2.2rem;
+  }
+  .step-title {
+    font-size: 1.55rem;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+  }
+  .step-subtitle {
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+  .step-heading--with-info {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .step-heading-left {
+    gap: 0.85rem;
+  }
+  .step-info-box {
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    border-radius: 10px;
+  }
+
+  /* Step Layout & Field Card (Step 1) */
+  .step-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .step-preview {
+    display: none;
+  }
+  .field-card {
+    padding: 1rem 0.95rem;
+    border-radius: 14px;
+  }
+  .field-card-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .field-header-actions {
+    display: flex;
+    width: 100%;
+    gap: 0.5rem;
+  }
+  .custom-select {
+    flex: 1;
+    min-width: 0;
+  }
+  .custom-select__trigger {
+    width: 100%;
+    min-width: 0;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.78rem;
+  }
+  .btn-ai {
+    flex: 1.2;
+    justify-content: center;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.78rem;
+  }
+  .story-textarea {
+    font-size: 1rem; /* 16px to prevent iOS Safari auto-zoom */
+    min-height: 140px;
+    padding: 0.75rem 0.85rem;
+  }
+  .textarea-footer {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+  }
+  .char-count {
+    font-size: 0.72rem;
+  }
+
+  /* Horizontal swipeable examples pill row */
+  .examples-row {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.35rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-top: 0.25rem;
+  }
+  .examples-row::-webkit-scrollbar {
+    display: none;
+  }
+  .example-pill {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.78rem;
+  }
+
+  /* Step 2: Gameplay Grid */
+  .gameplay-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .gameplay-card {
+    border-radius: 10px;
+    aspect-ratio: 16 / 10;
+  }
+  .gameplay-card__status {
+    top: 8px;
+    right: 8px;
+    padding: 3px 7px;
+    font-size: 0.65rem;
+  }
+  .gameplay-card__info {
+    bottom: 8px;
+    left: 10px;
+    gap: 2px;
+  }
+  .gameplay-card__name {
+    font-size: 0.85rem;
+  }
+
+  /* Step 3: Captions Grid */
+  .caption-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .caption-card {
+    border-radius: 10px;
+  }
+  .caption-preview {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+  .caption-card__info {
+    padding: 0.6rem 0.75rem;
+  }
+  .caption-label {
+    font-size: 0.82rem;
+  }
+  .caption-desc {
+    font-size: 0.7rem;
+  }
+  .color-section {
+    padding: 0.85rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+  .color-row {
+    gap: 0.5rem;
+  }
+  .color-swatch span {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Step 4: Voice & Duration */
+  .field-panel {
+    padding: 1rem;
+    border-radius: 14px;
+    margin-bottom: 1rem;
+  }
+  .field-panel-header {
+    margin-bottom: 0.85rem;
+  }
+  .btn-preview-voice {
+    display: none;
+  }
+  .voice-grid {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+  .voice-card {
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+  }
+  .voice-card-header {
+    margin-bottom: 0.4rem;
+  }
+  .voice-name {
+    font-size: 0.95rem;
+    margin-bottom: 0.1rem;
+  }
+  .voice-desc {
+    font-size: 0.75rem;
+  }
+
+  /* Duration Grid on mobile: segmented pills */
+  .duration-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  .duration-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.75rem 0.4rem;
+    border-radius: 10px;
+    gap: 0;
+  }
+  .duration-card-img {
+    display: none;
+  }
+  .duration-card-content {
+    align-items: center;
+  }
+  .dur-time {
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+  }
+  .dur-bar-wrap {
+    max-width: 50px;
+    margin-bottom: 0.35rem;
+  }
+  .dur-label {
+    font-size: 0.75rem;
+    margin-bottom: 0;
+  }
+  .dur-desc {
+    display: none;
+  }
+  .dur-card-check {
+    top: 6px;
+    right: 6px;
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Sticky Bottom Navigation Bar */
+  .step-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    margin: 0;
+    display: flex;
+    gap: 0.65rem;
+    box-shadow: 0 -6px 20px rgba(18, 20, 26, 0.08);
+  }
+  .step-actions .btn-back {
+    padding: 0.85rem 1.25rem;
+    flex-shrink: 0;
+    border-radius: 10px;
+  }
+  .step-actions .btn-continue,
+  .step-actions .btn-generate {
+    flex: 1;
+    margin: 0;
+    padding: 0.85rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 0.95rem;
+  }
+  .step {
+    padding-bottom: 5.5rem;
+  }
+
+  /* Step 5: Progress on mobile */
+  .progress-hero {
+    margin-bottom: 1.5rem;
+  }
+  .progress-orb {
+    width: 110px;
+    height: 110px;
+    margin-bottom: 1rem;
+  }
+  .progress-orb-inner {
+    font-size: 1.5rem;
+  }
+  .progress-title {
+    font-size: 1.4rem;
+  }
+  .progress-stage {
+    font-size: 0.85rem;
+  }
+  .pipeline-step {
+    padding: 0.75rem 0.85rem;
+    gap: 0.75rem;
+    border-radius: 10px;
+  }
+  .ps-icon-box {
+    width: 34px;
+    height: 34px;
+  }
+  .ps-title {
+    font-size: 0.88rem;
+  }
+  .ps-desc {
+    font-size: 0.72rem;
+  }
+
+  /* Step 6: Result on mobile */
+  .result-title {
+    font-size: 1.6rem;
+  }
+  .result-sub {
+    font-size: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+  .result-video {
+    max-width: 280px;
+    border-radius: 14px;
+  }
+  .result-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.65rem;
+  }
+  .result-actions .btn-continue,
+  .result-actions .btn-back {
+    width: 100%;
+    padding: 0.85rem 1.25rem;
+    justify-content: center;
+  }
 }

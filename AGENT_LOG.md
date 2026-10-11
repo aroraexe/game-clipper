@@ -678,6 +678,26 @@ ode process out of writing to /app/storage/temp.
 - **Verified:** Ran `npm test` (all 172 tests passed across 11 test suites); verified outline removal across all step headings.
 - **Notes:** Fixes user-reported black line box when landing on the app page.
 
+### 2026-10-11 13:33 — antigravity
+- **Task:** Make creation wizard completely phone-friendly with mobile-optimized layout
+- **Files:** frontend/app.html, frontend/app-style.css, AGENT_LOG.md
+- **Changes:**
+  - Generated mobile UI wireframe mockups for Step 1, Step 2, and Step 4; confirmed layout with user.
+  - `frontend/app-style.css`: Added comprehensive mobile responsive design under `@media (max-width: 680px)`:
+    - Sticky bottom navigation bar docking "Back", "Continue", and "Generate Short" with safe-area insets for one-handed thumb interaction without requiring scrolling.
+    - Wrapped `#btnStoryNext` in `.step-actions` for unified bottom docking across all steps.
+    - Slimmed mobile app header (28px step dots, condensed tools, hidden non-essential badges).
+    - Touch-optimized Step 1 header actions: duration pill and AI Reddit generator now fill full width side-by-side above textarea without clipping or awkward line wraps.
+    - Switched story textarea font size to 16px to prevent iOS Safari auto-zoom viewport distortion.
+    - Made example story pills horizontally swipeable on mobile.
+    - Step 2: 2-column square touch gameplay cards with 16:10 ratio and prominent orange selection borders.
+    - Step 3: 2-column caption cards with touch-friendly color swatches.
+    - Step 4: Vertical 1-column voice cards with direct play preview buttons; compact duration cards as segmented pills.
+    - Step 5 & 6: Scaled progress orb (110px) and full-width mobile video player with stacked action buttons.
+  - `frontend/app.html`: Bumped cache busters to `app-style.css?v=7`.
+- **Verified:** Ran `npm test` (all 172 tests passed across 11 test suites); verified responsive styles across 320px–680px breakpoints.
+- **Notes:** Creation wizard is now fully phone-friendly and native-feeling on mobile devices.
+
 
 
 
