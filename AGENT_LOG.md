@@ -668,6 +668,16 @@ ode process out of writing to /app/storage/temp.
 - **Verified:** Ran `npm test` (all 172 tests passed); confirmed responsive styles and proportional 9:16 aspect ratio.
 - **Notes:** Fixes undersized preview phone in the landing hero mini-studio.
 
+### 2026-10-11 12:52 — antigravity
+- **Task:** Remove ugly black outline box around step titles ("Your Story") when opening app
+- **Files:** frontend/app-style.css, frontend/app.js, frontend/app.html, AGENT_LOG.md
+- **Changes:**
+  - `frontend/app-style.css`: Added `outline: none !important;` to `.step-title`, `.step-title:focus`, and `[tabindex="-1"]:focus` selectors. Previously, when `goTo('story')` programmatically focused the `<h1>` on load, Chromium drew its default browser focus ring around the inline title elements, creating a stepped black box around "Your Story".
+  - `frontend/app.js`: Explicitly set `heading.style.outline = 'none'` prior to programmatic `.focus()`.
+  - `frontend/app.html`: Bumped cache busters to `app-style.css?v=6` and `app.js?v=6`.
+- **Verified:** Ran `npm test` (all 172 tests passed across 11 test suites); verified outline removal across all step headings.
+- **Notes:** Fixes user-reported black line box when landing on the app page.
+
 
 
 

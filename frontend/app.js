@@ -1127,6 +1127,7 @@ function goTo(stepName) {
   const heading = target && target.querySelector('.step-title');
   if (heading) {
     heading.setAttribute('tabindex', '-1');
+    heading.style.outline = 'none';
     heading.focus({ preventScroll: true });
   }
 
