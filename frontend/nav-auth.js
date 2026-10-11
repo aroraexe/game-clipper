@@ -81,6 +81,33 @@
       if (navSignIn) navSignIn.hidden = false;
       if (userMenu) userMenu.hidden = true;
     }
+
+    // Wire up mobile nav toggle on subpages
+    var navToggle = document.getElementById('nav-toggle');
+    var navLinks = document.getElementById('nav-links');
+    if (navToggle && navLinks && !navToggle._bound) {
+      navToggle._bound = true;
+      var setNavOpen = function (open) {
+        navLinks.classList.toggle('open', open);
+        navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        navToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      };
+
+      navToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        setNavOpen(!navLinks.classList.contains('open'));
+      });
+
+      navLinks.addEventListener('click', function (e) {
+        if (e.target.tagName === 'A') setNavOpen(false);
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!navLinks.contains(e.target) && !navToggle.contains(e.target)) {
+          setNavOpen(false);
+        }
+      });
+    }
   }
 
   if (document.readyState === 'loading') {

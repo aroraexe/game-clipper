@@ -24,7 +24,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="landing.css?v=10">
+  <link rel="stylesheet" href="landing.css?v=12">
   <script src="/billing.js" defer></script>
 </head>
 <body>
@@ -38,7 +38,12 @@
         </svg>
         <span>StoryPlay</span>
       </a>
-      <nav class="nav-links">
+      <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+      </button>
+      <nav class="nav-links" id="nav-links">
         <a href="/app">Create</a>
         <a href="/account" aria-current="page">Account</a>
         <a href="/pricing">Pricing</a>
@@ -147,6 +152,21 @@
 .status-pill--failed { background: rgba(255,80,80,0.2); color: #ffb4b4; }
 .status-pill--processing,
 .status-pill--queued { background: rgba(255,255,255,0.1); }
+@media (max-width: 600px) {
+  .account-job {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+  .account-job-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .account-job-actions .btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0.55rem 0.8rem;
+  }
+}
 </style>
 
 <script>
@@ -354,6 +374,6 @@
   }
 })();
 </script>
-<script src="/nav-auth.js" defer></script>
+<script src="/nav-auth.js?v=2" defer></script>
 </body>
 </html>

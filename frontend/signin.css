@@ -540,6 +540,49 @@ body {
   .right-half { flex: none; width: 100%; padding: 40px 20px; }
 }
 
+@media (max-width: 768px) {
+  .left-half {
+    padding: 16px 20px;
+    background: #0f1115;
+    min-height: auto;
+    flex: none;
+  }
+  .bg-video,
+  .bg-overlay,
+  .left-content {
+    display: none !important;
+  }
+  .left-header {
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .header-nav {
+    display: none;
+  }
+  .right-half {
+    padding: 16px 14px 40px;
+  }
+  .right-header {
+    margin-bottom: 16px;
+  }
+  .glass-panel {
+    padding: 22px 16px;
+    border-radius: 12px;
+  }
+  .panel-header {
+    min-height: auto;
+    margin-bottom: 16px;
+  }
+  .panel-header h2 {
+    min-height: auto;
+    font-size: 20px;
+  }
+  .form-input {
+    font-size: 16px;
+  }
+}
+
 /* Fix Chrome Autofill */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,

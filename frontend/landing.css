@@ -799,7 +799,19 @@ body::before {
 .subpage-footer .copy { color: var(--muted); font-size: 0.82rem; }
 
 @media (max-width: 860px) {
+  .subpage { padding-top: calc(var(--nav-h) + 2rem); padding-bottom: 3.5rem; }
+  .subpage-head { margin-bottom: 2rem; }
+  .subpage-section { margin-bottom: 2.75rem; }
   .doc-grid { grid-template-columns: 1fr; }
   .step-row { grid-template-columns: 44px 1fr; gap: 1rem; padding: 1.25rem; }
   .step-row .step-num { width: 40px; height: 40px; font-size: 1.1rem; }
+}
+
+@media (max-width: 520px) {
+  .subpage { padding-top: calc(var(--nav-h) + 1.25rem); padding-bottom: 2.5rem; }
+  .subpage-head h1 { font-size: 1.85rem; margin-bottom: 0.5rem; }
+  .subpage-head p { font-size: 0.95rem; }
+  .subpage-section { margin-bottom: 2rem; }
+  .price-panel { padding: 1.4rem 1.1rem; }
+  .glass-card { padding: 1.25rem 1rem; }
 }

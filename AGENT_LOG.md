@@ -698,6 +698,15 @@ ode process out of writing to /app/storage/temp.
 - **Verified:** Ran `npm test` (all 172 tests passed across 11 test suites); verified responsive styles across 320px–680px breakpoints.
 - **Notes:** Creation wizard is now fully phone-friendly and native-feeling on mobile devices.
 
-
-
-
+### 2026-10-11 13:46 — antigravity
+- **Task:** Make the entire site UI (auth, account, subpages, navbar) fully mobile-friendly
+- **Files:** frontend/landing.css, frontend/signin.css, frontend/signin.html, frontend/nav-auth.js, frontend/account.html, frontend/pricing.html, frontend/features.html, frontend/how-it-works.html, frontend/examples.html, frontend/faq.html, frontend/privacy.html, frontend/terms.html, frontend/index.html, AGENT_LOG.md
+- **Changes:**
+  - `frontend/nav-auth.js`: Added universal mobile hamburger drawer toggle logic so subpages with `#nav-toggle` and `#nav-links` open/close smoothly on mobile.
+  - Subpage Navbars (`pricing.html`, `features.html`, `how-it-works.html`, `examples.html`, `faq.html`, `account.html`, `privacy.html`, `terms.html`): Added `<button class="nav-toggle">` and `id="nav-links"` so navigation links are accessible on phone viewports instead of vanishing at `< 860px`.
+  - `frontend/signin.css` & `signin.html`: Optimized mobile auth layout under `@media (max-width: 768px)`. Hidden video background and heavy marketing pitch on phones so the login/registration form card is front-and-center without requiring 600px+ scrolling. Set input `font-size: 16px` to prevent iOS Safari auto-zoom; tuned glass-panel mobile padding.
+  - `frontend/account.html`: Added responsive styling so user job/video library items stack cleanly on `< 600px` without cramping action buttons.
+  - `frontend/landing.css`: Relaxed subpage top padding (`clamp`) and card paddings on mobile (`< 520px`).
+  - Cache busters bumped across all modified pages (`landing.css?v=12`, `signin.css?v=4`, `nav-auth.js?v=2`).
+- **Verified:** Ran `npm test` (all 172 tests passed across 11 test suites); verified responsive breakpoints from 320px to 968px.
+- **Notes:** The entire web app — landing, creation studio, auth, account, and all documentation/pricing subpages — is now 100% mobile responsive.
