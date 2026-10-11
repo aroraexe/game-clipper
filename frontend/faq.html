@@ -5,9 +5,116 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FAQ — StoryPlay</title>
   <meta name="description" content="Straight answers about length, output format, languages, rights and how long videos are kept.">
-  <link rel="stylesheet" href="landing.css?v=12">
+  <link rel="canonical" href="https://storyplay.app/faq">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="StoryPlay">
+  <meta property="og:title" content="FAQ — StoryPlay">
+  <meta property="og:description" content="Straight answers about length, output format, languages, rights and how long videos are kept.">
+  <meta property="og:url" content="https://storyplay.app/faq">
+  <meta property="og:image" content="https://storyplay.app/card-media/pick-minecraft.jpg">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FAQ — StoryPlay">
+  <meta name="twitter:description" content="Straight answers about length, output format, languages, rights and how long videos are kept.">
+  <meta name="twitter:image" content="https://storyplay.app/card-media/pick-minecraft.jpg">
+
+  <!-- FAQPage Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How long can a video be?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You pick 30, 45 or 60 seconds. The finished video follows the length of the generated voiceover instead, so the narration is never cut off mid-sentence."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is in the download?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 720×1280 MP4, H.264 video with AAC audio. Captions are burned into the picture rather than being a separate subtitle file."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which languages work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "English only. Both the voiceover and the caption timing are tuned for it."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I keep the rights?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. There is no watermark and no claim over what you make. What you are responsible for is having the right to post the story text you pasted."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I sign in?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Google, GitHub or an email address. No separate account to create."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Will my video disappear?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Finished videos and their job records are removed from the server an hour after creation. Download yours before you close the tab."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is the same gameplay never reused?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Segments are picked at random from the full-length footage, and the picker avoids the timestamp it used most recently, so consecutive videos do not open on the same moment."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Are the captions always exact?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Caption timing is estimated from word length rather than measured from the audio, so on a long script it can drift by a fraction of a second. It is close enough for reading, not frame-accurate."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why did my render fail?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most often the voice service was unreachable, or the server ran out of disk space. Failed jobs are retried twice before being marked as failed, and the error is shown on the job."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I upload my own gameplay?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Not from the browser. The games currently bundled are the only footage available."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="landing.css?v=13">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="/nav-auth.js?v=4" defer></script>
 </head>
 <body>
 
@@ -32,6 +139,8 @@
         <a href="/examples">Examples</a>
         <a href="/pricing">Pricing</a>
         <a href="/faq">FAQ</a>
+        <a href="/app" class="mobile-drawer-cta" id="drawerAppBtn" style="display:none; font-weight:700; color:var(--accent);">Open Studio (App) &rarr;</a>
+        <a href="/signin" class="mobile-drawer-cta" id="drawerSignInBtn" style="font-weight:700;">Sign In / Sign Up &rarr;</a>
       </nav>
     </div>
     <div class="nav-actions">

@@ -122,6 +122,8 @@ body::before {
 .nav-links a:hover,
 .nav-links a[aria-current="page"] { color: var(--text); }
 
+.mobile-drawer-cta { display: none !important; }
+
 .nav-actions { display: flex; align-items: center; gap: 0.65rem; flex-shrink: 0; }
 
 .nav-toggle {
@@ -655,6 +657,16 @@ body::before {
   }
   .nav-links.open { display: flex; }
   .nav-links a { padding: 0.75rem 0; width: 100%; }
+  .nav-links a.mobile-drawer-cta {
+    margin-top: 0.65rem;
+    padding: 0.8rem 1rem !important;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  }
   .how-it-works { grid-template-columns: 1fr; gap: 1.25rem; }
   .step-arrow { transform: rotate(90deg); align-self: center; }
   .how-grid { grid-template-columns: repeat(2, 1fr); }
@@ -667,6 +679,7 @@ body::before {
   .page { padding: 0 1.1rem; }
   .nav-container { padding: 0 1.1rem; }
   .nav-links { padding-left: 1.1rem; padding-right: 1.1rem; }
+  .nav-actions #navSignIn { display: none; }
   .games-row, .games-grid { grid-template-columns: repeat(2, 1fr); }
   .how-grid { grid-template-columns: 1fr; }
   .hero-brand { font-size: 2.6rem; }

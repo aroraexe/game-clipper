@@ -3,7 +3,7 @@
 
   function initNavAuth() {
     var API_BASE = (window.__API_BASE__ || '').replace(/\/$/, '');
-    var userEmail = localStorage.getItem('userEmail');
+    var cachedEmail = localStorage.getItem('userEmail');
 
     var navSignIn = document.getElementById('navSignIn');
     var navCreateBtn = document.getElementById('navCreateBtn');
@@ -14,12 +14,16 @@
     var menuBtn = document.getElementById('user-menu-btn');
     var dropdown = document.getElementById('user-dropdown');
     var signoutBtn = document.getElementById('btn-signout');
+    var drawerAppBtn = document.getElementById('drawerAppBtn');
+    var drawerSignInBtn = document.getElementById('drawerSignInBtn');
 
-    if (userEmail) {
+    function setLoggedInState(email) {
       if (navSignIn) navSignIn.hidden = true;
       if (userMenu) userMenu.hidden = false;
-      if (userEmailEl) userEmailEl.textContent = userEmail;
-      if (userAvatarEl) userAvatarEl.textContent = userEmail.charAt(0).toUpperCase();
+      if (drawerAppBtn) drawerAppBtn.style.display = 'block';
+      if (drawerSignInBtn) drawerSignInBtn.style.display = 'none';
+      if (userEmailEl) userEmailEl.textContent = email;
+      if (userAvatarEl) userAvatarEl.textContent = email.charAt(0).toUpperCase();
 
       if (navCreateBtn) {
         navCreateBtn.href = '/app';
@@ -29,60 +33,91 @@
         heroCreateBtn.href = '/app';
       }
 
-      // Re-point any in-content "Create video" / "Start free" buttons from /signin to /app
       var allSigninLinks = document.querySelectorAll('a[href="/signin"]');
       allSigninLinks.forEach(function (link) {
-        if (link.id !== 'navSignIn' && !link.classList.contains('btn-nav-outline') && !link.classList.contains('btn-nav-solid')) {
+        if (link.id !== 'navSignIn' && link.id !== 'drawerSignInBtn' && !link.classList.contains('btn-nav-outline') && !link.classList.contains('btn-nav-solid')) {
           link.href = '/app';
           if (link.getAttribute('data-plan-cta') === 'pro') {
             link.textContent = 'Upgrade in App';
           }
         }
       });
-
-      // Wire up menu open/close
-      if (menuBtn && dropdown && !menuBtn._bound) {
-        menuBtn._bound = true;
-        menuBtn.addEventListener('click', function (e) {
-          e.stopPropagation();
-          var open = dropdown.classList.toggle('open');
-          menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-        });
-
-        document.addEventListener('click', function () {
-          if (dropdown.classList.contains('open')) {
-            dropdown.classList.remove('open');
-            menuBtn.setAttribute('aria-expanded', 'false');
-          }
-        });
-
-        document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && dropdown.classList.contains('open')) {
-            dropdown.classList.remove('open');
-            menuBtn.setAttribute('aria-expanded', 'false');
-            menuBtn.focus();
-          }
-        });
-      }
-
-      // Wire up sign out
-      if (signoutBtn && !signoutBtn._bound) {
-        signoutBtn._bound = true;
-        signoutBtn.addEventListener('click', async function () {
-          try {
-            await fetch(API_BASE + '/api/auth/logout', { method: 'POST', credentials: 'include' });
-          } catch (_) {}
-          localStorage.removeItem('userEmail');
-          localStorage.removeItem('firebaseToken');
-          window.location.href = '/signin';
-        });
-      }
-    } else {
-      if (navSignIn) navSignIn.hidden = false;
-      if (userMenu) userMenu.hidden = true;
     }
 
-    // Wire up mobile nav toggle on subpages
+    function setLoggedOutState() {
+      if (navSignIn) navSignIn.hidden = false;
+      if (userMenu) userMenu.hidden = true;
+      if (drawerAppBtn) drawerAppBtn.style.display = 'none';
+      if (drawerSignInBtn) drawerSignInBtn.style.display = 'block';
+      if (navCreateBtn) {
+        navCreateBtn.href = '/signin';
+        navCreateBtn.textContent = 'Create Video';
+      }
+      if (heroCreateBtn) {
+        heroCreateBtn.href = '/signin';
+      }
+    }
+
+    // 1. Instant paint from cache if available
+    if (cachedEmail) {
+      setLoggedInState(cachedEmail);
+    } else {
+      setLoggedOutState();
+    }
+
+    // 2. Validate/refresh session with server
+    fetch(API_BASE + '/api/me', { credentials: 'include' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (data && (data.email || data.uid)) {
+          var email = data.email || cachedEmail || 'user';
+          localStorage.setItem('userEmail', email);
+          setLoggedInState(email);
+        } else if (!cachedEmail) {
+          setLoggedOutState();
+        }
+      })
+      .catch(function () {});
+
+    // Wire up account dropdown menu open/close
+    if (menuBtn && dropdown && !menuBtn._bound) {
+      menuBtn._bound = true;
+      menuBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = dropdown.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+
+      document.addEventListener('click', function () {
+        if (dropdown.classList.contains('open')) {
+          dropdown.classList.remove('open');
+          menuBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && dropdown.classList.contains('open')) {
+          dropdown.classList.remove('open');
+          menuBtn.setAttribute('aria-expanded', 'false');
+          menuBtn.focus();
+        }
+      });
+    }
+
+    // Wire up sign out
+    if (signoutBtn && !signoutBtn._bound) {
+      signoutBtn._bound = true;
+      signoutBtn.addEventListener('click', async function () {
+        try {
+          await fetch(API_BASE + '/api/auth/logout', { method: 'POST', credentials: 'include' });
+        } catch (_) {}
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('firebaseToken');
+        window.location.href = '/signin';
+      });
+    }
+
+    // Wire up mobile nav toggle
     var navToggle = document.getElementById('nav-toggle');
     var navLinks = document.getElementById('nav-links');
     if (navToggle && navLinks && !navToggle._bound) {

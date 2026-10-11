@@ -214,6 +214,20 @@ const SESSION_COOKIE_DEFAULTS = {
   path:     '/',
 };
 
+function isRequestSecure(req) {
+  if (req.secure) return true;
+  const proto = req.headers['x-forwarded-proto'];
+  if (proto && proto.split(',')[0].trim().toLowerCase() === 'https') return true;
+  if (req.headers['x-forwarded-ssl'] === 'on') return true;
+  if (process.env.NODE_ENV === 'production') {
+    const host = req.headers.host || '';
+    if (!host.startsWith('localhost') && !host.startsWith('127.0.0.1')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /* ─── Protected app shell ────────────────────────────────────────────────────── */
 // This MUST be registered before express.static, which resolves /app -> app.html
 // via `extensions: ['html']` and would otherwise serve the authenticated shell to
@@ -235,7 +249,7 @@ async function sendProtectedShell(req, res, next, fileName, routeLabel) {
     if (err.status === 503) return next(err);   // server misconfigured — don't hide it
     res.clearCookie('sessionToken', {
       ...SESSION_COOKIE_DEFAULTS,
-      secure: process.env.NODE_ENV === 'production' && req.secure
+      secure: isRequestSecure(req)
     });
     return res.redirect('/signin');
   }
@@ -336,7 +350,7 @@ app.post('/api/auth/session', async (req, res, next) => {
 
     const cookieOptions = {
       ...SESSION_COOKIE_DEFAULTS,
-      secure: process.env.NODE_ENV === 'production' && req.secure,
+      secure: isRequestSecure(req),
       maxAge: 60 * 60 * 1000,
     };
     res.cookie('sessionToken', idToken, cookieOptions);
@@ -352,7 +366,7 @@ app.post('/api/auth/session', async (req, res, next) => {
 app.post('/api/auth/logout', (req, res) => {
   res.clearCookie('sessionToken', {
     ...SESSION_COOKIE_DEFAULTS,
-    secure: process.env.NODE_ENV === 'production' && req.secure
+    secure: isRequestSecure(req)
   });
   res.sendStatus(200);
 });

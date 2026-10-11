@@ -742,3 +742,17 @@ ode process out of writing to /app/storage/temp.
     - Bumped stylesheet cache buster to `app-style.css?v=12` and script cache buster to `app.js?v=12`.
 - **Verified:** Tested with browser subagents on desktop (1024×768), 500×693 (user screenshot viewport), and mobile (390×844) with visual screenshot confirmation; ran `npm test` (all 172 tests passed).
 - **Notes:** Resolves the visual "shifted" look reported by the user. Advise user to hard-refresh (Ctrl + Shift + R) to clear cached CSS.
+
+### 2026-10-11 15:55 — antigravity
+- **Task:** Fix mobile auth redirect loop/bounce to sign-in page, add mobile navigation drawer CTAs, and implement SEO/Schema structured data
+- **Files:** backend/server.js, frontend/signin.html, frontend/app.html, frontend/account.html, frontend/nav-auth.js, frontend/landing.css, frontend/index.html, frontend/faq.html, frontend/features.html, frontend/how-it-works.html, frontend/examples.html, frontend/pricing.html, frontend/privacy.html, frontend/terms.html, AGENT_LOG.md
+- **Changes:**
+  - `backend/server.js`: Added `isRequestSecure(req)` checking reverse proxy headers (`x-forwarded-proto`, `x-forwarded-ssl`, and production non-localhost) so `sessionToken` cookie always has `secure: true` over HTTPS. Prevents mobile Safari and Chrome on iOS/Android from dropping cookies on Railway/reverse proxy HTTPS deployments.
+  - `frontend/signin.html`: Added `credentials: 'include'` to `POST /api/auth/session` calls. Removed premature `localStorage.removeItem('userEmail')` on 401. Updated `signin.html` to unconditionally check `/api/me` so logged-in users landing on `/signin` are immediately forwarded to `/app` instead of being prompted to sign in again.
+  - `frontend/app.html` & `frontend/account.html`: Removed premature `<head>` redirect to `/signin` on empty `localStorage`, allowing the page to self-heal user session from the active server cookie. Added `credentials: 'include'` to token refresh calls in `onIdTokenChanged`.
+  - `frontend/nav-auth.js`: Updated to asynchronously verify sessions via `/api/me` with `credentials: 'include'`. Dynamically manages mobile drawer CTA buttons (`drawerAppBtn` and `drawerSignInBtn`) across all pages.
+  - Mobile Drawer Navigation: Added `drawerAppBtn` ("Open Studio (App) →") and `drawerSignInBtn` ("Sign In / Sign Up →") inside `#nav-links` across `index.html`, `faq.html`, `features.html`, `how-it-works.html`, `examples.html`, `pricing.html`, `privacy.html`, `terms.html`.
+  - `frontend/landing.css`: Styled `.mobile-drawer-cta` for mobile drawers and hid `#navSignIn` on viewports `< 520px` to prevent navbar text clipping.
+  - SEO & Social Metadata: Added canonical tags across all pages (`https://storyplay.app/`, `/faq`, etc.), Open Graph (`og:type`, `og:site_name`, `og:title`, `og:description`, `og:url`, `og:image`), Twitter cards (`summary_large_image`), and Schema.org JSON-LD structured data (`WebApplication` and `Organization` on `index.html`, and `FAQPage` with all 10 Q&As on `faq.html`).
+- **Verified:** Ran `npm test` (all 172 tests passed across 11 test suites); verified mobile auth, drawer toggle, and navigation using browser subagent on 390×844 mobile viewport.
+- **Notes:** Completely eliminates the mobile sign-in bounce loop and ensures mobile users can seamlessly access the app.

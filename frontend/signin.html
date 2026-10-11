@@ -193,20 +193,19 @@
     import { auth, provider, githubProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from './firebase-config.js';
 
     // If the user lands here while already authenticated, redirect them to /app instead of signing them out.
-    const existingEmail = localStorage.getItem('userEmail');
     const apiBase = (window.__API_BASE__ || '').replace(/\/$/, '');
-    if (existingEmail) {
-      fetch(`${apiBase}/api/me`, { credentials: 'include' })
-        .then(function (res) {
-          if (res.ok) {
+    fetch(`${apiBase}/api/me`, { credentials: 'include' })
+      .then(function (res) {
+        if (res.ok) {
+          return res.json().then(function (data) {
+            if (data && (data.email || data.uid)) {
+              localStorage.setItem('userEmail', data.email || 'user');
+            }
             window.location.replace('/app');
-          } else if (res.status === 401 || res.status === 403) {
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('firebaseToken');
-          }
-        })
-        .catch(function () {});
-    }
+          });
+        }
+      })
+      .catch(function () {});
 
     if (auth) {
       onAuthStateChanged(auth, async function (user) {
@@ -216,6 +215,7 @@
             const res = await fetch(`${apiBase}/api/auth/session`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
               body: JSON.stringify({ idToken: token })
             });
             if (res.ok) {
@@ -354,6 +354,7 @@
       const response = await fetch(`${base}/api/auth/session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ idToken: token })
       });
       

@@ -9,16 +9,11 @@
       fetch('/api/me', { credentials: 'include' })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (data) {
-          if (data && data.email) {
-            localStorage.setItem('userEmail', data.email);
-            window.location.reload();
-          } else {
-            window.location.href = '/signin';
+          if (data && (data.email || data.uid)) {
+            localStorage.setItem('userEmail', data.email || 'user');
           }
         })
-        .catch(function () {
-          window.location.href = '/signin';
-        });
+        .catch(function () {});
     }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -587,6 +582,7 @@
           await fetch(`${base}/api/auth/session`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ idToken: token })
           });
         } catch (e) {
