@@ -710,3 +710,20 @@ ode process out of writing to /app/storage/temp.
   - Cache busters bumped across all modified pages (`landing.css?v=12`, `signin.css?v=4`, `nav-auth.js?v=2`).
 - **Verified:** Ran `npm test` (all 172 tests passed across 11 test suites); verified responsive breakpoints from 320px to 968px.
 - **Notes:** The entire web app — landing, creation studio, auth, account, and all documentation/pricing subpages — is now 100% mobile responsive.
+
+### 2026-10-11 14:06 — antigravity
+- **Task:** Redesign Step 1 (Story Page) to look and feel like a true native mobile app
+- **Files:** frontend/app.html, frontend/app-style.css, AGENT_LOG.md
+- **Changes:**
+  - Removed desktop-style horizontal overflow causing clipping and sideways scrolling: added `min-width: 0; width: 100%;` to `.step`, `.step-layout`, `.step-main`, `.field-card`, `.examples-row`.
+  - Transformed header step indicators into a sleek capsule progress pill `[ ● ○ ○ ○ ]` matching native iOS/Android design.
+  - Replaced oversized desktop "01" with a clean `STEP 01` badge and punchy heading.
+  - Redesigned Step 1 card layout:
+    - Top row: `Story text` label (left) and `45s (Medium) ▾` pill dropdown (right) in clean alignment.
+    - Prominent full-width `[ ★ Generate Reddit Story ]` button with dark gradient and gold star.
+    - Textarea with 145px height fitting the entire view in-frame on 390x844 viewports without pushing the ribbon off screen.
+    - Card footer cleanly separating `Minimum 50 characters` on the left and `0 / 1500` count on the right.
+  - Styled examples ribbon with `flex-wrap: nowrap`, momentum touch scroll, and uppercase label.
+  - Bumped cache buster to `app-style.css?v=11`.
+- **Verified:** Tested on 390×844 mobile viewport using browser subagent with full visual screenshot inspection; ran `npm test` (all 172 tests passed).
+- **Notes:** Step 1 now feels like a polished, native iOS/Android creation screen rather than a scaled-down desktop site.

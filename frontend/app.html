@@ -23,7 +23,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="app-style.css?v=7">
+  <link rel="stylesheet" href="app-style.css?v=11">
   <script src="/billing.js" defer></script>
 </head>
 <body>
@@ -114,7 +114,6 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
                 <span>Story text</span>
               </div>
-              <div class="field-header-actions">
               <div class="custom-select" id="aiDurationWrapper">
                 <div class="custom-select__trigger" id="aiDurationTrigger">
                   <span id="aiDurationLabel">45s (Medium)</span>
@@ -127,12 +126,12 @@
                 </div>
                 <input type="hidden" id="aiDuration" value="45">
               </div>
-                <button id="btnAiGenerate" class="btn-ai">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-                  Generate Reddit Story
-                </button>
-              </div>
             </div>
+
+            <button id="btnAiGenerate" class="btn-ai" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+              Generate Reddit Story
+            </button>
             <textarea
               id="storyInput"
               class="story-textarea"
@@ -141,7 +140,8 @@
               maxlength="3000"
             ></textarea>
             <div class="textarea-footer">
-              <span class="char-count"><span id="charCount">0</span> / 3000  Minimum 50 characters</span>
+              <span id="charMin" class="char-hint">Min. 50 characters</span>
+              <span class="char-count"><span id="charCount">0</span> / <span id="charLimit">3000</span></span>
             </div>
           </div>
 
@@ -167,7 +167,7 @@
           </div>
 
           <div class="step-actions">
-            <button class="btn-continue" id="btnStoryNext">Continue →</button>
+            <button class="btn-continue" id="btnStoryNext">Continue to Gameplay →</button>
           </div>
         </div>
 

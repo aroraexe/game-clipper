@@ -403,13 +403,14 @@ body {
 
 .btn-ai {
   display: inline-flex; align-items: center; gap: 0.4rem;
-  padding: 0.4rem 0.85rem;
+  padding: 0.5rem 0.95rem;
   background: var(--text);
   border: none; border-radius: 8px;
-  color: #fff; font-weight: 600; font-size: 0.82rem;
+  color: #fff; font-weight: 600; font-size: 0.84rem;
   cursor: pointer; transition: background 0.2s;
   font-family: var(--font-body);
   white-space: nowrap;
+  margin-bottom: 0.85rem;
 }
 .btn-ai:hover { background: #2A2E38; transform: none; }
 .btn-ai svg { color: #FFD700; }
@@ -901,18 +902,38 @@ body {
 .toast--error { border-color: rgba(18,20,26,0.35); background: #FFFFFF; }
 .toast--success { border-color: rgba(18,20,26,0.35); }
 
-/* ── Responsive Mobile (Phone-Friendly) ── */
+/* ── Responsive Mobile (Phone-Friendly Native App Layout) ── */
 @media (max-width: 680px) {
-  /* App Shell */
+  /* App Shell: eliminate desktop-like margins and prevent horizontal overflow */
+  body {
+    overflow-x: hidden;
+  }
   #app {
-    padding: 0.75rem 0.85rem 6.5rem;
+    padding: 0.65rem 0.85rem 6.5rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+  .step,
+  .step-layout,
+  .step-main {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   /* Header */
   .app-header {
-    padding: 0.6rem 0.85rem;
-    margin-bottom: 1.25rem;
-    border-radius: 12px;
+    padding: 0.55rem 0.85rem;
+    margin-bottom: 0.75rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(18, 20, 26, 0.08);
+    box-shadow: 0 4px 18px rgba(18, 20, 26, 0.04);
   }
   .app-logo span {
     font-size: 1.1rem;
@@ -920,43 +941,83 @@ body {
   .beta-badge {
     display: none;
   }
+  /* Capsule Progress Dots [ ● ○ ○ ○ ] */
   .step-indicators {
-    gap: 0.35rem;
+    background: rgba(18, 20, 26, 0.06);
+    padding: 5px 9px;
+    border-radius: 999px;
+    gap: 6px;
+    display: flex;
+    align-items: center;
   }
   .step-dot {
-    width: 28px;
-    height: 28px;
-    font-size: 0.7rem;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    font-size: 0;
+    color: transparent;
+    background: rgba(18, 20, 26, 0.22);
+    border: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+    box-shadow: none;
+  }
+  .step-dot.active {
+    width: 18px;
+    border-radius: 10px;
+    background: var(--accent);
+    box-shadow: 0 1px 5px rgba(232, 93, 4, 0.4);
+  }
+  .step-dot.done {
+    background: var(--accent);
+    opacity: 0.65;
   }
   .header-tools {
     gap: 0.45rem;
   }
   .header-tool-btn {
-    padding: 0.35rem 0.6rem;
-    font-size: 0.75rem;
+    display: none; /* Hide bulky Library text button on mobile header */
   }
   .user-avatar {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+    box-shadow: 0 2px 6px rgba(18, 20, 26, 0.08);
   }
 
-  /* Step Headings */
+  /* Step Headings: Native mobile badge + punchy title */
   .step-heading {
-    gap: 0.85rem;
-    margin-bottom: 1.25rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
   }
   .step-num {
-    font-size: 2.2rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    background: rgba(232, 93, 4, 0.10);
+    padding: 2px 7px;
+    border-radius: 5px;
+    line-height: 1.2;
+    display: inline-block;
+  }
+  .step-num::before {
+    content: 'STEP ';
   }
   .step-title {
     font-size: 1.55rem;
-    line-height: 1.2;
-    margin-bottom: 0.25rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 0;
   }
   .step-subtitle {
-    font-size: 0.85rem;
-    line-height: 1.45;
+    font-size: 0.84rem;
+    color: var(--muted);
+    line-height: 1.4;
+    margin: 0;
   }
   .step-heading--with-info {
     flex-direction: column;
@@ -972,7 +1033,7 @@ body {
     border-radius: 10px;
   }
 
-  /* Step Layout & Field Card (Step 1) */
+  /* Step 1: Layout & Field Card */
   .step-layout {
     grid-template-columns: 1fr;
     gap: 0;
@@ -981,67 +1042,145 @@ body {
     display: none;
   }
   .field-card {
-    padding: 1rem 0.95rem;
-    border-radius: 14px;
+    padding: 0.95rem;
+    border-radius: 16px;
+    border: 1px solid rgba(18, 20, 26, 0.10);
+    box-shadow: 0 4px 18px rgba(18, 20, 26, 0.04);
+    background: #FFFFFF;
   }
   .field-card-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-  }
-  .field-header-actions {
     display: flex;
-    width: 100%;
-    gap: 0.5rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.65rem;
+  }
+  .field-label-row {
+    font-weight: 700;
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
   }
   .custom-select {
-    flex: 1;
-    min-width: 0;
+    width: auto;
+    flex-shrink: 0;
   }
   .custom-select__trigger {
-    width: 100%;
+    width: auto;
     min-width: 0;
-    padding: 0.45rem 0.65rem;
-    font-size: 0.78rem;
+    padding: 0.32rem 0.65rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    border-radius: 999px;
+    background: rgba(18, 20, 26, 0.04);
+    border: 1px solid rgba(18, 20, 26, 0.08);
   }
   .btn-ai {
-    flex: 1.2;
+    width: 100%;
+    padding: 0.65rem 1rem;
+    font-size: 0.84rem;
+    font-weight: 600;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #16181F 0%, #222631 100%);
+    border: 1px solid rgba(232, 93, 4, 0.30);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 0.45rem 0.75rem;
-    font-size: 0.78rem;
+    gap: 0.45rem;
+    margin-bottom: 0.65rem;
+    box-shadow: 0 4px 14px rgba(18, 20, 26, 0.10);
+    transition: transform 0.12s ease;
+  }
+  .btn-ai:active {
+    transform: scale(0.98);
   }
   .story-textarea {
-    font-size: 1rem; /* 16px to prevent iOS Safari auto-zoom */
-    min-height: 140px;
-    padding: 0.75rem 0.85rem;
+    font-size: 1rem; /* 16px to prevent iOS auto-zoom */
+    min-height: 145px;
+    padding: 0.8rem 0.9rem;
+    line-height: 1.5;
+    border-radius: 12px;
+    border: 1px solid rgba(18, 20, 26, 0.12);
+    background: #FAFAFC;
+    width: 100%;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .story-textarea:focus {
+    background: #FFFFFF;
+    border-color: var(--accent);
   }
   .textarea-footer {
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+  .char-hint {
+    font-size: 0.74rem;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .char-hint--ok {
+    color: #10b981;
   }
   .char-count {
-    font-size: 0.72rem;
+    font-size: 0.76rem;
+    color: var(--muted);
+    font-weight: 600;
+    margin-left: auto;
+  }
+  .char-count.warn {
+    color: #f59e0b;
+  }
+  .char-count.error {
+    color: #ef4444;
   }
 
-  /* Horizontal swipeable examples pill row */
+  /* Horizontal swipeable examples pill ribbon */
   .examples-row {
-    overflow-x: auto;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     flex-wrap: nowrap;
-    padding-bottom: 0.35rem;
+    overflow-x: auto;
+    padding: 0.45rem 0 0.2rem;
+    margin-top: 0.5rem;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    margin-top: 0.25rem;
   }
   .examples-row::-webkit-scrollbar {
     display: none;
+  }
+  .examples-row > svg {
+    display: none;
+  }
+  .examples-row > span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .example-pill {
     flex-shrink: 0;
     white-space: nowrap;
     padding: 0.4rem 0.75rem;
     font-size: 0.78rem;
+    font-weight: 500;
+    border-radius: 999px;
+    background: #FFFFFF;
+    border: 1px solid rgba(18, 20, 26, 0.10);
+    box-shadow: 0 2px 6px rgba(18, 20, 26, 0.03);
+  }
+  .example-pill:active {
+    transform: scale(0.96);
   }
 
   /* Step 2: Gameplay Grid */
