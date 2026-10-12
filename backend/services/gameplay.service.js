@@ -37,7 +37,7 @@ const GAMEPLAY_DIR = gameplayDir();
 // subway-surfers and geometry-dash have no files at all → excluded.
 const CATALOGUE = [
   { id: 'minecraft', name: 'Minecraft', file: 'minecraft.mp4', fallback: 'minecraft_small.mp4', tags: ['sandbox', 'survival'] },
-  { id: 'roblox',    name: 'Roblox',    file: 'roblox.webm',   fallback: 'roblox_small.mp4',    tags: ['casual', 'colorful'] },
+  { id: 'roblox',    name: 'Roblox',    file: 'roblox.mp4',    fallback: 'roblox_small.mp4',    tags: ['casual', 'colorful'] },
   { id: 'gtav',      name: 'GTA V',     file: 'gtav.mp4',      fallback: 'gtav_small.mp4',      tags: ['action', 'open-world'] },
   { id: 'fortnite',  name: 'Fortnite',  file: 'fortnite.mp4',  fallback: 'fortnite_small.mp4',  tags: ['battle-royale', 'colorful'] },
 ];

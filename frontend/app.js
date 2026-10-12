@@ -239,10 +239,14 @@ function escapeHtml(s) {
 function formatExpiry(iso) {
   if (!iso) return '';
   const ms = new Date(iso).getTime() - Date.now();
-  if (ms <= 0) return 'expires soon';
-  const mins = Math.round(ms / 60000);
-  if (mins < 60) return `expires in ${mins}m`;
-  const hours = Math.round(mins / 60);
+  if (ms <= 0) return 'expired';
+  const totalSecs = Math.floor(ms / 1000);
+  if (totalSecs < 3600) {
+    const m = Math.floor(totalSecs / 60);
+    const s = totalSecs % 60;
+    return `expires in ${m}:${String(s).padStart(2, '0')}`;
+  }
+  const hours = Math.round(totalSecs / 3600);
   if (hours < 48) return `expires in ${hours}h`;
   return `expires in ${Math.round(hours / 24)}d`;
 }
@@ -270,7 +274,7 @@ async function refreshLibrary() {
             `<span class="library-status library-status--${escapeHtml(job.status)}">${escapeHtml(job.status)}</span>` +
             (job.gameplayId ? `${escapeHtml(job.gameplayId)} · ` : '') +
             new Date(job.createdAt).toLocaleString() +
-            (expiry ? ` · ${expiry}` : '') +
+            (expiry ? ` · <span class="library-expiry" data-expires="${escapeHtml(job.expiresAt)}">${expiry}</span>` : '') +
           `</div>` +
         `</div>`;
       if (job.downloadUrl) {
@@ -288,6 +292,18 @@ async function refreshLibrary() {
   }
 }
 
+let libraryCountdownTimer = null;
+
+function tickExpiryLabels() {
+  document.querySelectorAll('.library-expiry[data-expires]').forEach((el) => {
+    const text = formatExpiry(el.dataset.expires);
+    el.textContent = text;
+    if (text === 'expired') {
+      el.closest('.library-row')?.querySelector('.library-download')?.remove();
+    }
+  });
+}
+
 function setLibraryOpen(open) {
   const panel = $('library-panel');
   const backdrop = $('library-backdrop');
@@ -297,7 +313,17 @@ function setLibraryOpen(open) {
   backdrop.hidden = !open;
   btn.setAttribute('aria-expanded', open ? 'true' : 'false');
   document.body.classList.toggle('library-open', open);
-  if (open) refreshLibrary();
+  if (open) {
+    refreshLibrary();
+    if (!libraryCountdownTimer) {
+      libraryCountdownTimer = setInterval(tickExpiryLabels, 1000);
+    }
+  } else {
+    if (libraryCountdownTimer) {
+      clearInterval(libraryCountdownTimer);
+      libraryCountdownTimer = null;
+    }
+  }
 }
 
 function initLibraryUi() {

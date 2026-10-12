@@ -173,10 +173,14 @@
   function fmtExpiry(iso) {
     if (!iso) return '';
     var ms = new Date(iso).getTime() - Date.now();
-    if (ms <= 0) return 'expires soon';
-    var mins = Math.round(ms / 60000);
-    if (mins < 60) return 'expires in ' + mins + 'm';
-    var hours = Math.round(mins / 60);
+    if (ms <= 0) return 'expired';
+    var totalSecs = Math.floor(ms / 1000);
+    if (totalSecs < 3600) {
+      var m = Math.floor(totalSecs / 60);
+      var s = totalSecs % 60;
+      return 'expires in ' + m + ':' + String(s).padStart(2, '0');
+    }
+    var hours = Math.round(totalSecs / 3600);
     if (hours < 48) return 'expires in ' + hours + 'h';
     return 'expires in ' + Math.round(hours / 24) + 'd';
   }
@@ -304,7 +308,7 @@
             '<span class="status-pill status-pill--' + escapeHtml(job.status) + '">' + escapeHtml(job.status) + '</span>' +
             (job.gameplayId ? escapeHtml(job.gameplayId) + ' · ' : '') +
             new Date(job.createdAt).toLocaleString() +
-            (expiry ? ' · ' + expiry : '') +
+            (expiry ? ' · <span class="account-expiry" data-expires="' + escapeHtml(job.expiresAt) + '">' + expiry + '</span>' : '') +
             (job.error ? ' · ' + escapeHtml(job.error) : '') +
           '</div>' +
         '</div>' +
@@ -359,7 +363,22 @@
       });
 
     B.api('/api/videos')
-      .then(function (data) { renderLibrary(data.jobs || []); })
+      .then(function (data) {
+        renderLibrary(data.jobs || []);
+        setInterval(function () {
+          document.querySelectorAll('.account-expiry[data-expires]').forEach(function (el) {
+            var text = fmtExpiry(el.getAttribute('data-expires'));
+            el.textContent = text;
+            if (text === 'expired') {
+              var dl = el.closest('.account-job');
+              if (dl) {
+                var btn = dl.querySelector('.account-job-actions .btn');
+                if (btn) btn.remove();
+              }
+            }
+          });
+        }, 1000);
+      })
       .catch(function () {
         $('account-library').innerHTML =
           '<p style="color:var(--muted);">Could not load your library. Try again from the app.</p>';

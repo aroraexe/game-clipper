@@ -772,3 +772,13 @@ ode process out of writing to /app/storage/temp.
 - **Verified:** Ran `npm test` with all 177 tests passing across 11 test suites.
 - **Notes:** Free accounts are now strictly capped at 7 videos per rolling 30 days, with accurate usage persistence even after completed video files are cleaned up from temporary disk storage.
 
+### 2026-10-12 19:28 — antigravity
+- **Task:** Fix Android "moov atom not found" crash for Roblox gameplay and add real-time expiry countdown
+- **Files:** backend/services/gameplay.service.js, frontend/app.js, frontend/account.html
+- **Changes:**
+  - `backend/services/gameplay.service.js`: Changed Roblox primary file from `roblox.webm` to `roblox.mp4`. The old `upload.js` script uploaded `roblox_small.mp4` as `roblox.webm` to Railway, creating a corrupt file (MP4 content with .webm extension). FFmpeg then failed with "moov atom not found" and dumped its entire stderr (including build info) to the user's screen on Android. Now it correctly falls back to `roblox_small.mp4`.
+  - `frontend/app.js`: Rewrote `formatExpiry()` to show a live `mm:ss` countdown when under 60 minutes instead of a static "expires in 43m" that never updated. Added `data-expires` attributes to library expiry labels. Added `tickExpiryLabels()` on a 1-second interval while the library drawer is open, auto-removing the Download button when a video expires.
+  - `frontend/account.html`: Same `fmtExpiry()` rewrite for mm:ss precision. Added `data-expires` attributes and a 1-second countdown interval after the library is rendered. Download buttons are removed from expired rows.
+- **Verified:** `npm test` — all 177 tests pass across 11 suites. Confirmed no remaining references to `roblox.webm` in codebase.
+- **Notes:** On Railway, there may still be a stale `roblox.webm` file in `storage/gameplay/` from the old upload. Since the catalogue no longer references `.webm`, it will be ignored. It can be safely deleted from the Railway volume to reclaim ~45MB.
+
