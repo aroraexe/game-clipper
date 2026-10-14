@@ -129,7 +129,39 @@ function getStats() {
   };
 }
 
-module.exports = { enqueue, initQueue, getStats };
+/**
+ * Look up real-time queue position and ETA for a specific jobId.
+ */
+function getJobQueuePosition(jobId) {
+  const all = [...highQueue, ...normalQueue];
+  const idx = all.findIndex((item) => item.jobId === jobId);
+  if (idx !== -1) {
+    const queuePosition = idx + 1;
+    const ahead = idx;
+    const totalQueued = all.length;
+    const etaMs = queuePosition * avgEncodeMs;
+    return {
+      inQueue: true,
+      queuePosition,
+      ahead,
+      totalQueued,
+      active,
+      etaMs: Math.round(etaMs),
+      etaSeconds: Math.ceil(etaMs / 1000),
+    };
+  }
+  return {
+    inQueue: false,
+    queuePosition: 0,
+    ahead: 0,
+    totalQueued: all.length,
+    active,
+    etaMs: 0,
+    etaSeconds: 0,
+  };
+}
+
+module.exports = { enqueue, initQueue, getStats, getJobQueuePosition };
 
 /* ── Internal ────────────────────────────────────────────────────────────── */
 

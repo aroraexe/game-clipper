@@ -117,6 +117,16 @@ function expiresAtFor(job) {
 
 function toPublicJob(job, uid) {
   const story = String(job.params?.story || '');
+  let queueInfo = null;
+  try {
+    const renderQueue = require('../jobs/renderQueue');
+    queueInfo = renderQueue.getJobQueuePosition(job.jobId);
+  } catch (_) {}
+
+  const isQueued = job.status === 'queued' || (queueInfo && queueInfo.inQueue);
+  const queuePos = queueInfo?.queuePosition || job.queuePosition || (isQueued ? 1 : 0);
+  const etaMs = queueInfo?.etaMs || job.etaMs || 0;
+
   return {
     jobId:       job.jobId,
     status:      job.status,
@@ -134,6 +144,15 @@ function toPublicJob(job, uid) {
     downloadUrl: job.status === 'completed'
       ? createOutputPath(job.jobId, uid, true)
       : null,
+    queue: {
+      inQueue:       Boolean(isQueued),
+      queuePosition: queuePos,
+      ahead:         queueInfo ? queueInfo.ahead : Math.max(0, queuePos - 1),
+      totalQueued:   queueInfo ? queueInfo.totalQueued : (isQueued ? 1 : 0),
+      activeRenders: queueInfo ? queueInfo.active : 0,
+      etaMs:         etaMs,
+      etaSeconds:    Math.ceil(etaMs / 1000),
+    },
   };
 }
 
@@ -418,9 +437,28 @@ exports.createJob = async (req, res, next) => {
       jobId,
       status:  'queued',
       message: 'Job accepted — poll GET /api/videos/:jobId for status',
+      ...toPublicJob(job, req.user.uid),
     });
   } catch (err) {
     next(err);
+  }
+};
+
+/* ── GET /api/videos/queue/status ────────────────────────────────────────── */
+exports.getQueueStatus = (_req, res) => {
+  try {
+    const renderQueue = require('../jobs/renderQueue');
+    const stats = renderQueue.getStats();
+    const waitSec = Math.ceil(((stats.queued + (stats.active > 0 ? 1 : 0)) * stats.avgEncodeMs) / 1000);
+    res.json({
+      active: stats.active,
+      queued: stats.queued,
+      highPriorityQueued: stats.highPriorityQueued,
+      avgEncodeMs: stats.avgEncodeMs,
+      estimatedWaitSeconds: waitSec,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not read queue status' });
   }
 };
 

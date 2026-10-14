@@ -865,7 +865,7 @@ async function submitJob() {
     state.jobId = data.jobId;
     window.StoryPlayBilling?.api('/api/me').then(updateUsageChip).catch(() => {});
     goTo('progress');
-    startPolling(data.jobId);
+    startPolling(data.jobId, data.queue);
   } catch (err) {
     submitJob.retries = (submitJob.retries || 0) + 1;
     if (submitJob.retries <= 3) {
@@ -935,16 +935,124 @@ const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS  = 11 * 60 * 1000;
 const POLL_MAX_ERRORS  = 5;
 
+let queueCountdownTimer = null;
+let queueSecondsLeft = 0;
+
+function formatQueueEta(seconds) {
+  const s = Math.max(5, Number(seconds) || 0);
+  if (s < 60) return `~${s}s`;
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return rem > 0 ? `~${m}m ${rem}s` : `~${m}m`;
+}
+
+function updateQueueUi(queue, status) {
+  const card = $('queueCard');
+  if (!card) return;
+
+  const isQueued = status === 'queued' || (queue && queue.inQueue);
+
+  if (!isQueued) {
+    if (queueCountdownTimer) {
+      clearInterval(queueCountdownTimer);
+      queueCountdownTimer = null;
+    }
+    card.hidden = true;
+    return;
+  }
+
+  card.hidden = false;
+
+  const pos = (queue && queue.queuePosition) ? queue.queuePosition : 1;
+  const ahead = (queue && typeof queue.ahead === 'number') ? queue.ahead : Math.max(0, pos - 1);
+  const totalQueued = (queue && queue.totalQueued) ? queue.totalQueued : pos;
+  const etaSec = (queue && queue.etaSeconds) ? queue.etaSeconds : (pos * 45);
+
+  queueSecondsLeft = etaSec;
+
+  const posEl = $('queuePosNum');
+  if (posEl) posEl.textContent = String(pos);
+
+  const headlineEl = $('queueHeadline');
+  const subtextEl = $('queueSubtext');
+  const youPosEl = $('qfYouPos');
+  const youStatusEl = $('qfYouStatus');
+  const waitingNameEl = $('qfWaitingName');
+  const waitingStatusEl = $('qfWaitingStatus');
+  const etaTextEl = $('queueEtaText');
+
+  if (youPosEl) youPosEl.textContent = `#${pos}`;
+
+  if (ahead === 0) {
+    if (headlineEl) headlineEl.textContent = "You're next in line! ⚡";
+    if (subtextEl) subtextEl.textContent = '0 clips ahead of you • Preparing GPU slot…';
+    if (youStatusEl) youStatusEl.textContent = 'Up next';
+  } else {
+    if (headlineEl) headlineEl.textContent = `Position #${pos} in Queue`;
+    if (subtextEl) subtextEl.textContent = `${ahead} ${ahead === 1 ? 'clip' : 'clips'} ahead of you • Rendering in order`;
+    if (youStatusEl) youStatusEl.textContent = `#${pos} in line`;
+  }
+
+  const behind = Math.max(0, totalQueued - pos);
+  if (waitingStatusEl) waitingStatusEl.textContent = behind > 0 ? `+${behind} waiting` : 'Empty';
+  if (waitingNameEl) waitingNameEl.textContent = behind > 0 ? `Queue (+${behind})` : 'Queue';
+
+  if (etaTextEl) etaTextEl.textContent = `Est. wait: ${formatQueueEta(queueSecondsLeft)}`;
+
+  // Start smooth 1-second countdown if not already ticking
+  if (!queueCountdownTimer) {
+    queueCountdownTimer = setInterval(() => {
+      if (queueSecondsLeft > 5) {
+        queueSecondsLeft -= 1;
+        if (etaTextEl) etaTextEl.textContent = `Est. wait: ${formatQueueEta(queueSecondsLeft)}`;
+      }
+    }, 1000);
+  }
+}
+
+async function refreshQueuePreview() {
+  const banner = $('queueVoiceBanner');
+  const textEl = $('queueVoiceBannerText');
+  if (!banner || !textEl) return;
+
+  try {
+    const res = await fetch(apiUrl('/api/videos/queue/status'), {
+      credentials: 'include',
+      headers: authHeaders(),
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const queued = data.queued || 0;
+    const active = data.active || 0;
+    const waitSec = data.estimatedWaitSeconds || 0;
+
+    if (queued === 0 && active === 0) {
+      banner.classList.remove('is-busy');
+      textEl.textContent = '🟢 Server ready • Instant render slot available';
+    } else if (queued === 0 && active > 0) {
+      banner.classList.remove('is-busy');
+      textEl.textContent = `⚡ 1 clip currently rendering • You will be next (~${waitSec || 30}s wait)`;
+    } else {
+      banner.classList.add('is-busy');
+      textEl.textContent = `⏳ ${queued} ${queued === 1 ? 'clip' : 'clips'} waiting in line (~${formatQueueEta(waitSec)} wait)`;
+    }
+  } catch (_) {}
+}
+
 function stopPolling() {
   if (state.pollTimer) clearInterval(state.pollTimer);
   state.pollTimer = null;
+  if (queueCountdownTimer) {
+    clearInterval(queueCountdownTimer);
+    queueCountdownTimer = null;
+  }
 }
 
-function startPolling(jobId) {
+function startPolling(jobId, initialQueue = null) {
   stopPolling();
   lastStage = null;
   // Immediate UI sync: queued jobs have stage=null — don't leave the pipeline blank at 0%.
-  updateProgress(3, 'preparing_story', 'queued');
+  updateProgress(3, 'preparing_story', 'queued', initialQueue || { inQueue: true, queuePosition: 1, ahead: 0, etaSeconds: 45 });
 
   let errors = 0;
   const startedAt = Date.now();
@@ -980,11 +1088,11 @@ function startPolling(jobId) {
       }
 
       errors = 0;
-      updateProgress(data.progress || 0, data.stage, data.status);
+      updateProgress(data.progress || 0, data.stage, data.status, data.queue);
 
       if (data.status === 'completed') {
         stopPolling();
-        updateProgress(100, 'finalizing', 'completed');
+        updateProgress(100, 'finalizing', 'completed', null);
         state.outputUrl = data.outputUrl ? apiUrl(data.outputUrl) : null;
         state.downloadUrl = data.downloadUrl ? apiUrl(data.downloadUrl) : null;
         showResult(jobId);
@@ -1008,7 +1116,8 @@ function startPolling(jobId) {
 
 let lastStage = null;
 
-function updateProgress(pct, stage, status) {
+function updateProgress(pct, stage, status, queue = null) {
+  updateQueueUi(queue, status);
   const uiStage = normalizeStage(stage, status);
   // Ring. 2*PI*54 = 339.29 for the r="54" circle in app.html.
   const circumference = 339.29;
@@ -1147,6 +1256,7 @@ function goTo(stepName) {
   });
 
   if (stepName === 'gameplay') loadGameplay();
+  if (stepName === 'voice') refreshQueuePreview();
 
   // Move focus to the new step so keyboard and screen-reader users are not left
   // on a control that just became invisible.

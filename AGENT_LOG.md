@@ -818,3 +818,18 @@ ode process out of writing to /app/storage/temp.
 - **Verified:** Ran \
 pm test\ — all 189 tests passing across 12 test suites.
 - **Notes:** Once deployed to Railway, the scheduler runs at boot and will automatically clean the volume down from ~458MB to under ~290MB immediately by dropping stale \oblox.webm\ and old orphaned/expired outputs.
+
+### 2026-10-14 11:46 — antigravity
+- **Task:** Create real-time queue for people who click Generate Clip
+- **Files:** backend/jobs/renderQueue.js, backend/controllers/videos.controller.js, backend/routes/videos.routes.js, frontend/app.html, frontend/app-style.css, frontend/app.js, test/videos.queue.test.js (new), AGENT_LOG.md
+- **Changes:**
+  - ackend/jobs/renderQueue.js: Added and exported getJobQueuePosition(jobId) computing real-time queue position, ahead count, total queue depth, and ETA in seconds based on moving average encode time.
+  - ackend/controllers/videos.controller.js: Updated 	oPublicJob() to attach real-time queue payload (inQueue, queuePosition, head, 	otalQueued, ctiveRenders, etaSeconds). Updated createJob to return immediate queue position in 202 response. Added getQueueStatus controller returning server-wide queue depth and wait times.
+  - ackend/routes/videos.routes.js: Added GET /api/videos/queue/status route (guarded by equireAuth).
+  - rontend/app.html: Added real-time #queueCard on Step 5 with live pulse badge, #queuePosNum position indicator, dynamic headline/subtext, visual queue flow ([?? Rendering] -> [?? You (#1)] -> [?? Queue]), and live ETA pill. Added #queueVoiceBanner on Step 4 to show server queue status before clicking Generate.
+  - rontend/app-style.css: Added styles for #queueCard, linear-gradient animated top border, glowing pulsing dots, track connectors with sliding pulse animation, position badge, and mobile responsive rules.
+  - rontend/app.js: Updated submitJob to forward initial queue data, updated startPolling to update queue UI immediately, added 1-second live countdown timer for ETA, added efreshQueuePreview on Step 4 navigation, and hide/transition queue card when rendering starts.
+  - 	est/videos.queue.test.js: Added unit tests verifying queue positioning, ahead calculation, ETA estimation, queue status endpoint, and public job serialization.
+- **Verified:** Ran 
+pm test — all 192 tests passing across 13 test suites.
+- **Notes:** Users now see their exact live place in line (#1, #2, etc.), number of clips ahead, and a ticking real-time countdown instead of a static generic progress screen.

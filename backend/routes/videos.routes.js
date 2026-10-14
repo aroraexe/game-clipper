@@ -5,6 +5,7 @@ const videosCtrl  = require('../controllers/videos.controller');
 const { requireAuth } = require('../middleware/auth.middleware');
 
 router.get('/',                   requireAuth, videosCtrl.listJobs);
+router.get('/queue/status',       requireAuth, videosCtrl.getQueueStatus);
 router.post('/',                  requireAuth, videosCtrl.createJob);
 router.post('/generate-story',    requireAuth, videosCtrl.generateStory);
 router.get('/:jobId',             requireAuth, videosCtrl.getJob);

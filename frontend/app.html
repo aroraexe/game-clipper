@@ -422,6 +422,11 @@
         </div>
       </div>
 
+      <div class="queue-status-banner" id="queueVoiceBanner" aria-live="polite">
+        <span class="qsb-dot"></span>
+        <span class="qsb-text" id="queueVoiceBannerText">Checking render queue…</span>
+      </div>
+
       <div class="step-actions">
         <button class="btn-back" id="btnVoiceBack">← Back</button>
         <button class="btn-generate" id="btnGenerate">
@@ -446,6 +451,69 @@
         </div>
         <h2 class="progress-title">Creating your <span class="grad">Short</span></h2>
         <p class="progress-stage" id="progressStage">Queued — starting your render…</p>
+      </div>
+
+      <!-- Real-Time Render Queue Card -->
+      <div id="queueCard" class="queue-card" hidden aria-live="polite">
+        <div class="queue-card-header">
+          <div class="queue-live-tag">
+            <span class="queue-pulse-dot"></span>
+            <span class="queue-live-title">LIVE RENDER QUEUE</span>
+          </div>
+          <div class="queue-eta-badge" id="queueEtaBadge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="queueEtaText">Est. wait: ~45s</span>
+          </div>
+        </div>
+
+        <div class="queue-card-main">
+          <div class="queue-pos-badge-wrap">
+            <div class="queue-pos-badge">
+              <span class="queue-pos-hash">#</span><span class="queue-pos-num" id="queuePosNum">1</span>
+            </div>
+            <span class="queue-pos-sub">IN LINE</span>
+          </div>
+          <div class="queue-details">
+            <h3 class="queue-headline" id="queueHeadline">You're next in line!</h3>
+            <p class="queue-subtext" id="queueSubtext">0 clips ahead • Preparing GPU slot…</p>
+          </div>
+        </div>
+
+        <!-- Real-Time Queue Visual Flow -->
+        <div class="queue-flow" id="queueFlow">
+          <div class="qf-step active" id="qfSlotRendering">
+            <div class="qf-icon">🎬</div>
+            <div class="qf-info">
+              <span class="qf-name">Rendering</span>
+              <span class="qf-status">In progress</span>
+            </div>
+          </div>
+          <div class="qf-connector">
+            <div class="qf-pulse-line"></div>
+          </div>
+          <div class="qf-step you" id="qfSlotYou">
+            <div class="qf-icon">👤</div>
+            <div class="qf-info">
+              <span class="qf-name">You (<span id="qfYouPos">#1</span>)</span>
+              <span class="qf-status" id="qfYouStatus">Up next</span>
+            </div>
+          </div>
+          <div class="qf-connector" id="qfConnWaiting">
+            <div class="qf-pulse-line"></div>
+          </div>
+          <div class="qf-step waiting" id="qfSlotWaiting">
+            <div class="qf-icon">👥</div>
+            <div class="qf-info">
+              <span class="qf-name" id="qfWaitingName">Queue</span>
+              <span class="qf-status" id="qfWaitingStatus">+0 waiting</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="queue-card-footer">
+          <span class="queue-tip-icon">⚡</span>
+          <span class="queue-tip-text">Updates live every 2s. Your spot is reserved and will begin rendering automatically.</span>
+        </div>
       </div>
       <div class="pipeline-steps">
         <div class="pipeline-step" id="ps-preparing_story">
