@@ -789,3 +789,10 @@ ode process out of writing to /app/storage/temp.
 - **Changes:** Added padding, border-radius, font-size, font-weight, display:inline-flex, and smooth transitions to .btn-nav-outline and .btn-nav-solid. Fixed .btn-nav-solid hover — was incorrectly going orange (#CF4F00), now uses dark charcoal (#2a2d36). Removed conflicting shared background override.
 - **Verified:** Manual visual review.
 - **Notes:** None.
+
+### 2026-10-14 10:45 — antigravity
+- **Task:** Replace old play-button logo with new 3D faceted teal/blue StoryPlay logo.
+- **Files:** frontend/logo.svg (new), frontend/index.html, frontend/app.html, frontend/account.html, frontend/signin.html, frontend/features.html, frontend/how-it-works.html, frontend/examples.html, frontend/faq.html, frontend/pricing.html, frontend/privacy.html, frontend/terms.html
+- **Changes:** Replaced the flat white triangle SVG icon with a 3-faceted 3D prism play button SVG (dark navy left face, cyan-to-teal top face, blue bottom face) matching the new brand logo provided by the user. Updated all 11 HTML files. Added frontend/logo.svg as a standalone asset.
+- **Verified:** Grepped all 11 HTML files for sp-top — confirmed in all. Pushed commit 4fc02c0.
+- **Notes:** None.
