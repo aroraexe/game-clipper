@@ -796,3 +796,25 @@ ode process out of writing to /app/storage/temp.
 - **Changes:** Replaced the flat white triangle SVG icon with a 3-faceted 3D prism play button SVG (dark navy left face, cyan-to-teal top face, blue bottom face) matching the new brand logo provided by the user. Updated all 11 HTML files. Added frontend/logo.svg as a standalone asset.
 - **Verified:** Grepped all 11 HTML files for sp-top — confirmed in all. Pushed commit 4fc02c0.
 - **Notes:** None.
+
+### 2026-10-14 11:15 — antigravity
+- **Task:** Implement automated storage self-cleaning to prevent Railway volume overflow
+- **Files:** backend/services/cleanup.service.js (new), backend/services/gameplay.service.js, backend/server.js, backend/jobs/renderQueue.js, backend/routes/health.routes.js, test/cleanup.service.test.js (new), AGENT_LOG.md
+- **Changes:**
+  - ackend/services/cleanup.service.js: Created dedicated self-cleaning service that:
+    1. Removes expired job records & MP4 output files based on user plan retention (1 hr for Free, 7 days for Pro).
+    2. Sweeps orphaned output video files in \outputs/\ untracked by jobStore (>15 mins old).
+    3. Sweeps abandoned render temp directories and loose files in \	emp/\ (>5 mins old), skipping active in-flight jobs.
+    4. Sweeps unreferenced/stale gameplay assets from \gameplay/\ (e.g., stale \oblox.webm\, reclaiming ~45MB immediately on Railway) while keeping official catalogue files.
+    5. Sweeps stray temp files from \udio/\ and \subtitles/\.
+    6. Enforces storage budget ceiling (default 380MB, safe under 500MB Railway volume) with LRU auto-pruning of oldest completed renders before disk fills up (ENOSPC protection).
+    7. Exposes \getStorageStats()\ with breakdown and usage percentages.
+    8. Starts background scheduler running at boot and every 5 minutes.
+  - ackend/services/gameplay.service.js: Exported \VALID_GAMEPLAY_FILES\ set and \CATALOGUE\ so cleanup accurately identifies valid vs stale video files.
+  - ackend/server.js: Swapped inline 30-min interval with \cleanupService.startScheduler()\ on boot; delegated \sweepOrphanTempDirs\ to \cleanupService.cleanupTemp\ for backwards compatibility.
+  - ackend/jobs/renderQueue.js: Added \cleanupService.checkTempAndBudget()\ trigger on worker exit for immediate post-render temp cleanup.
+  - ackend/routes/health.routes.js: Added storage usage metrics to \/api/health\ response for monitoring volume health.
+  - 	est/cleanup.service.test.js: Added 9 unit tests covering expired job eviction, orphan outputs, temp sweep, gameplay asset cleanup, storage budget enforcement, and volume stats reporting.
+- **Verified:** Ran \
+pm test\ — all 189 tests passing across 12 test suites.
+- **Notes:** Once deployed to Railway, the scheduler runs at boot and will automatically clean the volume down from ~458MB to under ~290MB immediately by dropping stale \oblox.webm\ and old orphaned/expired outputs.

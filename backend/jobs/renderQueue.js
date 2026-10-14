@@ -224,6 +224,12 @@ function _runInWorker(item) {
     }
     _updateQueuePositions();
     drain();
+
+    // Proactive self-cleaning: sweep abandoned temp files and check volume budget
+    try {
+      const cleanupService = require('../services/cleanup.service');
+      setImmediate(() => cleanupService.checkTempAndBudget());
+    } catch (_) {}
   });
 }
 

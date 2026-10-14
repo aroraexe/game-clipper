@@ -10,6 +10,13 @@ router.get('/', (_req, res) => {
     // Queue module may not be loaded yet during early boot in tests.
   }
 
+  let storage = null;
+  try {
+    storage = require('../services/cleanup.service').getStorageStats();
+  } catch (_) {
+    // Storage module may not be loaded yet during early boot in tests.
+  }
+
   res.json({
     status:  'ok',
     service: 'storyplay',
@@ -20,6 +27,7 @@ router.get('/', (_req, res) => {
       height: parseInt(process.env.VIDEO_HEIGHT, 10) || 1280,
     },
     queue,
+    storage,
   });
 });
 

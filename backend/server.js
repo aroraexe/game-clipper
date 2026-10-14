@@ -427,36 +427,9 @@ app.use((err, req, res, _next) => {
 const TEMP_SWEEP_MIN_AGE_MS = 60 * 60 * 1000; // 1 hour
 
 function sweepOrphanTempDirs(now = Date.now()) {
-  const fs = require('fs');
-  const { list } = require('./jobs/jobStore');
-  const { jobTempDir } = require('./utils/storage.util');
-
-  const root = jobTempDir('__sweep__').replace(/[\\/]__sweep__$/, '');
-  const live = new Set(list().filter((j) => j.status === 'queued' || j.status === 'processing').map((j) => j.jobId));
-
-  let removed = 0;
-  let entries;
-  try {
-    entries = fs.readdirSync(root, { withFileTypes: true });
-  } catch (_) {
-    return 0; // storage not initialised yet
-  }
-
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    if (live.has(entry.name)) continue;
-    const full = path.join(root, entry.name);
-    try {
-      const age = now - fs.statSync(full).mtimeMs;
-      if (age < TEMP_SWEEP_MIN_AGE_MS) continue;
-      fs.rmSync(full, { recursive: true, force: true });
-      removed++;
-    } catch (e) {
-      console.warn(`[Cleanup] Could not remove orphan temp dir ${entry.name}: ${e.message}`);
-    }
-  }
-  if (removed > 0) console.log(`[Cleanup] Removed ${removed} orphaned render temp dir(s).`);
-  return removed;
+  const cleanupService = require('./services/cleanup.service');
+  const res = cleanupService.cleanupTemp(now);
+  return res.removed;
 }
 
 async function start() {
@@ -524,48 +497,16 @@ async function start() {
   }
 
   await initStorage();
-  sweepOrphanTempDirs();   // once at boot: reclaim whatever the last process left
+
+  // Storage self-cleaning: runs on boot and every 5 minutes.
+  // Purges expired videos (1hr free, 7d pro), orphan outputs, stale temp dirs,
+  // unreferenced gameplay assets (e.g. roblox.webm), and auto-evicts oldest
+  // completed renders if volume usage exceeds budget ceiling.
+  const cleanupService = require('./services/cleanup.service');
+  cleanupService.startScheduler();
 
   // Start the render queue worker (import here so queue starts after storage init)
   require('./jobs/renderQueue');
-
-  // Storage cleanup (runs every 30 mins).
-  // Retention is per-user: free tier keeps a finished video for 1 hour, paid
-  // subscribers for 7 days (see backend/config/plans.js). It used to be a
-  // hardcoded 1 hour for everybody, which made the product unsellable.
-  //
-  // Only terminal jobs are removed — never a job that is still queued or
-  // rendering, otherwise the render finishes to a file nobody can fetch.
-  setInterval(() => {
-    try {
-      const { list, removeJob } = require('./jobs/jobStore');
-      const userStore = require('./jobs/userStore');
-      const { planFor } = require('./config/plans');
-      const fs = require('fs');
-      const now = Date.now();
-      let cleared = 0;
-      let skipped = 0;
-      for (const job of list()) {
-        const terminal = job.status === 'completed' || job.status === 'failed';
-        if (!terminal) { skipped++; continue; }
-
-        const plan = planFor((uid) => userStore.planNameFor(uid), job.userId);
-        const finishedAt = new Date(job.updatedAt || job.createdAt).getTime();
-        if (now - finishedAt < plan.retentionMs) continue;
-
-        removeJob(job.jobId);
-        if (job.outputPath) {
-          try { fs.rmSync(job.outputPath); } catch (e) { /* already gone */ }
-        }
-        cleared++;
-      }
-      if (cleared > 0) console.log(`[Cleanup] Cleared ${cleared} finished job(s) & MP4s (${skipped} in-flight left alone).`);
-
-      sweepOrphanTempDirs();
-    } catch (e) {
-      console.error('[Cleanup] Error:', e.message);
-    }
-  }, 30 * 60 * 1000);
 
   app.listen(PORT, () => {
     console.log(`

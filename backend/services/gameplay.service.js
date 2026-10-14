@@ -143,7 +143,11 @@ async function selectSegment(gameId, durationS) {
   return { filePath, startTime, endTime, mock: false };
 }
 
-module.exports = { listAll, getById, selectSegment };
+const VALID_GAMEPLAY_FILES = new Set(
+  CATALOGUE.flatMap((c) => [c.file, c.fallback].filter(Boolean))
+);
+
+module.exports = { listAll, getById, selectSegment, CATALOGUE, VALID_GAMEPLAY_FILES };
 
 /* ── Internal helpers ─────────────────────────────────────────────────────── */
 
