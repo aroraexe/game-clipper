@@ -44,6 +44,25 @@ async function initStorage() {
     const fullPath = path.join(STORAGE_ROOT, dir);
     fs.mkdirSync(fullPath, { recursive: true });
   }
+
+  // If bundled gameplay files exist (e.g. Docker container), seed any missing files into gameplayDir
+  const bundledDir = path.resolve(__dirname, '../../bundled_gameplay');
+  if (fs.existsSync(bundledDir)) {
+    try {
+      const gDir = gameplayDir();
+      const files = fs.readdirSync(bundledDir);
+      for (const f of files) {
+        const dest = path.join(gDir, f);
+        if (!fs.existsSync(dest)) {
+          fs.copyFileSync(path.join(bundledDir, f), dest);
+          console.log(`[Storage] Seeded bundled asset '${f}' to volume`);
+        }
+      }
+    } catch (err) {
+      console.warn('[Storage] Could not seed bundled gameplay assets:', err.message);
+    }
+  }
+
   console.log(`[Storage] Directories ready at ${STORAGE_ROOT}`);
 }
 

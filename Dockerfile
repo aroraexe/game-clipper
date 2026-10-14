@@ -21,6 +21,7 @@ RUN npm ci --only=production
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
 COPY storage/ ./storage/
+COPY storage/gameplay/ ./bundled_gameplay/
 
 # Ensure required persistent storage dirs exist and belong to the node user.
 # The dir list must match storage.util.js DIRS, which is what actually creates

@@ -244,26 +244,33 @@ body {
 }
 
 .btn-nav-outline, .btn-nav-solid {
-  background: var(--accent);
-  color: #ffffff;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
 }
 .btn-nav-outline {
   color: var(--text-main);
   border: 1px solid var(--border-light);
   background: transparent;
-  text-decoration: none;
 }
 .btn-nav-outline:hover {
-  background: rgba(18,20,26,0.04);
+  background: rgba(18,20,26,0.06);
 }
 .btn-nav-solid {
-  background: #FFFFFF;
-  color: #000000;
-  border: none;
+  background: var(--text-main);
+  color: #ffffff;
+  border: 1px solid transparent;
 }
 .btn-nav-solid:hover {
-  background: #CF4F00;
+  background: #2a2d36;
 }
 
 .right-content {

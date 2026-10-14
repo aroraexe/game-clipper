@@ -782,3 +782,10 @@ ode process out of writing to /app/storage/temp.
 - **Verified:** `npm test` â€” all 177 tests pass across 11 suites. Confirmed no remaining references to `roblox.webm` in codebase.
 - **Notes:** On Railway, there may still be a stale `roblox.webm` file in `storage/gameplay/` from the old upload. Since the catalogue no longer references `.webm`, it will be ignored. It can be safely deleted from the Railway volume to reclaim ~45MB.
 
+
+### 2026-10-14 10:08 — antigravity
+- **Task:** Fix signin page UI — Sign in / Sign up nav buttons looked like plain unstyled text links.
+- **Files:** frontend/signin.css
+- **Changes:** Added padding, border-radius, font-size, font-weight, display:inline-flex, and smooth transitions to .btn-nav-outline and .btn-nav-solid. Fixed .btn-nav-solid hover — was incorrectly going orange (#CF4F00), now uses dark charcoal (#2a2d36). Removed conflicting shared background override.
+- **Verified:** Manual visual review.
+- **Notes:** None.

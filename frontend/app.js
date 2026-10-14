@@ -564,7 +564,7 @@ function renderGameplay(items) {
     card.disabled = !item.available;
     if (!item.available) {
       card.setAttribute('aria-disabled', 'true');
-      card.title = 'Gameplay file is missing on this server';
+      card.title = `${item.name} — Coming Soon`;
     }
     if (state.gameplayId === item.id) card.classList.add('gameplay-card--selected');
 
@@ -586,10 +586,10 @@ function renderGameplay(items) {
 
     const status = document.createElement('div');
     status.className = 'gameplay-card__status ' +
-      (item.available ? 'gameplay-card__status--ok' : 'gameplay-card__status--missing');
+      (item.available ? 'gameplay-card__status--ok' : 'gameplay-card__status--soon');
     status.innerHTML = item.available
       ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg> Ready'
-      : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> File missing';
+      : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Soon';
 
     const info = document.createElement('div');
     info.className = 'gameplay-card__info';
@@ -605,7 +605,7 @@ function renderGameplay(items) {
 
     card.addEventListener('click', () => {
       if (!item.available) {
-        toast(`${item.name} is not available on this server. Choose another game.`, 'error');
+        toast(`${item.name} is coming soon! Choose another game for now.`, 'info');
         return;
       }
       selectGameplay(item.id);
